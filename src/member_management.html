@@ -376,7 +376,7 @@
             if (user) {
                 try {
                     // Try to get user details from Firestore
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    const userDoc = await getDoc(doc(db, 'members', user.uid));
                     
                     let displayName = 'User';
                     let email = user.email || 'user@example.com';
@@ -604,7 +604,7 @@
       
       const membersQuery = query(
         collection(db, 'members'),
-        orderBy('name', 'asc')
+        orderBy('firstName', 'asc')
       );
       
       await yieldToFrame(); // Yield to prevent UI blocking
@@ -669,11 +669,11 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                ${getInitials(member.name)}
+                ${getInitials(member.firstName)}
               </div>
               <div>
                 <div class="text-sm leading-5 font-medium text-slate-900">
-                  ${member.name || 'N/A'}
+                  ${member.firstName || 'N/A'}
                   ${isCurrentUser ? '<span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">You</span>' : ''}
                 </div>
               </div>
@@ -683,7 +683,7 @@
             <div class="text-sm leading-5 text-slate-700">${member.email || 'N/A'}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm leading-5 text-slate-700">${formatDate(member.joinDate)}</div>
+            <div class="text-sm leading-5 text-slate-700">${formatDate(member.createdAt)}</div>
           </td>
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="text-sm leading-5 text-slate-700">${member.defaultWeeklyCapacity || 40} hours/week</div>

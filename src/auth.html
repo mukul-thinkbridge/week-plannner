@@ -628,7 +628,7 @@
         setDoc,
         doc,
         updateDoc,
-      } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-lite.js';
+      } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
 
       const db = getDb('crud');
       document.addEventListener('DOMContentLoaded', function () {
@@ -844,7 +844,7 @@
               hideLoader();
 
               try {
-                const userRef = doc(db, 'users', user.uid);
+                const userRef = doc(db, 'members', user.uid);
                 await updateDoc(userRef, {
                   lastLoginAt: new Date().toISOString(),
                 });
@@ -878,7 +878,7 @@
               lastLoginAt: new Date().toISOString(),
             };
             try {
-              await setDoc(doc(db, 'users', user.uid), userData);
+              await setDoc(doc(db, 'members', user.uid), userData);
             } catch (e) {
               console.error('Failed to create user profile:', e);
             }
@@ -934,7 +934,7 @@
               localStorage.setItem('lastAuthTime', Date.now().toString());
 
               try {
-                const userRef = doc(db, 'users', user.uid);
+                const userRef = doc(db, 'members', user.uid);
                 await updateDoc(userRef, {
                   uid: user.uid,
                   firstName: user.displayName?.split(' ')[0] || '',
@@ -946,7 +946,7 @@
                 });
               } catch {
                 try {
-                  await setDoc(doc(db, 'users', user.uid), {
+                  await setDoc(doc(db, 'members', user.uid), {
                     uid: user.uid,
                     firstName: user.displayName?.split(' ')[0] || '',
                     lastName:
