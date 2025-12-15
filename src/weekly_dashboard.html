@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Planner Team Management System</title>
+
+    <!-- Required: Main JS Script -->
+    <script type="module" src="scripts/main.js" data-tiramai="web-gen"></script>
+
+    <!-- Required: TailwindCSS -->
+    <script src="./lib/tailwindcss/tailwindcss.js" fetchpriority="high" data-tiramai="web-gen"></script>
+
+    <!-- Required: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" data-tiramai="web-gen"></script>
+
+    <!-- Required: Favicon -->
+    <link rel="icon" href="assets/imgs/logo.ico" type="image/x-icon" data-tiramai="web-gen"/>
+
+    <!-- ECharts Support (for charts/graphs) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" data-tiramai="web-gen"></script>
+
+    <!-- Markdown Support (for content rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" data-tiramai="web-gen"></script>
+
+    <style data-tiramai="web-gen">
+        .logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-nav-open {
+            transform: translateX(0);
+        }
+        
+        .mobile-nav-closed {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700">
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 py-4 z-30 h-16">
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            
+            <!-- Logo and App Name -->
+            <div class="flex items-center gap-3">
+                <div class="logo-svg">
+                    <svg width="32" height="32" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="90" y="80" width="220" height="240" rx="24" stroke="#2563EB" stroke-width="16" fill="none"/>
+                        <rect x="122" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="122" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="182" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="242" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <path d="M90 120h220" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="122" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="154" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="186" cy="108" r="8" fill="#1E40AF"/>
+                        <path d="M310 80v-16a14 14 0 0 0-14-14h-192a14 14 0 0 0-14 14v16" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+                <span class="text-xl leading-8 font-semibold text-slate-900 hidden sm:block">Weekly Planner Team Management System</span>
+                <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="user-profile-btn" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
+                    <div class="p-3 border-b border-slate-200">
+                        <p id="dropdown-user-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="dropdown-user-email" class="text-xs leading-4 text-slate-500">Loading...</p>
+                    </div>
+                    <div class="py-1">
+                        <button id="sign-out-btn" class="w-full text-left px-3 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-100 flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Side Navigation -->
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
+            <nav class="p-4 space-y-2">
+                <!-- Navigation Items -->
+                <a href="/weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Weekly Dashboard
+                </a>
+
+                <!-- Backlog Management with Children -->
+                <div class="nav-group">
+                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            Backlog Management
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                    </button>
+                    <a href="/backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        View All Activities
+                    </a>
+                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
+                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Activity Detail
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Capacity Management
+                </a>
+
+                <a href="/member_management.html" data-page="member_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Member Management
+                </a>
+            </nav>
+            
+            <!-- Footer in Sidebar -->
+            <div class="absolute bottom-4 w-full px-4">
+                <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
+                    Made with ❤️ by TiramAi
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+        <!-- Main Content -->
+        <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+            
+<!-- Weekly Dashboard Main Content -->
+<div class="space-y-6">
+  <!-- Dashboard Header -->
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl leading-10 font-bold text-slate-900">Weekly Dashboard</h1>
+        <p class="text-sm leading-5 text-slate-600 mt-1">Current week activities and team capacity overview</p>
+      </div>
+      
+      <!-- Week Selector -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
+          <label for="week-select" class="text-sm leading-5 font-medium text-slate-700">Week:</label>
+          <input type="week" id="week-select" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="text-sm leading-5 text-slate-600" id="week-range">
+          <span id="week-start-date">Loading...</span> - <span id="week-end-date">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <button id="btn-add-activity" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+      <i data-lucide="plus" class="w-4 h-4"></i>
+      Add Activity
+    </button>
+    <a href="capacity_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      Manage Capacity
+    </a>
+    <a href="backlog_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+      <i data-lucide="list" class="w-4 h-4"></i>
+      View Backlog
+    </a>
+    <a href="member_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+      <i data-lucide="users" class="w-4 h-4"></i>
+      Manage Members
+    </a>
+  </div>
+
+  <!-- Dashboard Content Grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+    <!-- Member Capacity Overview -->
+    <div class="xl:col-span-2">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Team Capacity</h2>
+          <button id="btn-refresh-capacity" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh capacity">
+            <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
+            Refresh
+          </button>
+        </div>
+        <div id="capacity-chart-container" class="h-64">
+          <div id="capacity-chart-skeleton" class="space-y-3">
+            <!-- Skeleton for capacity bars -->
+            <div class="animate-pulse">
+              <div class="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+              <div class="h-6 bg-slate-200 rounded"></div>
+            </div>
+            <div class="animate-pulse">
+              <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+              <div class="h-6 bg-slate-200 rounded"></div>
+            </div>
+            <div class="animate-pulse">
+              <div class="h-4 bg-slate-200 rounded w-28 mb-2"></div>
+              <div class="h-6 bg-slate-200 rounded"></div>
+            </div>
+          </div>
+          <canvas id="capacity-chart" class="hidden"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="xl:col-span-2">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Category Distribution</h2>
+          <button id="btn-refresh-categories" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh categories">
+            <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
+            Refresh
+          </button>
+        </div>
+        <div id="category-chart-container" class="h-64">
+          <div id="category-chart-skeleton" class="flex items-center justify-center h-full">
+            <div class="animate-pulse">
+              <div class="w-32 h-32 bg-slate-200 rounded-full"></div>
+              <div class="mt-4 space-y-2">
+                <div class="h-3 bg-slate-200 rounded w-24 mx-auto"></div>
+                <div class="h-3 bg-slate-200 rounded w-20 mx-auto"></div>
+                <div class="h-3 bg-slate-200 rounded w-28 mx-auto"></div>
+              </div>
+            </div>
+          </div>
+          <canvas id="category-chart" class="hidden"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activities Board -->
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+      <h2 class="text-xl leading-8 font-semibold text-slate-900">Activities Board</h2>
+      
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-3">
+        <select id="filter-category" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Categories</option>
+          <option value="Client Focused">Client Focused</option>
+          <option value="Tech Debt">Tech Debt</option>
+          <option value="R&D">R&D</option>
+        </select>
+        <select id="filter-priority" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+        <select id="filter-assignment" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Status</option>
+          <option value="assigned">Assigned</option>
+          <option value="unassigned">Unassigned</option>
+        </select>
+        <select id="filter-member" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Members</option>
+        </select>
+        <button id="btn-refresh-activities" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh activities">
+          <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Not Started Column -->
+      <div class="bg-slate-50 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg leading-7 font-semibold text-slate-800 flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-slate-500"></span>
+            Not Started
+          </h3>
+          <span id="not-started-count" class="bg-slate-200 text-slate-700 text-xs leading-4 px-2 py-1 rounded-full font-medium">0</span>
+        </div>
+        <div id="not-started-activities" class="space-y-3 min-h-[200px]">
+          <!-- Skeleton cards -->
+          <div class="activity-skeleton animate-pulse bg-white p-4 rounded-lg border border-slate-200">
+            <div class="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-2/3"></div>
+          </div>
+          <div class="activity-skeleton animate-pulse bg-white p-4 rounded-lg border border-slate-200">
+            <div class="h-4 bg-slate-200 rounded w-2/3 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/3 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="bg-amber-50 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg leading-7 font-semibold text-slate-800 flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+            In Progress
+          </h3>
+          <span id="in-progress-count" class="bg-amber-200 text-amber-800 text-xs leading-4 px-2 py-1 rounded-full font-medium">0</span>
+        </div>
+        <div id="in-progress-activities" class="space-y-3 min-h-[200px]">
+          <!-- Skeleton cards -->
+          <div class="activity-skeleton animate-pulse bg-white p-4 rounded-lg border border-slate-200">
+            <div class="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed Column -->
+      <div class="bg-emerald-50 rounded-lg p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg leading-7 font-semibold text-slate-800 flex items-center gap-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            Completed
+          </h3>
+          <span id="completed-count" class="bg-emerald-200 text-emerald-800 text-xs leading-4 px-2 py-1 rounded-full font-medium">0</span>
+        </div>
+        <div id="completed-activities" class="space-y-3 min-h-[200px]">
+          <!-- Skeleton cards -->
+          <div class="activity-skeleton animate-pulse bg-white p-4 rounded-lg border border-slate-200">
+            <div class="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-2/3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Add Activity Modal -->
+<div id="modal-add-activity" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg leading-7 font-semibold text-slate-800">Quick Add Activity</h3>
+          <button id="btn-close-modal" class="text-slate-400 hover:text-slate-600" aria-label="Close modal">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <form id="form-add-activity" class="space-y-4">
+          <div>
+            <label for="activity-title" class="block text-sm leading-5 font-medium text-slate-700 mb-1">
+              Title <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="activity-title" name="title" required 
+                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Enter activity title">
+            <div id="title-error" class="text-red-600 text-xs leading-4 mt-1 hidden"></div>
+          </div>
+
+          <div>
+            <label for="activity-category" class="block text-sm leading-5 font-medium text-slate-700 mb-1">
+              Category <span class="text-red-500">*</span>
+            </label>
+            <select id="activity-category" name="category" required 
+                    class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Select category</option>
+              <option value="Client Focused">Client Focused</option>
+              <option value="Tech Debt">Tech Debt</option>
+              <option value="R&D">R&D</option>
+            </select>
+            <div id="category-error" class="text-red-600 text-xs leading-4 mt-1 hidden"></div>
+          </div>
+
+          <div>
+            <label for="activity-priority" class="block text-sm leading-5 font-medium text-slate-700 mb-1">
+              Priority <span class="text-red-500">*</span>
+            </label>
+            <select id="activity-priority" name="priority" required 
+                    class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Select priority</option>
+              <option value="High">High</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <div id="priority-error" class="text-red-600 text-xs leading-4 mt-1 hidden"></div>
+          </div>
+
+          <div>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" id="add-to-current-week" name="addToCurrentWeek" checked 
+                     class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+              <span class="text-sm leading-5 text-slate-700">Add to Current Week</span>
+            </label>
+          </div>
+
+          <div>
+            <label for="activity-attachments" class="block text-sm leading-5 font-medium text-slate-700 mb-1">
+              Attachments
+            </label>
+            <input type="file" id="activity-attachments" name="attachments" multiple 
+                   class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png">
+            <div class="text-xs leading-4 text-slate-500 mt-1">Multiple files allowed (PDF, DOC, TXT, Images)</div>
+            <div id="attachments-list" class="mt-2 space-y-1"></div>
+          </div>
+
+          <div class="flex gap-3 pt-4">
+            <button type="submit" id="btn-submit-activity" 
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm leading-5 font-medium transition-colors">
+              Create Activity
+            </button>
+            <button type="button" id="btn-cancel-modal" 
+                    class="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm leading-5 font-medium hover:bg-slate-50 transition-colors">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </main>
+    </div>
+
+    <!-- Required: JavaScript -->
+    <script type="module" data-tiramai="web-gen">
+        import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+        import { auth, db, storage } from "./scripts/firebase.js";
+        import { onAuthStateChanged, getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const userNameElement = document.getElementById('user-name');
+        const dropdownUserNameElement = document.getElementById('dropdown-user-name');
+        const dropdownUserEmailElement = document.getElementById('dropdown-user-email');
+        const userProfileBtn = document.getElementById('user-profile-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        // User authentication state management
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Try to get user details from Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    let displayName = 'User';
+                    let email = user.email || 'user@example.com';
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || '';
+                        const lastName = userData.lastName || '';
+                        displayName = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || 'User');
+                        email = userData.email || user.email || 'user@example.com';
+                    } else {
+                        // Fallback to email or default
+                        displayName = user.email ? user.email.split('@')[0] : 'User';
+                    }
+                    
+                    // Update UI with user info
+                    userNameElement.textContent = displayName;
+                    dropdownUserNameElement.textContent = displayName;
+                    dropdownUserEmailElement.textContent = email;
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                    // Fallback to basic auth info
+                    const fallbackName = user.email ? user.email.split('@')[0] : 'User';
+                    userNameElement.textContent = fallbackName;
+                    dropdownUserNameElement.textContent = fallbackName;
+                    dropdownUserEmailElement.textContent = user.email || 'user@example.com';
+                }
+            } else {
+                // Redirect to auth page if not authenticated
+                window.location.href = 'auth.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Sign out functionality
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                showLoader('Signing out...');
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Error signing out', 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Mobile navigation
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('mobile-nav-open');
+            if (isOpen) {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.remove('hidden');
+            }
+        });
+
+        // Close mobile nav when overlay is clicked
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-nav-open');
+            sidebar.classList.add('mobile-nav-closed');
+            mobileOverlay.classList.add('hidden');
+        });
+
+        // Close mobile nav when nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('mobile-nav-open');
+                    sidebar.classList.add('mobile-nav-closed');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Collapsible navigation groups
+        document.querySelectorAll('.nav-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
+                
+                if (targetElement) {
+                    targetElement.classList.toggle('hidden');
+                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                        'rotate(0deg)' : 'rotate(90deg)';
+                }
+            });
+        });
+
+        // Active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const pageName = item.getAttribute('data-page');
+                if (pageName === currentPage) {
+                    item.classList.add('bg-blue-50', 'text-blue-700', 'border-r-2', 'border-blue-500');
+                    item.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Set active navigation on load
+        setActiveNavigation();
+
+        // Resize handler for mobile nav
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+            }
+        });
+    </script>
+
+    
+<script id="data-script" type="module" data-tiramai="web-gen">
+import { onAuthStateChanged, getAuth } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import {
+  collection, getDocs, setDoc, addDoc, doc, getDoc, updateDoc, 
+  query, where, orderBy, limit, onSnapshot, Timestamp,
+  getCountFromServer
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js";
+import { auth, getDb, storage } from "./scripts/firebase.js";
+import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+
+const db = getDb();
+
+// Global state
+let currentWeekStart = null;
+let currentUser = null;
+let currentAbort = null;
+
+// DOM elements
+const weekSelect = document.getElementById('week-select');
+const weekStartDate = document.getElementById('week-start-date');
+const weekEndDate = document.getElementById('week-end-date');
+const btnAddActivity = document.getElementById('btn-add-activity');
+const modalAddActivity = document.getElementById('modal-add-activity');
+const btnCloseModal = document.getElementById('btn-close-modal');
+const btnCancelModal = document.getElementById('btn-cancel-modal');
+const formAddActivity = document.getElementById('form-add-activity');
+
+// Filter elements
+const filterCategory = document.getElementById('filter-category');
+const filterPriority = document.getElementById('filter-priority');
+const filterAssignment = document.getElementById('filter-assignment');
+const filterMember = document.getElementById('filter-member');
+
+// Activity columns
+const notStartedActivities = document.getElementById('not-started-activities');
+const inProgressActivities = document.getElementById('in-progress-activities');
+const completedActivities = document.getElementById('completed-activities');
+const notStartedCount = document.getElementById('not-started-count');
+const inProgressCount = document.getElementById('in-progress-count');
+const completedCount = document.getElementById('completed-count');
+
+// Refresh buttons
+const btnRefreshCapacity = document.getElementById('btn-refresh-capacity');
+const btnRefreshCategories = document.getElementById('btn-refresh-categories');
+const btnRefreshActivities = document.getElementById('btn-refresh-activities');
+
+// Utility functions
+const yieldToFrame = () => new Promise(r => requestAnimationFrame(() => r()));
+
+function createSemaphore(max = 2) {
+  const queue = [];
+  let active = 0;
+  const next = () => {
+    if (active >= max || queue.length === 0) return;
+    active++;
+    const { fn, res, rej } = queue.shift();
+    Promise.resolve()
+      .then(fn)
+      .then(v => res(v))
+      .catch(e => rej(e))
+      .finally(() => { active--; next(); });
+  };
+  return (fn) => new Promise((res, rej) => { queue.push({ fn, res, rej }); next(); });
+}
+const withLimit = createSemaphore(2);
+
+function getWednesdayOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1) + 2; // Wednesday
+  return new Date(d.setDate(diff));
+}
+
+function formatDateForDisplay(date) {
+  return date.toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+}
+
+function formatDateForISO(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function getCurrentWeekDates() {
+  const today = new Date();
+  const wednesday = getWednesdayOfWeek(today);
+  const tuesday = new Date(wednesday);
+  tuesday.setDate(wednesday.getDate() + 6);
+  return { wednesday, tuesday };
+}
+
+function getWeekFromValue(weekValue) {
+  const [year, weekNum] = weekValue.split('-W');
+  const jan1 = new Date(year, 0, 1);
+  const days = (weekNum - 1) * 7;
+  const weekStart = new Date(jan1.getTime() + days * 24 * 60 * 60 * 1000);
+  const wednesday = getWednesdayOfWeek(weekStart);
+  const tuesday = new Date(wednesday);
+  tuesday.setDate(wednesday.getDate() + 6);
+  return { wednesday, tuesday };
+}
+
+// Authentication check
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    location.href = "auth.html?redirect=" + encodeURIComponent(location.pathname);
+  } else {
+    currentUser = user;
+    funInitializeWeek();
+    funInitialLoad();
+  }
+});
+
+// Initialize week selector
+function funInitializeWeek() {
+  const { wednesday, tuesday } = getCurrentWeekDates();
+  currentWeekStart = wednesday;
+  
+  // Set week picker to current week
+  const year = wednesday.getFullYear();
+  const weekNumber = Math.ceil(((wednesday - new Date(year, 0, 1)) / 86400000 + 1) / 7);
+  weekSelect.value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
+  
+  // Update display
+  weekStartDate.textContent = formatDateForDisplay(wednesday);
+  weekEndDate.textContent = formatDateForDisplay(tuesday);
+}
+
+// Week selector change handler
+weekSelect.addEventListener('change', (e) => {
+  if (e.target.value) {
+    const { wednesday, tuesday } = getWeekFromValue(e.target.value);
+    currentWeekStart = wednesday;
+    weekStartDate.textContent = formatDateForDisplay(wednesday);
+    weekEndDate.textContent = formatDateForDisplay(tuesday);
+    funLoadActivities();
+  }
+});
+
+// Activity card creation
+function funCreateActivityCard(activity, members = {}) {
+  const card = document.createElement('div');
+  card.className = 'bg-white p-4 rounded-lg border border-slate-200 cursor-pointer hover:shadow-md transition-shadow';
+  card.setAttribute('data-activity-id', activity.id);
+  
+  const categoryColors = {
+    'Client Focused': 'bg-blue-100 text-blue-800',
+    'Tech Debt': 'bg-orange-100 text-orange-800',
+    'R&D': 'bg-purple-100 text-purple-800'
+  };
+  
+  const priorityColors = {
+    'High': 'border-l-red-500',
+    'Medium': 'border-l-amber-500',
+    'Low': 'border-l-green-500'
+  };
+  
+  const assignedMember = activity.assignedMember && members[activity.assignedMember] 
+    ? members[activity.assignedMember] 
+    : null;
+  
+  const assignmentIndicator = activity.assignedMember 
+    ? '<span class="h-2 w-2 rounded-full bg-green-500" title="Assigned"></span>'
+    : '<span class="h-2 w-2 rounded-full bg-slate-400" title="Unassigned"></span>';
+    
+  card.innerHTML = `
+    <div class="border-l-4 ${priorityColors[activity.priority] || 'border-l-slate-300'} pl-3">
+      <div class="flex items-start justify-between mb-2">
+        <h4 class="text-sm leading-5 font-medium text-slate-900 line-clamp-2">${activity.title || 'Untitled Activity'}</h4>
+        ${assignmentIndicator}
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <span class="inline-flex items-center px-2 py-1 rounded text-xs leading-4 font-medium ${categoryColors[activity.category] || 'bg-slate-100 text-slate-800'}">
+          ${activity.category || 'N/A'}
+        </span>
+        <span class="text-xs leading-4 text-slate-500">${activity.priority || 'Medium'}</span>
+      </div>
+      ${assignedMember ? `
+        <div class="flex items-center gap-2 mt-2">
+          <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+            <span class="text-xs leading-4 text-white font-medium">${assignedMember.name.charAt(0).toUpperCase()}</span>
+          </div>
+          <span class="text-xs leading-4 text-slate-600">${assignedMember.name}</span>
+        </div>
+      ` : ''}
+      ${activity.assignedHours ? `
+        <div class="text-xs leading-4 text-slate-500 mt-1">${activity.assignedHours}h allocated</div>
+      ` : ''}
+    </div>
+  `;
+  
+  card.addEventListener('click', () => {
+    window.location.href = `activity_detail.html?activityId=${activity.id}`;
+  });
+  
+  return card;
+}
+
+// Abortable fetch function
+async function funFetchWithAbort(buildQuery) {
+  if (currentAbort) currentAbort.abort();
+  currentAbort = new AbortController();
+  const signal = currentAbort.signal;
+
+  try {
+    const q = buildQuery();
+    const snapshot = await getDocs(q);
+    if (signal.aborted) return { items: [], cursor: null };
+    return {
+      items: snapshot.docs.map(d => ({ id: d.id, ...d.data() })),
+      cursor: snapshot.docs.at(-1) || null,
+    };
+  } catch (err) {
+    if (signal.aborted) return { items: [], cursor: null };
+    showToast(err?.message || "Failed to load data");
+    return { items: [], cursor: null };
+  }
+}
+
+// Load members for filters and cards
+async function funLoadMembers() {
+  try {
+    const membersData = await withLimit(() => getDocs(collection(db, 'members')));
+    const members = {};
+    membersData.docs.forEach(doc => {
+      members[doc.id] = { id: doc.id, ...doc.data() };
+    });
+    
+    // Populate member filter
+    filterMember.innerHTML = '<option value="">All Members</option>';
+    Object.values(members).forEach(member => {
+      const option = document.createElement('option');
+      option.value = member.id;
+      option.textContent = member.name || 'Unnamed Member';
+      filterMember.appendChild(option);
+    });
+    
+    return members;
+  } catch (error) {
+    console.error('Error loading members:', error);
+    showToast('Failed to load members', 'error');
+    return {};
+  }
+}
+
+// Load activities for current week
+async function funLoadActivities() {
+  if (!currentWeekStart) return;
+  
+  try {
+    // Show skeleton loading
+    document.querySelectorAll('.activity-skeleton').forEach(skeleton => {
+      skeleton.style.display = 'block';
+    });
+    
+    const members = await funLoadMembers();
+    
+    // Build query for activities in current week
+    const weekISODate = formatDateForISO(currentWeekStart);
+    
+    const { items: activities } = await funFetchWithAbort(() => 
+      query(
+        collection(db, 'activities'),
+        where('weekAllocated', '==', weekISODate),
+        orderBy('createdAt', 'desc'),
+        limit(100)
+      )
+    );
+    
+    // Apply filters
+    const filteredActivities = activities.filter(activity => {
+      if (filterCategory.value && activity.category !== filterCategory.value) return false;
+      if (filterPriority.value && activity.priority !== filterPriority.value) return false;
+      if (filterAssignment.value === 'assigned' && !activity.assignedMember) return false;
+      if (filterAssignment.value === 'unassigned' && activity.assignedMember) return false;
+      if (filterMember.value && activity.assignedMember !== filterMember.value) return false;
+      return true;
+    });
+    
+    // Group activities by status
+    const groupedActivities = {
+      'Not Started': filteredActivities.filter(a => a.status === 'Not Started'),
+      'In Progress': filteredActivities.filter(a => a.status === 'In Progress'),
+      'Completed': filteredActivities.filter(a => a.status === 'Completed')
+    };
+    
+    // Clear existing activities and hide skeletons
+    document.querySelectorAll('.activity-skeleton').forEach(skeleton => {
+      skeleton.style.display = 'none';
+    });
+    
+    notStartedActivities.innerHTML = '';
+    inProgressActivities.innerHTML = '';
+    completedActivities.innerHTML = '';
+    
+    // Populate activity columns
+    groupedActivities['Not Started'].forEach(activity => {
+      const card = funCreateActivityCard(activity, members);
+      notStartedActivities.appendChild(card);
+    });
+    
+    groupedActivities['In Progress'].forEach(activity => {
+      const card = funCreateActivityCard(activity, members);
+      inProgressActivities.appendChild(card);
+    });
+    
+    groupedActivities['Completed'].forEach(activity => {
+      const card = funCreateActivityCard(activity, members);
+      completedActivities.appendChild(card);
+    });
+    
+    // Update counts
+    notStartedCount.textContent = groupedActivities['Not Started'].length;
+    inProgressCount.textContent = groupedActivities['In Progress'].length;
+    completedCount.textContent = groupedActivities['Completed'].length;
+    
+    // Show empty states if no activities
+    if (groupedActivities['Not Started'].length === 0) {
+      notStartedActivities.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">No activities yet</div>';
+    }
+    if (groupedActivities['In Progress'].length === 0) {
+      inProgressActivities.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">No activities in progress</div>';
+    }
+    if (groupedActivities['Completed'].length === 0) {
+      completedActivities.innerHTML = '<div class="text-center py-8 text-slate-500 text-sm">No completed activities</div>';
+    }
+    
+  } catch (error) {
+    console.error('Error loading activities:', error);
+    showToast('Failed to load activities', 'error');
+  }
+}
+
+// Load team capacity
+async function funLoadCapacity() {
+  try {
+    const members = await withLimit(() => getDocs(collection(db, 'members')));
+    const memberData = [];
+    
+    for (const memberDoc of members.docs) {
+      const member = { id: memberDoc.id, ...memberDoc.data() };
+      
+      // Get unavailability for current week
+      const weekISODate = formatDateForISO(currentWeekStart);
+      const unavailabilityQuery = query(
+        collection(db, 'unavailability'),
+        where('memberId', '==', member.id),
+        where('weekStart', '==', weekISODate)
+      );
+      
+      const unavailabilitySnapshot = await withLimit(() => getDocs(unavailabilityQuery));
+      const totalUnavailable = unavailabilitySnapshot.docs.reduce((sum, doc) => {
+        return sum + (doc.data().hoursUnavailable || 0);
+      }, 0);
+      
+      const defaultCapacity = member.defaultWeeklyCapacity || 40;
+      const availableHours = Math.max(0, defaultCapacity - totalUnavailable);
+      
+      memberData.push({
+        name: member.name || 'Unnamed Member',
+        available: availableHours,
+        total: defaultCapacity
+      });
+    }
+    
+    await yieldToFrame();
+    funRenderCapacityChart(memberData);
+    
+  } catch (error) {
+    console.error('Error loading capacity:', error);
+    showToast('Failed to load capacity data', 'error');
+  }
+}
+
+// Load category distribution
+async function funLoadCategoryDistribution() {
+  try {
+    if (!currentWeekStart) return;
+    
+    const weekISODate = formatDateForISO(currentWeekStart);
+    
+    // Use count aggregation for better performance
+    const categories = ['Client Focused', 'Tech Debt', 'R&D'];
+    const categoryData = [];
+    
+    for (const category of categories) {
+      const categoryQuery = query(
+        collection(db, 'activities'),
+        where('weekAllocated', '==', weekISODate),
+        where('category', '==', category)
+      );
+      
+      const countSnapshot = await withLimit(() => getCountFromServer(categoryQuery));
+      categoryData.push({
+        name: category,
+        count: countSnapshot.data().count
+      });
+    }
+    
+    await yieldToFrame();
+    funRenderCategoryChart(categoryData);
+    
+  } catch (error) {
+    console.error('Error loading category distribution:', error);
+    showToast('Failed to load category data', 'error');
+  }
+}
+
+// Render capacity chart using ECharts
+async function funRenderCapacityChart(data) {
+  try {
+    await yieldToFrame();
+    
+    const skeleton = document.getElementById('capacity-chart-skeleton');
+    const chartElement = document.getElementById('capacity-chart');
+    
+    skeleton.style.display = 'none';
+    chartElement.style.display = 'block';
+    
+    const chart = echarts.init(chartElement);
+    
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: function(params) {
+          const data = params[0];
+          const member = data.name;
+          const available = data.value;
+          const total = data.data.total;
+          return `${member}<br/>Available: ${available}h<br/>Total: ${total}h`;
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'value',
+        max: 'dataMax'
+      },
+      yAxis: {
+        type: 'category',
+        data: data.map(d => d.name)
+      },
+      series: [
+        {
+          name: 'Available Hours',
+          type: 'bar',
+          data: data.map(d => ({
+            value: d.available,
+            total: d.total,
+            itemStyle: {
+              color: d.available > d.total * 0.8 ? '#10b981' : 
+                     d.available > d.total * 0.5 ? '#f59e0b' : '#ef4444'
+            }
+          })),
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{c}h'
+          }
+        }
+      ]
+    };
+    
+    chart.setOption(option);
+    
+    // Resize chart on window resize
+    const resizeChart = () => chart.resize();
+    window.addEventListener('resize', resizeChart);
+    
+  } catch (error) {
+    console.error('Error rendering capacity chart:', error);
+    showToast('Failed to render capacity chart', 'error');
+  }
+}
+
+// Render category chart using ECharts
+async function funRenderCategoryChart(data) {
+  try {
+    await yieldToFrame();
+    
+    const skeleton = document.getElementById('category-chart-skeleton');
+    const chartElement = document.getElementById('category-chart');
+    
+    skeleton.style.display = 'none';
+    chartElement.style.display = 'block';
+    
+    const chart = echarts.init(chartElement);
+    
+    const colors = ['#3b82f6', '#f59e0b', '#8b5cf6'];
+    
+    const option = {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        textStyle: {
+          fontSize: 12
+        }
+      },
+      series: [
+        {
+          name: 'Activities',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['60%', '50%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '18',
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: data.map((item, index) => ({
+            value: item.count,
+            name: item.name,
+            itemStyle: {
+              color: colors[index % colors.length]
+            }
+          }))
+        }
+      ]
+    };
+    
+    chart.setOption(option);
+    
+    // Resize chart on window resize
+    const resizeChart = () => chart.resize();
+    window.addEventListener('resize', resizeChart);
+    
+  } catch (error) {
+    console.error('Error rendering category chart:', error);
+    showToast('Failed to render category chart', 'error');
+  }
+}
+
+// Initial data load
+async function funInitialLoad() {
+  await Promise.all([
+    funLoadActivities(),
+    funLoadCapacity(),
+    funLoadCategoryDistribution()
+  ]);
+}
+
+// Filter event listeners
+[filterCategory, filterPriority, filterAssignment, filterMember].forEach(filter => {
+  filter.addEventListener('change', funLoadActivities);
+});
+
+// Refresh button handlers
+btnRefreshActivities.addEventListener('click', funLoadActivities);
+btnRefreshCapacity.addEventListener('click', funLoadCapacity);
+btnRefreshCategories.addEventListener('click', funLoadCategoryDistribution);
+
+// Modal handling
+btnAddActivity.addEventListener('click', () => {
+  modalAddActivity.classList.remove('hidden');
+  document.getElementById('activity-title').focus();
+});
+
+btnCloseModal.addEventListener('click', () => {
+  modalAddActivity.classList.add('hidden');
+  formAddActivity.reset();
+  funClearValidationErrors();
+});
+
+btnCancelModal.addEventListener('click', () => {
+  modalAddActivity.classList.add('hidden');
+  formAddActivity.reset();
+  funClearValidationErrors();
+});
+
+// Close modal on backdrop click
+modalAddActivity.addEventListener('click', (e) => {
+  if (e.target === modalAddActivity) {
+    modalAddActivity.classList.add('hidden');
+    formAddActivity.reset();
+    funClearValidationErrors();
+  }
+});
+
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !modalAddActivity.classList.contains('hidden')) {
+    modalAddActivity.classList.add('hidden');
+    formAddActivity.reset();
+    funClearValidationErrors();
+  }
+});
+
+// Validation functions
+function funClearValidationErrors() {
+  document.querySelectorAll('.text-red-600').forEach(error => {
+    error.classList.add('hidden');
+  });
+  document.querySelectorAll('input, select').forEach(input => {
+    input.classList.remove('border-red-500');
+  });
+}
+
+function funShowValidationError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const errorElement = document.getElementById(fieldId.replace('-', '-error'));
+  
+  if (field) {
+    field.classList.add('border-red-500');
+  }
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+  }
+}
+
+function funValidateForm() {
+  let isValid = true;
+  funClearValidationErrors();
+  
+  const title = document.getElementById('activity-title').value.trim();
+  const category = document.getElementById('activity-category').value;
+  const priority = document.getElementById('activity-priority').value;
+  
+  if (!title) {
+    funShowValidationError('activity-title', 'Title is required');
+    isValid = false;
+  }
+  
+  if (!category) {
+    funShowValidationError('activity-category', 'Category is required');
+    isValid = false;
+  }
+  
+  if (!priority) {
+    funShowValidationError('activity-priority', 'Priority is required');
+    isValid = false;
+  }
+  
+  return isValid;
+}
+
+// File upload handling
+document.getElementById('activity-attachments').addEventListener('change', function(e) {
+  const fileList = document.getElementById('attachments-list');
+  fileList.innerHTML = '';
+  
+  Array.from(e.target.files).forEach((file, index) => {
+    const fileItem = document.createElement('div');
+    fileItem.className = 'flex items-center justify-between p-2 bg-slate-50 rounded text-xs';
+    fileItem.innerHTML = `
+      <span class="flex items-center gap-2">
+        <i data-lucide="paperclip" class="w-3 h-3"></i>
+        ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+      </span>
+      <button type="button" data-file-index="${index}" class="text-red-500 hover:text-red-700">
+        <i data-lucide="x" class="w-3 h-3"></i>
+      </button>
+    `;
+    
+    fileItem.querySelector('button').addEventListener('click', () => {
+      fileItem.remove();
+      // Note: We can't actually remove files from input, but this gives visual feedback
+    });
+    
+    fileList.appendChild(fileItem);
+  });
+  
+  // Re-initialize lucide icons
+  lucide.createIcons();
+});
+
+// Form submission
+formAddActivity.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  if (!funValidateForm()) return;
+  
+  showLoader('Creating activity...');
+  
+  try {
+    const title = document.getElementById('activity-title').value.trim();
+    const category = document.getElementById('activity-category').value;
+    const priority = document.getElementById('activity-priority').value;
+    const addToCurrentWeek = document.getElementById('add-to-current-week').checked;
+    const files = document.getElementById('activity-attachments').files;
+    
+    const activityData = {
+      title,
+      category,
+      priority,
+      status: 'Not Started',
+      createdAt: Timestamp.now().toDate().toISOString(),
+      updatedAt: Timestamp.now().toDate().toISOString()
+    };
+    
+    // Add to current week if checkbox is checked
+    if (addToCurrentWeek && currentWeekStart) {
+      activityData.weekAllocated = formatDateForISO(currentWeekStart);
+    }
+    
+    // Create activity document
+    const activityRef = await addDoc(collection(db, 'activities'), activityData);
+    
+    // Handle file uploads
+    const attachments = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const fileRef = ref(storage, `activities/${activityRef.id}/${file.name}`);
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        attachments.push({
+          filename: file.name,
+          url: downloadURL,
+          uploadedBy: currentUser.uid,
+          timestamp: Timestamp.now().toDate().toISOString()
+        });
+      } catch (fileError) {
+        console.error('Error uploading file:', file.name, fileError);
+        showToast(`Failed to upload ${file.name}`, 'error');
+      }
+    }
+    
+    // Update activity with attachments if any were uploaded
+    if (attachments.length > 0) {
+      await updateDoc(activityRef, { attachments });
+    }
+    
+    // Create activity log
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: activityRef.id,
+      timestamp: Timestamp.now().toDate().toISOString(),
+      action: 'Created',
+      memberId: currentUser.uid,
+      details: `Activity "${title}" created`
+    });
+    
+    showToast('Activity created successfully', 'success');
+    modalAddActivity.classList.add('hidden');
+    formAddActivity.reset();
+    funClearValidationErrors();
+    
+    // Reload activities if added to current week
+    if (addToCurrentWeek && currentWeekStart) {
+      funLoadActivities();
+      funLoadCategoryDistribution();
+    }
+    
+  } catch (error) {
+    console.error('Error creating activity:', error);
+    showToast('Failed to create activity', 'error');
+  } finally {
+    hideLoader();
+  }
+});
+
+// Initialize Lucide icons
+lucide.createIcons();
+</script>
+
+</body>
+</html>

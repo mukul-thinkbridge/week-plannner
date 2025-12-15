@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Planner Team Management System</title>
+
+    <!-- Required: Main JS Script -->
+    <script type="module" src="scripts/main.js" data-tiramai="web-gen"></script>
+
+    <!-- Required: TailwindCSS -->
+    <script src="./lib/tailwindcss/tailwindcss.js" fetchpriority="high" data-tiramai="web-gen"></script>
+
+    <!-- Required: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" data-tiramai="web-gen"></script>
+
+    <!-- Required: Favicon -->
+    <link rel="icon" href="assets/imgs/logo.ico" type="image/x-icon" data-tiramai="web-gen"/>
+
+    <!-- ECharts Support (for charts/graphs) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" data-tiramai="web-gen"></script>
+
+    <!-- Markdown Support (for content rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" data-tiramai="web-gen"></script>
+
+    <style data-tiramai="web-gen">
+        .logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-nav-open {
+            transform: translateX(0);
+        }
+        
+        .mobile-nav-closed {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700">
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 py-4 z-30 h-16">
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            
+            <!-- Logo and App Name -->
+            <div class="flex items-center gap-3">
+                <div class="logo-svg">
+                    <svg width="32" height="32" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="90" y="80" width="220" height="240" rx="24" stroke="#2563EB" stroke-width="16" fill="none"/>
+                        <rect x="122" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="122" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="182" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="242" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <path d="M90 120h220" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="122" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="154" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="186" cy="108" r="8" fill="#1E40AF"/>
+                        <path d="M310 80v-16a14 14 0 0 0-14-14h-192a14 14 0 0 0-14 14v16" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+                <span class="text-xl leading-8 font-semibold text-slate-900 hidden sm:block">Weekly Planner Team Management System</span>
+                <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="user-profile-btn" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
+                    <div class="p-3 border-b border-slate-200">
+                        <p id="dropdown-user-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="dropdown-user-email" class="text-xs leading-4 text-slate-500">Loading...</p>
+                    </div>
+                    <div class="py-1">
+                        <button id="sign-out-btn" class="w-full text-left px-3 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-100 flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Side Navigation -->
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
+            <nav class="p-4 space-y-2">
+                <!-- Navigation Items -->
+                <a href="/weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Weekly Dashboard
+                </a>
+
+                <!-- Backlog Management with Children -->
+                <div class="nav-group">
+                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            Backlog Management
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                    </button>
+                    <a href="/backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        View All Activities
+                    </a>
+                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
+                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Activity Detail
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Capacity Management
+                </a>
+
+                <a href="/member_management.html" data-page="member_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Member Management
+                </a>
+            </nav>
+            
+            <!-- Footer in Sidebar -->
+            <div class="absolute bottom-4 w-full px-4">
+                <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
+                    Made with ❤️ by TiramAi
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+        <!-- Main Content -->
+        <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+            
+<!-- Page Header -->
+<div class="container mx-auto max-w-7xl">
+  <div class="mb-6 sm:mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl leading-10 font-bold text-slate-900">Backlog Management</h1>
+        <button id="btn-refresh" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs leading-4 text-slate-500 hover:text-slate-700 border border-slate-200 rounded hover:bg-slate-50 transition-colors" aria-label="Refresh activities">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          Refresh
+        </button>
+      </div>
+      <button id="btn-create-activity" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Create New Activity
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters and Controls -->
+  <div class="bg-white rounded-lg border border-slate-200 p-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label for="filter-category" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Category</label>
+        <select id="filter-category" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Categories</option>
+          <option value="Client Focused">Client Focused</option>
+          <option value="Tech Debt">Tech Debt</option>
+          <option value="R&D">R&D</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-priority" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Priority</label>
+        <select id="filter-priority" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-allocation" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Allocation Status</label>
+        <select id="filter-allocation" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Activities</option>
+          <option value="allocated">Allocated</option>
+          <option value="unallocated">Unallocated</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-member" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Assigned Member</label>
+        <select id="filter-member" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Members</option>
+          <option value="unassigned">Unassigned</option>
+          <!-- Members will be populated dynamically -->
+        </select>
+      </div>
+    </div>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 pt-4 border-t border-slate-200 gap-4">
+      <div class="flex items-center gap-2 text-sm leading-5 text-slate-600">
+        <span id="activities-count">0</span> activities found
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="sort-by" class="text-xs leading-4 font-medium text-slate-700">Sort by:</label>
+        <select id="sort-by" class="px-3 py-1.5 text-xs leading-4 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="createdAt-desc">Created (Newest)</option>
+          <option value="createdAt-asc">Created (Oldest)</option>
+          <option value="updatedAt-desc">Updated (Newest)</option>
+          <option value="title-asc">Title (A-Z)</option>
+          <option value="priority-desc">Priority (High-Low)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activities List -->
+  <div class="bg-white rounded-lg border border-slate-200">
+    <!-- Loading Skeleton -->
+    <div id="activities-skeleton" class="hidden">
+      <div class="p-4 border-b border-slate-100">
+        <div class="flex items-start gap-4">
+          <div class="w-3 h-3 bg-slate-200 rounded-full animate-pulse"></div>
+          <div class="flex-1">
+            <div class="h-4 bg-slate-200 rounded animate-pulse mb-2"></div>
+            <div class="flex items-center gap-4 mb-2">
+              <div class="h-3 w-16 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-3 w-12 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-3 w-20 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="h-6 w-16 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-6 w-16 bg-slate-200 rounded animate-pulse"></div>
+              <div class="h-6 w-16 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activities Container -->
+    <div id="activities-container">
+      <!-- Activities will be populated here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden text-center py-12">
+      <i data-lucide="inbox" class="w-12 h-12 text-slate-400 mx-auto mb-4"></i>
+      <h3 class="text-lg leading-7 font-semibold text-slate-800 mb-2">No Activities Found</h3>
+      <p class="text-sm leading-5 text-slate-600 mb-6">Get started by creating your first activity or adjusting your filters.</p>
+      <button id="btn-create-activity-empty" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Create Activity
+      </button>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination-container" class="hidden border-t border-slate-200 px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center text-sm leading-5 text-slate-700">
+        Showing <span id="page-start">1</span> to <span id="page-end">20</span> of <span id="total-count">0</span> activities
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btn-prev-page" class="px-3 py-1.5 text-sm leading-5 text-slate-600 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Previous
+        </button>
+        <button id="btn-next-page" class="px-3 py-1.5 text-sm leading-5 text-slate-600 border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create/Edit Activity Modal -->
+<div id="modal-activity" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <h2 id="modal-activity-title" class="text-xl leading-8 font-semibold text-slate-900">Create Activity</h2>
+        <button id="btn-close-activity-modal" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <form id="form-activity" class="p-6 space-y-6">
+        <input type="hidden" id="activity-id" />
+        
+        <!-- Title -->
+        <div>
+          <label for="activity-title" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Title <span class="text-red-500">*</span></label>
+          <input type="text" id="activity-title" required class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter activity title">
+          <div id="error-activity-title" class="hidden text-xs leading-4 text-red-600 mt-1"></div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="activity-description" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Description</label>
+          <textarea id="activity-description" rows="4" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none" placeholder="Enter activity description"></textarea>
+        </div>
+
+        <!-- Category and Priority Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label for="activity-category" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Category <span class="text-red-500">*</span></label>
+            <select id="activity-category" required class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Select Category</option>
+              <option value="Client Focused">Client Focused</option>
+              <option value="Tech Debt">Tech Debt</option>
+              <option value="R&D">R&D</option>
+            </select>
+            <div id="error-activity-category" class="hidden text-xs leading-4 text-red-600 mt-1"></div>
+          </div>
+          <div>
+            <label for="activity-priority" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Priority <span class="text-red-500">*</span></label>
+            <select id="activity-priority" required class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="">Select Priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <div id="error-activity-priority" class="hidden text-xs leading-4 text-red-600 mt-1"></div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label for="activity-tags-input" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Tags</label>
+          <div class="border border-slate-200 rounded p-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+            <div id="selected-tags" class="flex flex-wrap gap-2 mb-2"></div>
+            <input type="text" id="activity-tags-input" class="w-full text-sm leading-5 outline-none" placeholder="Type and press Enter to add tags">
+          </div>
+        </div>
+
+        <!-- Week Allocation -->
+        <div>
+          <label for="activity-week" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Week Allocation</label>
+          <select id="activity-week" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">No Week Allocated</option>
+            <!-- Week options will be populated dynamically -->
+          </select>
+        </div>
+
+        <!-- Current Attachments (Edit mode) -->
+        <div id="current-attachments-section" class="hidden">
+          <label class="block text-sm leading-5 font-medium text-slate-700 mb-2">Current Attachments</label>
+          <div id="current-attachments" class="space-y-2"></div>
+        </div>
+
+        <!-- File Upload -->
+        <div>
+          <label for="activity-attachments" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Upload Attachments</label>
+          <div class="border-2 border-dashed border-slate-200 rounded-lg p-4 hover:border-slate-300 transition-colors">
+            <input type="file" id="activity-attachments" multiple class="w-full text-sm leading-5 text-slate-600">
+            <p class="text-xs leading-4 text-slate-500 mt-1">You can select multiple files</p>
+          </div>
+          <div id="selected-files" class="mt-2 space-y-1"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
+          <button type="button" id="btn-cancel-activity" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cancel
+          </button>
+          <button type="submit" id="btn-submit-activity" class="px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Create Activity
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="modal-delete" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+      <div class="p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+          </div>
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Delete Activity</h2>
+        </div>
+        <p class="text-sm leading-5 text-slate-600 mb-2">Are you sure you want to delete this activity?</p>
+        <p id="delete-activity-title" class="text-sm leading-5 font-medium text-slate-900 mb-4"></p>
+        <p class="text-xs leading-4 text-red-600 mb-6">This action cannot be undone.</p>
+        
+        <div class="flex items-center justify-end gap-3">
+          <button id="btn-cancel-delete" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cancel
+          </button>
+          <button id="btn-confirm-delete" class="px-4 py-2 bg-red-600 text-white text-sm leading-5 font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Allocate to Week Modal -->
+<div id="modal-allocate" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <h2 class="text-xl leading-8 font-semibold text-slate-900">Allocate to Week</h2>
+        <button id="btn-close-allocate-modal" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-sm leading-5 text-slate-600 mb-2">Allocating activity:</p>
+        <p id="allocate-activity-title" class="text-sm leading-5 font-medium text-slate-900 mb-6"></p>
+        
+        <div class="space-y-3">
+          <label class="block text-sm leading-5 font-medium text-slate-700 mb-3">Select Week</label>
+          <div id="week-options" class="space-y-2">
+            <!-- Week options will be populated dynamically -->
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200 mt-6">
+          <button id="btn-cancel-allocate" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cancel
+          </button>
+          <button id="btn-confirm-allocate" class="px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+            Allocate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Assign Modal -->
+<div id="modal-assign" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-lg">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <h2 class="text-xl leading-8 font-semibold text-slate-900">Quick Assign</h2>
+        <button id="btn-close-assign-modal" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-sm leading-5 text-slate-600 mb-2">Assigning activity:</p>
+        <p id="assign-activity-title" class="text-sm leading-5 font-medium text-slate-900 mb-6"></p>
+        
+        <form id="form-assign" class="space-y-6">
+          <input type="hidden" id="assign-activity-id" />
+          
+          <!-- Member Selection -->
+          <div>
+            <label for="assign-member" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Select Member <span class="text-red-500">*</span></label>
+            <div id="member-options" class="space-y-2 max-h-48 overflow-y-auto">
+              <!-- Member options will be populated dynamically -->
+            </div>
+            <div id="error-assign-member" class="hidden text-xs leading-4 text-red-600 mt-1"></div>
+          </div>
+
+          <!-- Hours to Assign -->
+          <div>
+            <label for="assign-hours" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Hours to Assign <span class="text-red-500">*</span></label>
+            <input type="number" id="assign-hours" min="1" max="40" required class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter hours">
+            <div id="error-assign-hours" class="hidden text-xs leading-4 text-red-600 mt-1"></div>
+          </div>
+          
+          <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-200">
+            <button type="button" id="btn-cancel-assign" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Cancel
+            </button>
+            <button type="submit" id="btn-confirm-assign" class="px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Assign
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </main>
+    </div>
+
+    <!-- Required: JavaScript -->
+    <script type="module" data-tiramai="web-gen">
+        import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+        import { auth, db, storage } from "./scripts/firebase.js";
+        import { onAuthStateChanged, getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const userNameElement = document.getElementById('user-name');
+        const dropdownUserNameElement = document.getElementById('dropdown-user-name');
+        const dropdownUserEmailElement = document.getElementById('dropdown-user-email');
+        const userProfileBtn = document.getElementById('user-profile-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        // User authentication state management
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Try to get user details from Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    let displayName = 'User';
+                    let email = user.email || 'user@example.com';
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || '';
+                        const lastName = userData.lastName || '';
+                        displayName = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || 'User');
+                        email = userData.email || user.email || 'user@example.com';
+                    } else {
+                        // Fallback to email or default
+                        displayName = user.email ? user.email.split('@')[0] : 'User';
+                    }
+                    
+                    // Update UI with user info
+                    userNameElement.textContent = displayName;
+                    dropdownUserNameElement.textContent = displayName;
+                    dropdownUserEmailElement.textContent = email;
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                    // Fallback to basic auth info
+                    const fallbackName = user.email ? user.email.split('@')[0] : 'User';
+                    userNameElement.textContent = fallbackName;
+                    dropdownUserNameElement.textContent = fallbackName;
+                    dropdownUserEmailElement.textContent = user.email || 'user@example.com';
+                }
+            } else {
+                // Redirect to auth page if not authenticated
+                window.location.href = 'auth.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Sign out functionality
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                showLoader('Signing out...');
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Error signing out', 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Mobile navigation
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('mobile-nav-open');
+            if (isOpen) {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.remove('hidden');
+            }
+        });
+
+        // Close mobile nav when overlay is clicked
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-nav-open');
+            sidebar.classList.add('mobile-nav-closed');
+            mobileOverlay.classList.add('hidden');
+        });
+
+        // Close mobile nav when nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('mobile-nav-open');
+                    sidebar.classList.add('mobile-nav-closed');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Collapsible navigation groups
+        document.querySelectorAll('.nav-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
+                
+                if (targetElement) {
+                    targetElement.classList.toggle('hidden');
+                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                        'rotate(0deg)' : 'rotate(90deg)';
+                }
+            });
+        });
+
+        // Active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const pageName = item.getAttribute('data-page');
+                if (pageName === currentPage) {
+                    item.classList.add('bg-blue-50', 'text-blue-700', 'border-r-2', 'border-blue-500');
+                    item.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Set active navigation on load
+        setActiveNavigation();
+
+        // Resize handler for mobile nav
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+            }
+        });
+    </script>
+
+    
+<script id="data-script" type="module" data-tiramai="web-gen">
+// Firebase imports
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import {
+  collection, getDocs, setDoc, addDoc, doc, getDoc, updateDoc, deleteDoc, writeBatch,
+  query, where, orderBy, limit, startAfter, onSnapshot, Timestamp,
+  getCountFromServer
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { auth, getDb, storage } from "./scripts/firebase.js";
+import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js';
+
+const db = getDb();
+
+// State management
+let currentUser = null;
+let activities = [];
+let members = [];
+let currentPage = 1;
+let pageSize = 20;
+let totalCount = 0;
+let lastDoc = null;
+let currentFilters = {};
+let currentSort = 'createdAt-desc';
+let currentActivityId = null;
+let selectedTags = [];
+let currentAbort = null;
+
+// DOM Elements
+const activitiesContainer = document.getElementById('activities-container');
+const activitiesSkeleton = document.getElementById('activities-skeleton');
+const emptyState = document.getElementById('empty-state');
+const activitiesCount = document.getElementById('activities-count');
+
+// Filter elements
+const filterCategory = document.getElementById('filter-category');
+const filterPriority = document.getElementById('filter-priority');
+const filterAllocation = document.getElementById('filter-allocation');
+const filterMember = document.getElementById('filter-member');
+const sortBy = document.getElementById('sort-by');
+
+// Modal elements
+const modalActivity = document.getElementById('modal-activity');
+const modalDelete = document.getElementById('modal-delete');
+const modalAllocate = document.getElementById('modal-allocate');
+const modalAssign = document.getElementById('modal-assign');
+
+// Pagination elements
+const paginationContainer = document.getElementById('pagination-container');
+
+// Initialize auth and load data
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "auth.html?redirect=" + encodeURIComponent(location.pathname);
+    return;
+  }
+  
+  currentUser = user;
+  await funInitialLoad();
+});
+
+// Initialize page
+async function funInitialLoad(forceRefresh = false) {
+  try {
+    // Reset state for fresh load
+    if (forceRefresh) {
+      currentPage = 1;
+      lastDoc = null;
+      activities = [];
+    }
+    
+    // Show skeleton
+    funShowSkeleton(true);
+    
+    // Load members and activities concurrently with limit
+    await withLimit(async () => {
+      await Promise.all([
+        funLoadMembers(),
+        funLoadActivities()
+      ]);
+    });
+    
+    funPopulateWeekOptions();
+    
+  } catch (error) {
+    console.error('Error in initial load:', error);
+    showToast('Failed to load data', 'error');
+  } finally {
+    funShowSkeleton(false);
+  }
+}
+
+// Concurrency limiter
+function createSemaphore(max = 2) {
+  const queue = [];
+  let active = 0;
+  const next = () => {
+    if (active >= max || queue.length === 0) return;
+    active++;
+    const { fn, res, rej } = queue.shift();
+    Promise.resolve()
+      .then(fn)
+      .then(v => res(v))
+      .catch(e => rej(e))
+      .finally(() => { active--; next(); });
+  };
+  return (fn) => new Promise((res, rej) => { queue.push({ fn, res, rej }); next(); });
+}
+const withLimit = createSemaphore(2);
+
+// Abort controller for search operations
+function funAbortPreviousQuery() {
+  if (currentAbort) {
+    currentAbort.abort();
+  }
+  currentAbort = new AbortController();
+  return currentAbort.signal;
+}
+
+// Load members
+async function funLoadMembers() {
+  const signal = funAbortPreviousQuery();
+  
+  try {
+    const membersQuery = query(
+      collection(db, 'members'),
+      orderBy('name', 'asc')
+    );
+    
+    const snapshot = await getDocs(membersQuery);
+    if (signal.aborted) return;
+    
+    members = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    funPopulateMemberFilter();
+    
+  } catch (error) {
+    if (signal.aborted) return;
+    console.error('Error loading members:', error);
+    showToast('Failed to load members', 'error');
+  }
+}
+
+// Load activities with current filters and pagination
+async function funLoadActivities(isLoadMore = false) {
+  const signal = funAbortPreviousQuery();
+  
+  try {
+    if (!isLoadMore) {
+      currentPage = 1;
+      lastDoc = null;
+    }
+
+    const activitiesQuery = funBuildQuery();
+    const snapshot = await getDocs(activitiesQuery);
+    
+    if (signal.aborted) return;
+
+    const newActivities = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    if (isLoadMore) {
+      activities = [...activities, ...newActivities];
+    } else {
+      activities = newActivities;
+    }
+
+    // Update pagination info
+    if (snapshot.docs.length > 0) {
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
+    }
+
+    // Get total count (for display purposes)
+    const countQuery = funBuildCountQuery();
+    const countSnapshot = await getCountFromServer(countQuery);
+    if (!signal.aborted) {
+      totalCount = countSnapshot.data().count;
+    }
+
+    funRenderActivities();
+    funUpdatePagination();
+
+  } catch (error) {
+    if (signal.aborted) return;
+    console.error('Error loading activities:', error);
+    showToast('Failed to load activities', 'error');
+  }
+}
+
+// Build Firestore query based on current filters and sort
+function funBuildQuery() {
+  let baseQuery = collection(db, 'activities');
+  let constraints = [];
+
+  // Apply filters
+  if (currentFilters.category) {
+    constraints.push(where('category', '==', currentFilters.category));
+  }
+  if (currentFilters.priority) {
+    constraints.push(where('priority', '==', currentFilters.priority));
+  }
+  if (currentFilters.allocation === 'allocated') {
+    constraints.push(where('weekAllocated', '!=', null));
+  } else if (currentFilters.allocation === 'unallocated') {
+    constraints.push(where('weekAllocated', '==', null));
+  }
+  if (currentFilters.member === 'unassigned') {
+    constraints.push(where('assignedMember', '==', null));
+  } else if (currentFilters.member) {
+    constraints.push(where('assignedMember', '==', currentFilters.member));
+  }
+
+  // Apply sorting
+  const [sortField, sortDirection] = currentSort.split('-');
+  constraints.push(orderBy(sortField, sortDirection === 'asc' ? 'asc' : 'desc'));
+
+  // Add pagination
+  if (lastDoc) {
+    constraints.push(startAfter(lastDoc));
+  }
+  constraints.push(limit(pageSize));
+
+  return query(baseQuery, ...constraints);
+}
+
+// Build count query (without pagination)
+function funBuildCountQuery() {
+  let baseQuery = collection(db, 'activities');
+  let constraints = [];
+
+  // Apply same filters as main query
+  if (currentFilters.category) {
+    constraints.push(where('category', '==', currentFilters.category));
+  }
+  if (currentFilters.priority) {
+    constraints.push(where('priority', '==', currentFilters.priority));
+  }
+  if (currentFilters.allocation === 'allocated') {
+    constraints.push(where('weekAllocated', '!=', null));
+  } else if (currentFilters.allocation === 'unallocated') {
+    constraints.push(where('weekAllocated', '==', null));
+  }
+  if (currentFilters.member === 'unassigned') {
+    constraints.push(where('assignedMember', '==', null));
+  } else if (currentFilters.member) {
+    constraints.push(where('assignedMember', '==', currentFilters.member));
+  }
+
+  return constraints.length > 0 ? query(baseQuery, ...constraints) : baseQuery;
+}
+
+// Render activities list
+function funRenderActivities() {
+  if (activities.length === 0) {
+    activitiesContainer.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    paginationContainer.classList.add('hidden');
+    activitiesCount.textContent = '0';
+    return;
+  }
+
+  emptyState.classList.add('hidden');
+  
+  const html = activities.map(activity => {
+    const member = activity.assignedMember ? 
+      members.find(m => m.id === activity.assignedMember) : null;
+    
+    const weekText = activity.weekAllocated ? 
+      `Week of ${funFormatDate(activity.weekAllocated)}` : 'Unallocated';
+    
+    const assignedText = member ? member.name : 'Unassigned';
+    
+    const statusColor = {
+      'Not Started': 'bg-slate-500',
+      'In Progress': 'bg-amber-500', 
+      'Completed': 'bg-emerald-500'
+    }[activity.status] || 'bg-slate-500';
+
+    const priorityColor = {
+      'High': 'bg-red-500',
+      'Medium': 'bg-amber-500',
+      'Low': 'bg-emerald-500'
+    }[activity.priority] || 'bg-slate-500';
+
+    const canDelete = !activity.assignedMember;
+    
+    return `
+      <div class="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors" data-activity-id="${activity.id}">
+        <div class="flex items-start gap-4">
+          <span class="h-3 w-3 rounded-full ${priorityColor} mt-1 flex-shrink-0" title="${activity.priority} Priority"></span>
+          
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-4 mb-2">
+              <h3 class="text-sm leading-5 font-medium text-slate-900 cursor-pointer hover:text-blue-600" onclick="funNavigateToDetail('${activity.id}')">${funEscapeHtml(activity.title || 'Untitled')}</h3>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button onclick="funEditActivity('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Edit Activity">
+                  <i data-lucide="edit-2" class="w-4 h-4"></i>
+                </button>
+                <button onclick="funShowQuickAssign('${activity.id}')" class="p-1 text-slate-400 hover:text-emerald-600" title="Quick Assign">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                </button>
+                <button onclick="funShowAllocateModal('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Allocate to Week">
+                  <i data-lucide="calendar" class="w-4 h-4"></i>
+                </button>
+                ${canDelete ? `
+                  <button onclick="funShowDeleteModal('${activity.id}')" class="p-1 text-slate-400 hover:text-red-600" title="Delete Activity">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            
+            ${activity.description ? `<p class="text-xs leading-4 text-slate-600 mb-2 line-clamp-2">${funEscapeHtml(activity.description)}</p>` : ''}
+            
+            <div class="flex flex-wrap items-center gap-4 mb-2 text-xs leading-4 text-slate-600">
+              <span class="flex items-center gap-1">
+                <i data-lucide="tag" class="w-3 h-3"></i>
+                ${activity.category || 'N/A'}
+              </span>
+              <span class="flex items-center gap-1">
+                <i data-lucide="calendar" class="w-3 h-3"></i>
+                ${weekText}
+              </span>
+              <span class="flex items-center gap-1">
+                <i data-lucide="user" class="w-3 h-3"></i>
+                ${assignedText}
+              </span>
+              ${activity.assignedHours ? `<span class="flex items-center gap-1">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                ${activity.assignedHours}h
+              </span>` : ''}
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-xs leading-4 font-medium text-slate-700 rounded">
+                <span class="h-2 w-2 rounded-full ${statusColor}"></span>
+                ${activity.status || 'Not Started'}
+              </span>
+              
+              ${activity.tags && activity.tags.length > 0 ? 
+                activity.tags.map(tag => `
+                  <span class="inline-flex px-2 py-1 bg-blue-50 text-xs leading-4 text-blue-700 rounded">${funEscapeHtml(tag)}</span>
+                `).join('') : ''
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  activitiesContainer.innerHTML = html;
+  activitiesCount.textContent = totalCount.toString();
+  
+  // Reinitialize Lucide icons
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// Utility functions
+function funEscapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function funFormatDate(dateString) {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric', 
+      year: 'numeric' 
+    });
+  } catch (error) {
+    return 'N/A';
+  }
+}
+
+function funShowSkeleton(show) {
+  if (show) {
+    activitiesSkeleton.classList.remove('hidden');
+    activitiesContainer.innerHTML = '';
+    // Duplicate skeleton for effect
+    const skeletonContent = activitiesSkeleton.innerHTML;
+    activitiesSkeleton.innerHTML = skeletonContent.repeat(3);
+  } else {
+    activitiesSkeleton.classList.add('hidden');
+  }
+}
+
+// Navigation function
+function funNavigateToDetail(activityId) {
+  if (activityId) {
+    window.location.href = `activity_detail.html?activityId=${activityId}`;
+  }
+}
+
+// Populate member filter dropdown
+function funPopulateMemberFilter() {
+  const memberOptions = members.map(member => 
+    `<option value="${member.id}">${funEscapeHtml(member.name)}</option>`
+  ).join('');
+  
+  filterMember.innerHTML = `
+    <option value="">All Members</option>
+    <option value="unassigned">Unassigned</option>
+    ${memberOptions}
+  `;
+}
+
+// Populate week options for allocation
+function funPopulateWeekOptions() {
+  const weekSelects = [
+    document.getElementById('activity-week'),
+    document.getElementById('week-options')
+  ];
+  
+  // Generate next 4 weeks starting from current Wednesday
+  const weeks = [];
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 3 = Wednesday
+  
+  // Find next/current Wednesday
+  let daysUntilWednesday = (3 - currentDay + 7) % 7;
+  if (daysUntilWednesday === 0 && today.getHours() >= 0) {
+    // If it's Wednesday, include this week
+    daysUntilWednesday = 0;
+  }
+  
+  const nextWednesday = new Date(today);
+  nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+  
+  for (let i = 0; i < 4; i++) {
+    const weekDate = new Date(nextWednesday);
+    weekDate.setDate(nextWednesday.getDate() + (i * 7));
+    
+    const isoDate = weekDate.toISOString().split('T')[0];
+    const displayDate = weekDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    
+    weeks.push({
+      value: isoDate,
+      label: `Week of ${displayDate}`
+    });
+  }
+  
+  // Populate dropdown select
+  if (weekSelects[0]) {
+    weekSelects[0].innerHTML = `
+      <option value="">No Week Allocated</option>
+      ${weeks.map(week => `<option value="${week.value}">${week.label}</option>`).join('')}
+    `;
+  }
+  
+  // Populate radio options for allocation modal
+  if (weekSelects[1]) {
+    weekSelects[1].innerHTML = weeks.map(week => `
+      <label class="flex items-center gap-3 p-3 border border-slate-200 rounded cursor-pointer hover:bg-slate-50">
+        <input type="radio" name="allocate-week" value="${week.value}" class="text-blue-500 focus:ring-blue-500">
+        <span class="text-sm leading-5 text-slate-700">${week.label}</span>
+      </label>
+    `).join('');
+  }
+}
+
+// Update pagination UI
+function funUpdatePagination() {
+  const start = Math.min((currentPage - 1) * pageSize + 1, totalCount);
+  const end = Math.min(currentPage * pageSize, totalCount);
+  const hasNextPage = activities.length === pageSize;
+  
+  document.getElementById('page-start').textContent = start.toString();
+  document.getElementById('page-end').textContent = end.toString();
+  document.getElementById('total-count').textContent = totalCount.toString();
+  
+  document.getElementById('btn-prev-page').disabled = currentPage === 1;
+  document.getElementById('btn-next-page').disabled = !hasNextPage;
+  
+  if (totalCount > pageSize) {
+    paginationContainer.classList.remove('hidden');
+  } else {
+    paginationContainer.classList.add('hidden');
+  }
+}
+
+// Activity CRUD operations
+async function funCreateActivity(activityData, files) {
+  try {
+    showLoader('Creating activity...');
+    
+    // Upload attachments first if any
+    const attachments = [];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const fileRef = ref(storage, `activities/${Date.now()}_${file.name}`);
+        const uploadResult = await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(uploadResult.ref);
+        
+        attachments.push({
+          filename: file.name,
+          url: downloadURL,
+          uploadedBy: currentUser.uid,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    const newActivity = {
+      ...activityData,
+      attachments,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    await addDoc(collection(db, 'activities'), newActivity);
+    
+    // Log activity creation
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: 'pending', // Will be updated by backend trigger if needed
+      timestamp: new Date().toISOString(),
+      action: 'Created',
+      memberId: currentUser.uid,
+      details: 'Activity created',
+      previousState: '{}'
+    });
+    
+    showToast('Activity created successfully', 'success');
+    funCloseActivityModal();
+    await funLoadActivities(); // Refresh the list
+    
+  } catch (error) {
+    console.error('Error creating activity:', error);
+    showToast('Failed to create activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+async function funUpdateActivity(activityId, activityData, files, deletedAttachments) {
+  try {
+    showLoader('Updating activity...');
+    
+    const activityRef = doc(db, 'activities', activityId);
+    const currentDoc = await getDoc(activityRef);
+    
+    if (!currentDoc.exists()) {
+      throw new Error('Activity not found');
+    }
+    
+    const currentActivity = currentDoc.data();
+    let attachments = currentActivity.attachments || [];
+    
+    // Remove deleted attachments
+    if (deletedAttachments && deletedAttachments.length > 0) {
+      for (const attachment of deletedAttachments) {
+        try {
+          const fileRef = ref(storage, attachment.url);
+          await deleteObject(fileRef);
+        } catch (err) {
+          console.warn('Failed to delete attachment:', err);
+        }
+      }
+      attachments = attachments.filter(att => 
+        !deletedAttachments.some(del => del.url === att.url)
+      );
+    }
+    
+    // Upload new attachments
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const fileRef = ref(storage, `activities/${Date.now()}_${file.name}`);
+        const uploadResult = await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(uploadResult.ref);
+        
+        attachments.push({
+          filename: file.name,
+          url: downloadURL,
+          uploadedBy: currentUser.uid,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+    
+    const updatedActivity = {
+      ...activityData,
+      attachments,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDoc(activityRef, updatedActivity);
+    
+    // Log activity update
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: activityId,
+      timestamp: new Date().toISOString(),
+      action: 'Edited',
+      memberId: currentUser.uid,
+      details: 'Activity updated',
+      previousState: JSON.stringify(currentActivity)
+    });
+    
+    showToast('Activity updated successfully', 'success');
+    funCloseActivityModal();
+    await funLoadActivities(); // Refresh the list
+    
+  } catch (error) {
+    console.error('Error updating activity:', error);
+    showToast('Failed to update activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+async function funDeleteActivity(activityId) {
+  try {
+    showLoader('Deleting activity...');
+    
+    const activityRef = doc(db, 'activities', activityId);
+    const activityDoc = await getDoc(activityRef);
+    
+    if (!activityDoc.exists()) {
+      throw new Error('Activity not found');
+    }
+    
+    const activityData = activityDoc.data();
+    
+    // Delete attachments from storage
+    if (activityData.attachments && activityData.attachments.length > 0) {
+      for (const attachment of activityData.attachments) {
+        try {
+          const fileRef = ref(storage, attachment.url);
+          await deleteObject(fileRef);
+        } catch (err) {
+          console.warn('Failed to delete attachment:', err);
+        }
+      }
+    }
+    
+    // Delete activity document
+    await deleteDoc(activityRef);
+    
+    showToast('Activity deleted successfully', 'success');
+    funCloseDeleteModal();
+    await funLoadActivities(); // Refresh the list
+    
+  } catch (error) {
+    console.error('Error deleting activity:', error);
+    showToast('Failed to delete activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Modal functions
+function funShowCreateModal() {
+  currentActivityId = null;
+  selectedTags = [];
+  
+  document.getElementById('modal-activity-title').textContent = 'Create Activity';
+  document.getElementById('btn-submit-activity').textContent = 'Create Activity';
+  document.getElementById('current-attachments-section').classList.add('hidden');
+  
+  // Reset form
+  document.getElementById('form-activity').reset();
+  document.getElementById('activity-id').value = '';
+  funRenderSelectedTags();
+  
+  modalActivity.classList.remove('hidden');
+  document.getElementById('activity-title').focus();
+}
+
+async function funEditActivity(activityId) {
+  try {
+    showLoader('Loading activity...');
+    
+    const activityRef = doc(db, 'activities', activityId);
+    const activityDoc = await getDoc(activityRef);
+    
+    if (!activityDoc.exists()) {
+      showToast('Activity not found', 'error');
+      return;
+    }
+    
+    const activity = activityDoc.data();
+    currentActivityId = activityId;
+    selectedTags = activity.tags || [];
+    
+    // Populate form
+    document.getElementById('modal-activity-title').textContent = 'Edit Activity';
+    document.getElementById('btn-submit-activity').textContent = 'Update Activity';
+    document.getElementById('activity-id').value = activityId;
+    document.getElementById('activity-title').value = activity.title || '';
+    document.getElementById('activity-description').value = activity.description || '';
+    document.getElementById('activity-category').value = activity.category || '';
+    document.getElementById('activity-priority').value = activity.priority || '';
+    document.getElementById('activity-week').value = activity.weekAllocated || '';
+    
+    funRenderSelectedTags();
+    funRenderCurrentAttachments(activity.attachments || []);
+    
+    modalActivity.classList.remove('hidden');
+    document.getElementById('activity-title').focus();
+    
+  } catch (error) {
+    console.error('Error loading activity:', error);
+    showToast('Failed to load activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+function funRenderSelectedTags() {
+  const container = document.getElementById('selected-tags');
+  if (selectedTags.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+  
+  container.innerHTML = selectedTags.map(tag => `
+    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-xs leading-4 text-blue-700 rounded">
+      ${funEscapeHtml(tag)}
+      <button type="button" onclick="funRemoveTag('${funEscapeHtml(tag)}')" class="text-blue-500 hover:text-blue-700">
+        <i data-lucide="x" class="w-3 h-3"></i>
+      </button>
+    </span>
+  `).join('');
+  
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+let currentAttachments = [];
+
+function funRenderCurrentAttachments(attachments) {
+  currentAttachments = attachments || [];
+  const section = document.getElementById('current-attachments-section');
+  const container = document.getElementById('current-attachments');
+  
+  if (currentAttachments.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  
+  section.classList.remove('hidden');
+  container.innerHTML = currentAttachments.map((attachment, index) => `
+    <div class="flex items-center justify-between p-2 bg-slate-50 rounded">
+      <div class="flex items-center gap-2">
+        <i data-lucide="file" class="w-4 h-4 text-slate-500"></i>
+        <span class="text-sm leading-5 text-slate-700">${funEscapeHtml(attachment.filename)}</span>
+      </div>
+      <button type="button" onclick="funMarkAttachmentForDeletion(${index})" class="text-red-500 hover:text-red-700">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      </button>
+    </div>
+  `).join('');
+  
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+let attachmentsToDelete = [];
+
+function funMarkAttachmentForDeletion(index) {
+  const attachment = currentAttachments[index];
+  attachmentsToDelete.push(attachment);
+  currentAttachments.splice(index, 1);
+  funRenderCurrentAttachments(currentAttachments);
+}
+
+function funAddTag(tag) {
+  const trimmedTag = tag.trim();
+  if (trimmedTag && !selectedTags.includes(trimmedTag)) {
+    selectedTags.push(trimmedTag);
+    funRenderSelectedTags();
+  }
+}
+
+function funRemoveTag(tag) {
+  selectedTags = selectedTags.filter(t => t !== tag);
+  funRenderSelectedTags();
+}
+
+function funCloseActivityModal() {
+  modalActivity.classList.add('hidden');
+  selectedTags = [];
+  currentAttachments = [];
+  attachmentsToDelete = [];
+  document.getElementById('form-activity').reset();
+}
+
+function funShowDeleteModal(activityId) {
+  const activity = activities.find(a => a.id === activityId);
+  if (!activity) return;
+  
+  if (activity.assignedMember) {
+    showToast('Cannot delete assigned activities', 'error');
+    return;
+  }
+  
+  currentActivityId = activityId;
+  document.getElementById('delete-activity-title').textContent = activity.title || 'Untitled';
+  modalDelete.classList.remove('hidden');
+}
+
+function funCloseDeleteModal() {
+  modalDelete.classList.add('hidden');
+  currentActivityId = null;
+}
+
+function funShowAllocateModal(activityId) {
+  const activity = activities.find(a => a.id === activityId);
+  if (!activity) return;
+  
+  currentActivityId = activityId;
+  document.getElementById('allocate-activity-title').textContent = activity.title || 'Untitled';
+  
+  // Clear previous selection
+  document.querySelectorAll('input[name="allocate-week"]').forEach(radio => {
+    radio.checked = false;
+  });
+  
+  document.getElementById('btn-confirm-allocate').disabled = true;
+  modalAllocate.classList.remove('hidden');
+}
+
+function funCloseAllocateModal() {
+  modalAllocate.classList.add('hidden');
+  currentActivityId = null;
+}
+
+async function funAllocateActivity(weekDate) {
+  try {
+    showLoader('Allocating activity...');
+    
+    const activityRef = doc(db, 'activities', currentActivityId);
+    await updateDoc(activityRef, {
+      weekAllocated: weekDate,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Log allocation
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Week Reallocated',
+      memberId: currentUser.uid,
+      details: `Activity allocated to week of ${weekDate}`,
+      previousState: '{}'
+    });
+    
+    showToast('Activity allocated successfully', 'success');
+    funCloseAllocateModal();
+    await funLoadActivities(); // Refresh the list
+    
+  } catch (error) {
+    console.error('Error allocating activity:', error);
+    showToast('Failed to allocate activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+function funShowQuickAssign(activityId) {
+  const activity = activities.find(a => a.id === activityId);
+  if (!activity) return;
+  
+  currentActivityId = activityId;
+  document.getElementById('assign-activity-title').textContent = activity.title || 'Untitled';
+  document.getElementById('assign-activity-id').value = activityId;
+  
+  // Reset form
+  document.getElementById('form-assign').reset();
+  document.querySelectorAll('input[name="assign-member"]').forEach(radio => {
+    radio.checked = false;
+  });
+  
+  funRenderMemberOptions();
+  modalAssign.classList.remove('hidden');
+}
+
+function funRenderMemberOptions() {
+  const container = document.getElementById('member-options');
+  
+  if (members.length === 0) {
+    container.innerHTML = '<p class="text-sm leading-5 text-slate-500">No members available</p>';
+    return;
+  }
+  
+  // For now, show all members - in real app you'd calculate capacity
+  container.innerHTML = members.map(member => `
+    <label class="flex items-center justify-between p-3 border border-slate-200 rounded cursor-pointer hover:bg-slate-50">
+      <div class="flex items-center gap-3">
+        <input type="radio" name="assign-member" value="${member.id}" class="text-blue-500 focus:ring-blue-500">
+        <div>
+          <span class="text-sm leading-5 text-slate-700 font-medium">${funEscapeHtml(member.name)}</span>
+          <p class="text-xs leading-4 text-slate-500">${member.defaultWeeklyCapacity || 40}h weekly capacity</p>
+        </div>
+      </div>
+      <span class="text-xs leading-4 text-emerald-600 font-medium">Available</span>
+    </label>
+  `).join('');
+}
+
+function funCloseAssignModal() {
+  modalAssign.classList.add('hidden');
+  currentActivityId = null;
+}
+
+async function funAssignActivity(memberId, hours) {
+  try {
+    showLoader('Assigning activity...');
+    
+    const activityRef = doc(db, 'activities', currentActivityId);
+    await updateDoc(activityRef, {
+      assignedMember: memberId,
+      assignedHours: parseInt(hours),
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Log assignment
+    const member = members.find(m => m.id === memberId);
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Member Assigned',
+      memberId: currentUser.uid,
+      details: `Activity assigned to ${member?.name || 'Unknown'} for ${hours} hours`,
+      previousState: '{}'
+    });
+    
+    showToast('Activity assigned successfully', 'success');
+    funCloseAssignModal();
+    await funLoadActivities(); // Refresh the list
+    
+  } catch (error) {
+    console.error('Error assigning activity:', error);
+    showToast('Failed to assign activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Lucide icons
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+  
+  // Create activity buttons
+  document.getElementById('btn-create-activity')?.addEventListener('click', funShowCreateModal);
+  document.getElementById('btn-create-activity-empty')?.addEventListener('click', funShowCreateModal);
+  
+  // Refresh button
+  document.getElementById('btn-refresh')?.addEventListener('click', () => {
+    funInitialLoad(true);
+  });
+  
+  // Filter change handlers
+  [filterCategory, filterPriority, filterAllocation, filterMember, sortBy].forEach(element => {
+    element?.addEventListener('change', (e) => {
+      const value = e.target.value;
+      const name = e.target.id.replace('filter-', '').replace('sort-by', 'sort');
+      
+      if (name === 'sort') {
+        currentSort = value;
+      } else {
+        if (value) {
+          currentFilters[name] = value;
+        } else {
+          delete currentFilters[name];
+        }
+      }
+      
+      // Reset pagination when filters change
+      currentPage = 1;
+      lastDoc = null;
+      
+      funLoadActivities();
+    });
+  });
+  
+  // Activity modal handlers
+  document.getElementById('btn-close-activity-modal')?.addEventListener('click', funCloseActivityModal);
+  document.getElementById('btn-cancel-activity')?.addEventListener('click', funCloseActivityModal);
+  
+  // Activity form submission
+  document.getElementById('form-activity')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+      title: document.getElementById('activity-title').value.trim(),
+      description: document.getElementById('activity-description').value.trim(),
+      category: document.getElementById('activity-category').value,
+      priority: document.getElementById('activity-priority').value,
+      weekAllocated: document.getElementById('activity-week').value || null,
+      tags: selectedTags,
+      status: 'Not Started' // Default status for new activities
+    };
+    
+    // Validation
+    let hasError = false;
+    
+    if (!formData.title) {
+      document.getElementById('error-activity-title').textContent = 'Title is required';
+      document.getElementById('error-activity-title').classList.remove('hidden');
+      hasError = true;
+    } else {
+      document.getElementById('error-activity-title').classList.add('hidden');
+    }
+    
+    if (!formData.category) {
+      document.getElementById('error-activity-category').textContent = 'Category is required';
+      document.getElementById('error-activity-category').classList.remove('hidden');
+      hasError = true;
+    } else {
+      document.getElementById('error-activity-category').classList.add('hidden');
+    }
+    
+    if (!formData.priority) {
+      document.getElementById('error-activity-priority').textContent = 'Priority is required';
+      document.getElementById('error-activity-priority').classList.remove('hidden');
+      hasError = true;
+    } else {
+      document.getElementById('error-activity-priority').classList.add('hidden');
+    }
+    
+    if (hasError) return;
+    
+    const files = document.getElementById('activity-attachments').files;
+    
+    if (currentActivityId) {
+      await funUpdateActivity(currentActivityId, formData, files, attachmentsToDelete);
+    } else {
+      await funCreateActivity(formData, files);
+    }
+  });
+  
+  // Tags input handler
+  document.getElementById('activity-tags-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const tag = e.target.value.trim();
+      if (tag) {
+        funAddTag(tag);
+        e.target.value = '';
+      }
+    }
+  });
+  
+  // Delete modal handlers
+  document.getElementById('btn-cancel-delete')?.addEventListener('click', funCloseDeleteModal);
+  document.getElementById('btn-confirm-delete')?.addEventListener('click', async () => {
+    if (currentActivityId) {
+      await funDeleteActivity(currentActivityId);
+    }
+  });
+  
+  // Allocate modal handlers
+  document.getElementById('btn-close-allocate-modal')?.addEventListener('click', funCloseAllocateModal);
+  document.getElementById('btn-cancel-allocate')?.addEventListener('click', funCloseAllocateModal);
+  document.getElementById('btn-confirm-allocate')?.addEventListener('click', async () => {
+    const selectedWeek = document.querySelector('input[name="allocate-week"]:checked');
+    if (selectedWeek && currentActivityId) {
+      await funAllocateActivity(selectedWeek.value);
+    }
+  });
+  
+  // Week selection handler for allocation modal
+  document.addEventListener('change', (e) => {
+    if (e.target.name === 'allocate-week') {
+      document.getElementById('btn-confirm-allocate').disabled = false;
+    }
+  });
+  
+  // Assign modal handlers  
+  document.getElementById('btn-close-assign-modal')?.addEventListener('click', funCloseAssignModal);
+  document.getElementById('btn-cancel-assign')?.addEventListener('click', funCloseAssignModal);
+  
+  document.getElementById('form-assign')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const selectedMember = document.querySelector('input[name="assign-member"]:checked');
+    const hours = document.getElementById('assign-hours').value;
+    
+    // Validation
+    let hasError = false;
+    
+    if (!selectedMember) {
+      document.getElementById('error-assign-member').textContent = 'Please select a member';
+      document.getElementById('error-assign-member').classList.remove('hidden');
+      hasError = true;
+    } else {
+      document.getElementById('error-assign-member').classList.add('hidden');
+    }
+    
+    if (!hours || hours < 1 || hours > 40) {
+      document.getElementById('error-assign-hours').textContent = 'Hours must be between 1 and 40';
+      document.getElementById('error-assign-hours').classList.remove('hidden');
+      hasError = true;
+    } else {
+      document.getElementById('error-assign-hours').classList.add('hidden');
+    }
+    
+    if (hasError) return;
+    
+    await funAssignActivity(selectedMember.value, hours);
+  });
+  
+  // Pagination handlers
+  document.getElementById('btn-prev-page')?.addEventListener('click', async () => {
+    if (currentPage > 1) {
+      currentPage--;
+      await funLoadActivities();
+    }
+  });
+  
+  document.getElementById('btn-next-page')?.addEventListener('click', async () => {
+    currentPage++;
+    await funLoadActivities(true); // Load more
+  });
+  
+  // Modal backdrop click handlers
+  [modalActivity, modalDelete, modalAllocate, modalAssign].forEach(modal => {
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        if (modal === modalActivity) funCloseActivityModal();
+        if (modal === modalDelete) funCloseDeleteModal();
+        if (modal === modalAllocate) funCloseAllocateModal();
+        if (modal === modalAssign) funCloseAssignModal();
+      }
+    });
+  });
+  
+  // Escape key handler
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (!modalActivity.classList.contains('hidden')) funCloseActivityModal();
+      if (!modalDelete.classList.contains('hidden')) funCloseDeleteModal();
+      if (!modalAllocate.classList.contains('hidden')) funCloseAllocateModal();
+      if (!modalAssign.classList.contains('hidden')) funCloseAssignModal();
+    }
+  });
+});
+
+// Make functions available globally for onclick handlers
+window.funEditActivity = funEditActivity;
+window.funShowDeleteModal = funShowDeleteModal;
+window.funShowAllocateModal = funShowAllocateModal;
+window.funShowQuickAssign = funShowQuickAssign;
+window.funNavigateToDetail = funNavigateToDetail;
+window.funRemoveTag = funRemoveTag;
+window.funMarkAttachmentForDeletion = funMarkAttachmentForDeletion;
+</script>
+
+</body>
+</html>

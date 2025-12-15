@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Planner Team Management System</title>
+
+    <!-- Required: Main JS Script -->
+    <script type="module" src="scripts/main.js" data-tiramai="web-gen"></script>
+
+    <!-- Required: TailwindCSS -->
+    <script src="./lib/tailwindcss/tailwindcss.js" fetchpriority="high" data-tiramai="web-gen"></script>
+
+    <!-- Required: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" data-tiramai="web-gen"></script>
+
+    <!-- Required: Favicon -->
+    <link rel="icon" href="assets/imgs/logo.ico" type="image/x-icon" data-tiramai="web-gen"/>
+
+    <!-- ECharts Support (for charts/graphs) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" data-tiramai="web-gen"></script>
+
+    <!-- Markdown Support (for content rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" data-tiramai="web-gen"></script>
+
+    <style data-tiramai="web-gen">
+        .logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-nav-open {
+            transform: translateX(0);
+        }
+        
+        .mobile-nav-closed {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700">
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 py-4 z-30 h-16">
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            
+            <!-- Logo and App Name -->
+            <div class="flex items-center gap-3">
+                <div class="logo-svg">
+                    <svg width="32" height="32" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="90" y="80" width="220" height="240" rx="24" stroke="#2563EB" stroke-width="16" fill="none"/>
+                        <rect x="122" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="122" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="182" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="242" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <path d="M90 120h220" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="122" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="154" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="186" cy="108" r="8" fill="#1E40AF"/>
+                        <path d="M310 80v-16a14 14 0 0 0-14-14h-192a14 14 0 0 0-14 14v16" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+                <span class="text-xl leading-8 font-semibold text-slate-900 hidden sm:block">Weekly Planner Team Management System</span>
+                <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="user-profile-btn" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
+                    <div class="p-3 border-b border-slate-200">
+                        <p id="dropdown-user-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="dropdown-user-email" class="text-xs leading-4 text-slate-500">Loading...</p>
+                    </div>
+                    <div class="py-1">
+                        <button id="sign-out-btn" class="w-full text-left px-3 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-100 flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Side Navigation -->
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
+            <nav class="p-4 space-y-2">
+                <!-- Navigation Items -->
+                <a href="/weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Weekly Dashboard
+                </a>
+
+                <!-- Backlog Management with Children -->
+                <div class="nav-group">
+                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            Backlog Management
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                    </button>
+                    <a href="/backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        View All Activities
+                    </a>
+                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
+                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Activity Detail
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Capacity Management
+                </a>
+
+                <a href="/member_management.html" data-page="member_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Member Management
+                </a>
+            </nav>
+            
+            <!-- Footer in Sidebar -->
+            <div class="absolute bottom-4 w-full px-4">
+                <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
+                    Made with ❤️ by TiramAi
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+        <!-- Main Content -->
+        <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+            
+<!-- Member Management Page Content -->
+<div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl leading-10 font-bold text-slate-900">Member Management</h1>
+        <p class="text-sm leading-5 font-normal text-slate-700 mt-1">View and manage team members</p>
+      </div>
+      <button id="btn-add-member" class="inline-flex items-center gap-2 px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-500 border border-transparent rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Add Member
+      </button>
+    </div>
+  </div>
+
+  <!-- Members Table Container -->
+  <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+    <!-- Loading Skeleton -->
+    <div id="members-skeleton" class="animate-pulse">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="h-4 bg-slate-200 rounded w-32"></div>
+      </div>
+      <div class="divide-y divide-slate-200">
+        <div class="px-6 py-4 flex items-center gap-4">
+          <div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+          <div class="flex-1">
+            <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-48"></div>
+          </div>
+          <div class="h-3 bg-slate-200 rounded w-24"></div>
+          <div class="h-8 w-8 bg-slate-200 rounded"></div>
+        </div>
+        <div class="px-6 py-4 flex items-center gap-4">
+          <div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+          <div class="flex-1">
+            <div class="h-4 bg-slate-200 rounded w-36 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-52"></div>
+          </div>
+          <div class="h-3 bg-slate-200 rounded w-24"></div>
+          <div class="h-8 w-8 bg-slate-200 rounded"></div>
+        </div>
+        <div class="px-6 py-4 flex items-center gap-4">
+          <div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+          <div class="flex-1">
+            <div class="h-4 bg-slate-200 rounded w-28 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-44"></div>
+          </div>
+          <div class="h-3 bg-slate-200 rounded w-24"></div>
+          <div class="h-8 w-8 bg-slate-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Table -->
+    <div id="members-content" class="hidden">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-7 font-semibold text-slate-800">Team Members</h3>
+          <div class="flex items-center gap-2">
+            <span id="members-count" class="text-sm leading-5 text-slate-600">0 members</span>
+            <button id="btn-refresh" class="inline-flex items-center gap-1 px-2 py-1 text-xs text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded" aria-label="Refresh members">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+          <thead class="bg-slate-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs leading-4 font-medium text-slate-500 uppercase tracking-wider">Member</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs leading-4 font-medium text-slate-500 uppercase tracking-wider">Email</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs leading-4 font-medium text-slate-500 uppercase tracking-wider">Join Date</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs leading-4 font-medium text-slate-500 uppercase tracking-wider">Capacity</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs leading-4 font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="members-table-body" class="bg-white divide-y divide-slate-200">
+            <!-- Dynamic content will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="members-empty" class="hidden px-6 py-12 text-center">
+      <div class="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+        <i data-lucide="users" class="w-8 h-8 text-slate-400"></i>
+      </div>
+      <h3 class="text-lg leading-7 font-semibold text-slate-900 mb-2">No team members</h3>
+      <p class="text-sm leading-5 text-slate-600 mb-4">Get started by adding your first team member.</p>
+      <button id="btn-add-member-empty" class="inline-flex items-center gap-2 px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-500 border border-transparent rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Add Member
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div id="add-member-modal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" id="add-member-backdrop"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-auto transform transition-all">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-7 font-semibold text-slate-900">Add New Member</h3>
+          <button id="add-member-modal-close" class="p-2 hover:bg-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
+          </button>
+        </div>
+      </div>
+      
+      <form id="add-member-form" class="p-6 space-y-4">
+        <div>
+          <label for="member-name" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Name <span class="text-red-500">*</span></label>
+          <input type="text" id="member-name" name="name" required class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter member name">
+          <div id="name-error" class="hidden text-xs text-red-600 mt-1"></div>
+        </div>
+        
+        <div>
+          <label for="member-email" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Email <span class="text-red-500">*</span></label>
+          <input type="email" id="member-email" name="email" required class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
+          <div id="email-error" class="hidden text-xs text-red-600 mt-1"></div>
+        </div>
+        
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" id="add-member-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cancel
+          </button>
+          <button type="submit" id="add-member-submit" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-500 border border-transparent rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Add Member
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-member-modal" class="fixed inset-0 z-50 hidden">
+  <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" id="delete-member-backdrop"></div>
+  <div class="fixed inset-0 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-auto transform transition-all">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg leading-7 font-semibold text-slate-900">Delete Member</h3>
+          <button id="delete-member-modal-close" class="p-2 hover:bg-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i data-lucide="x" class="w-4 h-4 text-slate-500"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="flex items-start gap-3 mb-4">
+          <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm leading-5 font-medium text-slate-900 mb-1">Are you sure you want to delete this member?</h4>
+            <p class="text-sm leading-5 text-slate-600">You are about to delete <strong id="delete-member-name">N/A</strong>. This action cannot be undone.</p>
+          </div>
+        </div>
+        
+        <div id="delete-member-activities" class="hidden bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+          <div class="flex items-start gap-2">
+            <i data-lucide="info" class="w-4 h-4 text-amber-600 mt-0.5"></i>
+            <div class="text-sm leading-5 text-amber-800">
+              <p class="font-medium">Warning</p>
+              <p>This member is assigned to <span id="delete-member-activity-count">0</span> activities. They will be unassigned from all activities.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button type="button" id="delete-member-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-slate-100 border border-slate-300 rounded hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            Cancel
+          </button>
+          <button type="button" id="delete-member-confirm" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-red-600 border border-transparent rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+            Delete Member
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </main>
+    </div>
+
+    <!-- Required: JavaScript -->
+    <script type="module" data-tiramai="web-gen">
+        import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+        import { auth, db, storage } from "./scripts/firebase.js";
+        import { onAuthStateChanged, getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const userNameElement = document.getElementById('user-name');
+        const dropdownUserNameElement = document.getElementById('dropdown-user-name');
+        const dropdownUserEmailElement = document.getElementById('dropdown-user-email');
+        const userProfileBtn = document.getElementById('user-profile-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        // User authentication state management
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Try to get user details from Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    let displayName = 'User';
+                    let email = user.email || 'user@example.com';
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || '';
+                        const lastName = userData.lastName || '';
+                        displayName = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || 'User');
+                        email = userData.email || user.email || 'user@example.com';
+                    } else {
+                        // Fallback to email or default
+                        displayName = user.email ? user.email.split('@')[0] : 'User';
+                    }
+                    
+                    // Update UI with user info
+                    userNameElement.textContent = displayName;
+                    dropdownUserNameElement.textContent = displayName;
+                    dropdownUserEmailElement.textContent = email;
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                    // Fallback to basic auth info
+                    const fallbackName = user.email ? user.email.split('@')[0] : 'User';
+                    userNameElement.textContent = fallbackName;
+                    dropdownUserNameElement.textContent = fallbackName;
+                    dropdownUserEmailElement.textContent = user.email || 'user@example.com';
+                }
+            } else {
+                // Redirect to auth page if not authenticated
+                window.location.href = 'auth.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Sign out functionality
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                showLoader('Signing out...');
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Error signing out', 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Mobile navigation
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('mobile-nav-open');
+            if (isOpen) {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.remove('hidden');
+            }
+        });
+
+        // Close mobile nav when overlay is clicked
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-nav-open');
+            sidebar.classList.add('mobile-nav-closed');
+            mobileOverlay.classList.add('hidden');
+        });
+
+        // Close mobile nav when nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('mobile-nav-open');
+                    sidebar.classList.add('mobile-nav-closed');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Collapsible navigation groups
+        document.querySelectorAll('.nav-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
+                
+                if (targetElement) {
+                    targetElement.classList.toggle('hidden');
+                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                        'rotate(0deg)' : 'rotate(90deg)';
+                }
+            });
+        });
+
+        // Active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const pageName = item.getAttribute('data-page');
+                if (pageName === currentPage) {
+                    item.classList.add('bg-blue-50', 'text-blue-700', 'border-r-2', 'border-blue-500');
+                    item.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Set active navigation on load
+        setActiveNavigation();
+
+        // Resize handler for mobile nav
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+            }
+        });
+    </script>
+
+    
+<script id="data-script" type="module" data-tiramai="web-gen">
+  import { onAuthStateChanged, getAuth } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+  import { 
+    collection, 
+    getDocs, 
+    setDoc, 
+    addDoc, 
+    doc, 
+    getDoc, 
+    updateDoc, 
+    deleteDoc, 
+    writeBatch,
+    query, 
+    where, 
+    orderBy, 
+    limit, 
+    startAfter, 
+    onSnapshot, 
+    Timestamp,
+    getCountFromServer
+  } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+  import { auth, getDb } from './scripts/firebase.js';
+  import { showToast, showLoader, hideLoader } from './scripts/main.js';
+
+  const db = getDb();
+
+  // Global state
+  let currentUser = null;
+  let currentAbort = null;
+  let membersData = [];
+  let memberToDelete = null;
+
+  // DOM elements
+  const membersSkeletonEl = document.getElementById('members-skeleton');
+  const membersContentEl = document.getElementById('members-content');
+  const membersEmptyEl = document.getElementById('members-empty');
+  const membersTableBodyEl = document.getElementById('members-table-body');
+  const membersCountEl = document.getElementById('members-count');
+
+  // Modal elements
+  const addMemberModalEl = document.getElementById('add-member-modal');
+  const deleteMemberModalEl = document.getElementById('delete-member-modal');
+  const addMemberFormEl = document.getElementById('add-member-form');
+
+  // Utility functions
+  const yieldToFrame = () => new Promise(r => requestAnimationFrame(() => r()));
+
+  // Date formatting
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      return 'N/A';
+    }
+  };
+
+  // Email validation
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Get member initials for avatar
+  const getInitials = (name) => {
+    if (!name) return 'NA';
+    return name.split(' ')
+      .map(word => word.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
+  };
+
+  // Abortable read function
+  async function funFetchMembers() {
+    if (currentAbort) currentAbort.abort();
+    currentAbort = new AbortController();
+    const signal = currentAbort.signal;
+
+    try {
+      showSkeleton();
+      
+      const membersQuery = query(
+        collection(db, 'members'),
+        orderBy('name', 'asc')
+      );
+      
+      await yieldToFrame(); // Yield to prevent UI blocking
+      
+      const snapshot = await getDocs(membersQuery);
+      
+      if (signal.aborted) return [];
+      
+      const members = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      return members;
+    } catch (error) {
+      if (signal.aborted) return [];
+      console.error('Error fetching members:', error);
+      showToast('Failed to load members', 'error');
+      return [];
+    }
+  }
+
+  // Show skeleton while loading
+  function showSkeleton() {
+    membersSkeletonEl.classList.remove('hidden');
+    membersContentEl.classList.add('hidden');
+    membersEmptyEl.classList.add('hidden');
+  }
+
+  // Show content
+  function showContent() {
+    membersSkeletonEl.classList.add('hidden');
+    membersContentEl.classList.remove('hidden');
+    membersEmptyEl.classList.add('hidden');
+  }
+
+  // Show empty state
+  function showEmpty() {
+    membersSkeletonEl.classList.add('hidden');
+    membersContentEl.classList.add('hidden');
+    membersEmptyEl.classList.remove('hidden');
+  }
+
+  // Render members table
+  function renderMembersTable(members) {
+    if (!members || members.length === 0) {
+      showEmpty();
+      return;
+    }
+
+    showContent();
+    membersCountEl.textContent = `${members.length} member${members.length !== 1 ? 's' : ''}`;
+    
+    membersTableBodyEl.innerHTML = members.map(member => {
+      const isCurrentUser = currentUser && (
+        currentUser.uid === member.id || 
+        currentUser.email === member.email
+      );
+      
+      return `
+        <tr class="${isCurrentUser ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}">
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                ${getInitials(member.name)}
+              </div>
+              <div>
+                <div class="text-sm leading-5 font-medium text-slate-900">
+                  ${member.name || 'N/A'}
+                  ${isCurrentUser ? '<span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">You</span>' : ''}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm leading-5 text-slate-700">${member.email || 'N/A'}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm leading-5 text-slate-700">${formatDate(member.joinDate)}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm leading-5 text-slate-700">${member.defaultWeeklyCapacity || 40} hours/week</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right">
+            ${!isCurrentUser ? `
+              <button 
+                class="inline-flex items-center p-1 text-slate-400 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+                onclick="funOpenDeleteModal('${member.id}')"
+                title="Delete member"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            ` : `
+              <span class="text-xs text-slate-400">Current user</span>
+            `}
+          </td>
+        </tr>
+      `;
+    }).join('');
+    
+    // Re-initialize Lucide icons for newly added elements
+    lucide.createIcons();
+  }
+
+  // Load members data
+  async function funLoadMembers(forceRefresh = false) {
+    try {
+      const members = await funFetchMembers();
+      membersData = members;
+      renderMembersTable(members);
+    } catch (error) {
+      console.error('Error loading members:', error);
+      showToast('Failed to load members', 'error');
+      showEmpty();
+    }
+  }
+
+  // Add new member
+  async function funAddMember(memberData) {
+    try {
+      showLoader('Adding member...');
+      
+      // Check if email already exists
+      const existingQuery = query(
+        collection(db, 'members'),
+        where('email', '==', memberData.email)
+      );
+      const existingSnapshot = await getDocs(existingQuery);
+      
+      if (!existingSnapshot.empty) {
+        showToast('A member with this email already exists', 'error');
+        return false;
+      }
+
+      const newMember = {
+        name: memberData.name,
+        email: memberData.email,
+        joinDate: new Date().toISOString(),
+        defaultWeeklyCapacity: 40
+      };
+
+      await addDoc(collection(db, 'members'), newMember);
+      showToast('Member added successfully', 'success');
+      
+      // Refresh the members list
+      await funLoadMembers();
+      return true;
+    } catch (error) {
+      console.error('Error adding member:', error);
+      showToast('Failed to add member', 'error');
+      return false;
+    } finally {
+      hideLoader();
+    }
+  }
+
+  // Get activity count for member
+  async function funGetMemberActivityCount(memberId) {
+    try {
+      const activitiesQuery = query(
+        collection(db, 'activities'),
+        where('assignedMember', '==', memberId)
+      );
+      
+      const countSnapshot = await getCountFromServer(activitiesQuery);
+      return countSnapshot.data().count;
+    } catch (error) {
+      console.error('Error getting activity count:', error);
+      return 0;
+    }
+  }
+
+  // Delete member
+  async function funDeleteMember(memberId) {
+    try {
+      showLoader('Deleting member...');
+      
+      // Get member details first
+      const memberDoc = await getDoc(doc(db, 'members', memberId));
+      if (!memberDoc.exists()) {
+        showToast('Member not found', 'error');
+        return false;
+      }
+
+      const batch = writeBatch(db);
+      
+      // Delete the member
+      batch.delete(doc(db, 'members', memberId));
+      
+      // Unassign from all activities
+      const activitiesQuery = query(
+        collection(db, 'activities'),
+        where('assignedMember', '==', memberId)
+      );
+      const activitiesSnapshot = await getDocs(activitiesQuery);
+      
+      activitiesSnapshot.forEach((activityDoc) => {
+        batch.update(activityDoc.ref, {
+          assignedMember: null,
+          assignedHours: 0
+        });
+      });
+      
+      await batch.commit();
+      showToast('Member deleted successfully', 'success');
+      
+      // Refresh the members list
+      await funLoadMembers();
+      return true;
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      showToast('Failed to delete member', 'error');
+      return false;
+    } finally {
+      hideLoader();
+    }
+  }
+
+  // Open delete confirmation modal
+  window.funOpenDeleteModal = async function(memberId) {
+    const member = membersData.find(m => m.id === memberId);
+    if (!member) {
+      showToast('Member not found', 'error');
+      return;
+    }
+
+    memberToDelete = member;
+    
+    // Update modal content
+    document.getElementById('delete-member-name').textContent = member.name || 'Unknown';
+    
+    // Get activity count
+    try {
+      const activityCount = await funGetMemberActivityCount(memberId);
+      const activitiesWarning = document.getElementById('delete-member-activities');
+      const activityCountEl = document.getElementById('delete-member-activity-count');
+      
+      if (activityCount > 0) {
+        activityCountEl.textContent = activityCount;
+        activitiesWarning.classList.remove('hidden');
+      } else {
+        activitiesWarning.classList.add('hidden');
+      }
+    } catch (error) {
+      console.error('Error getting activity count:', error);
+      document.getElementById('delete-member-activities').classList.add('hidden');
+    }
+    
+    deleteMemberModalEl.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Focus trap
+    const deleteButton = document.getElementById('delete-member-confirm');
+    deleteButton.focus();
+  };
+
+  // Close modal function
+  function closeModal(modalEl) {
+    modalEl.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
+  // Form validation
+  function validateForm() {
+    const nameInput = document.getElementById('member-name');
+    const emailInput = document.getElementById('member-email');
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    
+    let isValid = true;
+    
+    // Reset errors
+    nameError.classList.add('hidden');
+    emailError.classList.add('hidden');
+    nameInput.classList.remove('border-red-500');
+    emailInput.classList.remove('border-red-500');
+    
+    // Validate name
+    if (!nameInput.value.trim()) {
+      nameError.textContent = 'Name is required';
+      nameError.classList.remove('hidden');
+      nameInput.classList.add('border-red-500');
+      isValid = false;
+    }
+    
+    // Validate email
+    if (!emailInput.value.trim()) {
+      emailError.textContent = 'Email is required';
+      emailError.classList.remove('hidden');
+      emailInput.classList.add('border-red-500');
+      isValid = false;
+    } else if (!isValidEmail(emailInput.value.trim())) {
+      emailError.textContent = 'Please enter a valid email address';
+      emailError.classList.remove('hidden');
+      emailInput.classList.add('border-red-500');
+      isValid = false;
+    }
+    
+    return isValid;
+  }
+
+  // Real-time form validation
+  function setupFormValidation() {
+    const nameInput = document.getElementById('member-name');
+    const emailInput = document.getElementById('member-email');
+    
+    nameInput.addEventListener('input', () => {
+      const nameError = document.getElementById('name-error');
+      if (nameInput.value.trim()) {
+        nameError.classList.add('hidden');
+        nameInput.classList.remove('border-red-500');
+      }
+    });
+    
+    emailInput.addEventListener('input', () => {
+      const emailError = document.getElementById('email-error');
+      const email = emailInput.value.trim();
+      if (email && isValidEmail(email)) {
+        emailError.classList.add('hidden');
+        emailInput.classList.remove('border-red-500');
+      }
+    });
+  }
+
+  // Event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize form validation
+    setupFormValidation();
+    
+    // Add member button clicks
+    document.getElementById('btn-add-member').addEventListener('click', () => {
+      addMemberModalEl.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('member-name').focus();
+    });
+    
+    document.getElementById('btn-add-member-empty').addEventListener('click', () => {
+      addMemberModalEl.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      document.getElementById('member-name').focus();
+    });
+    
+    // Refresh button
+    document.getElementById('btn-refresh').addEventListener('click', () => {
+      funLoadMembers(true);
+    });
+    
+    // Add member modal events
+    document.getElementById('add-member-modal-close').addEventListener('click', () => {
+      closeModal(addMemberModalEl);
+    });
+    
+    document.getElementById('add-member-backdrop').addEventListener('click', () => {
+      closeModal(addMemberModalEl);
+    });
+    
+    document.getElementById('add-member-cancel').addEventListener('click', () => {
+      closeModal(addMemberModalEl);
+    });
+    
+    // Delete member modal events
+    document.getElementById('delete-member-modal-close').addEventListener('click', () => {
+      closeModal(deleteMemberModalEl);
+    });
+    
+    document.getElementById('delete-member-backdrop').addEventListener('click', () => {
+      closeModal(deleteMemberModalEl);
+    });
+    
+    document.getElementById('delete-member-cancel').addEventListener('click', () => {
+      closeModal(deleteMemberModalEl);
+    });
+    
+    document.getElementById('delete-member-confirm').addEventListener('click', async () => {
+      if (memberToDelete) {
+        const success = await funDeleteMember(memberToDelete.id);
+        if (success) {
+          closeModal(deleteMemberModalEl);
+          memberToDelete = null;
+        }
+      }
+    });
+    
+    // Add member form submission
+    addMemberFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+      
+      const formData = new FormData(addMemberFormEl);
+      const memberData = {
+        name: formData.get('name').trim(),
+        email: formData.get('email').trim()
+      };
+      
+      const success = await funAddMember(memberData);
+      if (success) {
+        addMemberFormEl.reset();
+        closeModal(addMemberModalEl);
+      }
+    });
+    
+    // ESC key to close modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!addMemberModalEl.classList.contains('hidden')) {
+          closeModal(addMemberModalEl);
+        }
+        if (!deleteMemberModalEl.classList.contains('hidden')) {
+          closeModal(deleteMemberModalEl);
+        }
+      }
+    });
+  });
+
+  // Auth state management
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      location.href = "auth.html?redirect=" + encodeURIComponent(location.pathname);
+    } else {
+      currentUser = user;
+      funLoadMembers();
+    }
+  });
+</script>
+
+</body>
+</html>

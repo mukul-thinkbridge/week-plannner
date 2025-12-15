@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Planner Team Management System</title>
+
+    <!-- Required: Main JS Script -->
+    <script type="module" src="scripts/main.js" data-tiramai="web-gen"></script>
+
+    <!-- Required: TailwindCSS -->
+    <script src="./lib/tailwindcss/tailwindcss.js" fetchpriority="high" data-tiramai="web-gen"></script>
+
+    <!-- Required: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" data-tiramai="web-gen"></script>
+
+    <!-- Required: Favicon -->
+    <link rel="icon" href="assets/imgs/logo.ico" type="image/x-icon" data-tiramai="web-gen"/>
+
+    <!-- ECharts Support (for charts/graphs) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" data-tiramai="web-gen"></script>
+
+    <!-- Markdown Support (for content rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" data-tiramai="web-gen"></script>
+
+    <style data-tiramai="web-gen">
+        .logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-nav-open {
+            transform: translateX(0);
+        }
+        
+        .mobile-nav-closed {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700">
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 py-4 z-30 h-16">
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            
+            <!-- Logo and App Name -->
+            <div class="flex items-center gap-3">
+                <div class="logo-svg">
+                    <svg width="32" height="32" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="90" y="80" width="220" height="240" rx="24" stroke="#2563EB" stroke-width="16" fill="none"/>
+                        <rect x="122" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="122" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="182" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="242" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <path d="M90 120h220" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="122" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="154" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="186" cy="108" r="8" fill="#1E40AF"/>
+                        <path d="M310 80v-16a14 14 0 0 0-14-14h-192a14 14 0 0 0-14 14v16" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+                <span class="text-xl leading-8 font-semibold text-slate-900 hidden sm:block">Weekly Planner Team Management System</span>
+                <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="user-profile-btn" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
+                    <div class="p-3 border-b border-slate-200">
+                        <p id="dropdown-user-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="dropdown-user-email" class="text-xs leading-4 text-slate-500">Loading...</p>
+                    </div>
+                    <div class="py-1">
+                        <button id="sign-out-btn" class="w-full text-left px-3 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-100 flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Side Navigation -->
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
+            <nav class="p-4 space-y-2">
+                <!-- Navigation Items -->
+                <a href="/weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Weekly Dashboard
+                </a>
+
+                <!-- Backlog Management with Children -->
+                <div class="nav-group">
+                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            Backlog Management
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                    </button>
+                    <a href="/backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        View All Activities
+                    </a>
+                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
+                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Activity Detail
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Capacity Management
+                </a>
+
+                <a href="/member_management.html" data-page="member_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Member Management
+                </a>
+            </nav>
+            
+            <!-- Footer in Sidebar -->
+            <div class="absolute bottom-4 w-full px-4">
+                <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
+                    Made with ❤️ by TiramAi
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+        <!-- Main Content -->
+        <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+            
+<!-- Page Header -->
+<div class="mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <h1 class="text-2xl leading-10 font-bold text-slate-900">Capacity Management</h1>
+  </div>
+</div>
+
+<!-- Week Navigation -->
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <button id="prev-week" class="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+        Previous
+      </button>
+      <div class="flex flex-col">
+        <span class="text-lg font-semibold text-slate-900" id="week-display">Loading...</span>
+        <span class="text-sm text-slate-500" id="week-dates">Loading...</span>
+      </div>
+      <button id="next-week" class="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        Next
+        <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+      </button>
+    </div>
+    
+    <button id="refresh-data" class="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Refresh data">
+      <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Capacity Overview -->
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl leading-8 font-semibold text-slate-900">Week Overview</h2>
+  </div>
+  
+  <div id="overview-skeleton" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="animate-pulse">
+      <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+      <div class="h-8 bg-slate-200 rounded w-16"></div>
+    </div>
+    <div class="animate-pulse">
+      <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+      <div class="h-8 bg-slate-200 rounded w-16"></div>
+    </div>
+    <div class="animate-pulse">
+      <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+      <div class="h-8 bg-slate-200 rounded w-16"></div>
+    </div>
+  </div>
+  
+  <div id="overview-content" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
+    <div class="text-center">
+      <p class="text-sm text-slate-500 mb-1">Total Capacity</p>
+      <p class="text-2xl font-bold text-slate-900" id="total-capacity">0 hrs</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-slate-500 mb-1">Unavailable Hours</p>
+      <p class="text-2xl font-bold text-red-600" id="unavailable-hours">0 hrs</p>
+    </div>
+    <div class="text-center">
+      <p class="text-sm text-slate-500 mb-1">Available Capacity</p>
+      <p class="text-2xl font-bold text-emerald-600" id="available-capacity">0 hrs</p>
+    </div>
+  </div>
+</div>
+
+<!-- Weekly Calendar Grid -->
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl leading-8 font-semibold text-slate-900">Weekly Calendar</h2>
+  </div>
+  
+  <!-- Calendar Grid -->
+  <div class="grid grid-cols-7 gap-1" id="calendar-grid">
+    <!-- Day Headers -->
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Wed</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Thu</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Fri</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Sat</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Sun</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Mon</div>
+    <div class="text-center py-3 text-sm font-medium text-slate-600 bg-slate-50 rounded">Tue</div>
+    
+    <!-- Calendar Days (will be populated by JS) -->
+    <div id="calendar-days" class="col-span-7 grid grid-cols-7 gap-1">
+      <!-- Skeleton loading -->
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+      <div class="calendar-day-skeleton h-24 bg-slate-100 animate-pulse rounded"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Member Capacity Table -->
+<div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-slate-200">
+    <h2 class="text-xl leading-8 font-semibold text-slate-900">Member Capacity</h2>
+  </div>
+  
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Member</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Default Capacity</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Unavailable Hours</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Remaining Capacity</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Utilization</th>
+        </tr>
+      </thead>
+      <tbody id="member-capacity-tbody" class="bg-white divide-y divide-slate-200">
+        <!-- Skeleton rows -->
+        <tr class="capacity-skeleton">
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-32 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-20 animate-pulse"></div></td>
+        </tr>
+        <tr class="capacity-skeleton">
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-28 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-16 animate-pulse"></div></td>
+          <td class="px-6 py-4"><div class="h-4 bg-slate-200 rounded w-20 animate-pulse"></div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add/Edit Unavailability Modal -->
+<div id="unavailability-modal" class="fixed inset-0 z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen px-4">
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" id="modal-backdrop"></div>
+    <div class="bg-white rounded-lg shadow-lg max-w-md w-full z-10 relative">
+      <div class="px-6 py-4 border-b border-slate-200">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-900" id="modal-title">Add Unavailability</h3>
+          <button id="close-modal" class="text-slate-400 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      
+      <form id="unavailability-form" class="p-6 space-y-4">
+        <input type="hidden" id="unavailability-id" value="">
+        
+        <div>
+          <label for="unavailability-date" class="block text-sm font-medium text-slate-700 mb-2">Date</label>
+          <input type="date" id="unavailability-date" class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" readonly>
+        </div>
+        
+        <div>
+          <label for="unavailable-hours" class="block text-sm font-medium text-slate-700 mb-2">Hours Unavailable</label>
+          <input type="number" id="unavailable-hours" min="1" max="8" step="1" class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <p class="mt-1 text-sm text-slate-500">Enter 1-8 hours</p>
+        </div>
+        
+        <div>
+          <label for="unavailability-reason" class="block text-sm font-medium text-slate-700 mb-2">Reason</label>
+          <input type="text" id="unavailability-reason" class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="e.g., Sick leave, Vacation, Meeting">
+        </div>
+        
+        <div id="past-date-warning" class="hidden bg-amber-50 border border-amber-200 rounded p-3">
+          <div class="flex items-center">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 mr-2"></i>
+            <p class="text-sm text-amber-700">You are modifying a past date. This will update historical data.</p>
+          </div>
+        </div>
+        
+        <div class="flex gap-3 pt-4">
+          <button type="submit" id="submit-unavailability" class="flex-1 bg-slate-800 text-white px-4 py-2 rounded hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+            Save Unavailability
+          </button>
+          <button type="button" id="cancel-modal" class="px-4 py-2 text-slate-600 border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+            Cancel
+          </button>
+          <button type="button" id="delete-unavailability" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium hidden">
+            Delete
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+        </main>
+    </div>
+
+    <!-- Required: JavaScript -->
+    <script type="module" data-tiramai="web-gen">
+        import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+        import { auth, db, storage } from "./scripts/firebase.js";
+        import { onAuthStateChanged, getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const userNameElement = document.getElementById('user-name');
+        const dropdownUserNameElement = document.getElementById('dropdown-user-name');
+        const dropdownUserEmailElement = document.getElementById('dropdown-user-email');
+        const userProfileBtn = document.getElementById('user-profile-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        // User authentication state management
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Try to get user details from Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    let displayName = 'User';
+                    let email = user.email || 'user@example.com';
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || '';
+                        const lastName = userData.lastName || '';
+                        displayName = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || 'User');
+                        email = userData.email || user.email || 'user@example.com';
+                    } else {
+                        // Fallback to email or default
+                        displayName = user.email ? user.email.split('@')[0] : 'User';
+                    }
+                    
+                    // Update UI with user info
+                    userNameElement.textContent = displayName;
+                    dropdownUserNameElement.textContent = displayName;
+                    dropdownUserEmailElement.textContent = email;
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                    // Fallback to basic auth info
+                    const fallbackName = user.email ? user.email.split('@')[0] : 'User';
+                    userNameElement.textContent = fallbackName;
+                    dropdownUserNameElement.textContent = fallbackName;
+                    dropdownUserEmailElement.textContent = user.email || 'user@example.com';
+                }
+            } else {
+                // Redirect to auth page if not authenticated
+                window.location.href = 'auth.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Sign out functionality
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                showLoader('Signing out...');
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Error signing out', 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Mobile navigation
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('mobile-nav-open');
+            if (isOpen) {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.remove('hidden');
+            }
+        });
+
+        // Close mobile nav when overlay is clicked
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-nav-open');
+            sidebar.classList.add('mobile-nav-closed');
+            mobileOverlay.classList.add('hidden');
+        });
+
+        // Close mobile nav when nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('mobile-nav-open');
+                    sidebar.classList.add('mobile-nav-closed');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Collapsible navigation groups
+        document.querySelectorAll('.nav-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
+                
+                if (targetElement) {
+                    targetElement.classList.toggle('hidden');
+                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                        'rotate(0deg)' : 'rotate(90deg)';
+                }
+            });
+        });
+
+        // Active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const pageName = item.getAttribute('data-page');
+                if (pageName === currentPage) {
+                    item.classList.add('bg-blue-50', 'text-blue-700', 'border-r-2', 'border-blue-500');
+                    item.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Set active navigation on load
+        setActiveNavigation();
+
+        // Resize handler for mobile nav
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+            }
+        });
+    </script>
+
+    
+<script id="data-script" type="module" data-tiramai="web-gen">
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import {
+  collection, getDocs, setDoc, addDoc, doc, getDoc, updateDoc, deleteDoc, writeBatch,
+  query, where, orderBy, limit, startAfter, Timestamp, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+import { auth, getDb } from "./scripts/firebase.js";
+import { showToast, showLoader, hideLoader } from "./scripts/main.js";
+
+const db = getDb();
+let currentWeekStart = null;
+let currentUser = null;
+let currentAbort;
+let isEditingMode = false;
+let editingUnavailabilityId = null;
+
+// Initialize Lucide icons
+lucide.createIcons();
+
+// Authentication check
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    location.href = "auth.html?redirect=" + encodeURIComponent(location.pathname);
+    return;
+  }
+  currentUser = user;
+  funInitialLoad();
+});
+
+// Get Wednesday of current week (Wednesday to Tuesday cycle)
+function funGetWeekStart(date = new Date()) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = day < 3 ? day + 4 : day - 3; // Wednesday = 3, adjust accordingly
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Format date to ISO string (YYYY-MM-DD)
+function funFormatISODate(date) {
+  if (!date) return null;
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().split('T')[0];
+}
+
+// Format display date
+function funFormatDisplayDate(date) {
+  if (!date) return 'N/A';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return 'N/A';
+  return d.toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric', 
+    year: 'numeric' 
+  });
+}
+
+// Check if date is in the past
+function funIsPastDate(date) {
+  if (!date) return false;
+  const d = new Date(date);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return d < today;
+}
+
+// Abortable fetch wrapper
+async function funFetchWithAbort(fetchFn) {
+  if (currentAbort) currentAbort.abort();
+  currentAbort = new AbortController();
+  const signal = currentAbort.signal;
+  
+  try {
+    const result = await fetchFn();
+    if (signal.aborted) return null;
+    return result;
+  } catch (err) {
+    if (signal.aborted) return null;
+    throw err;
+  }
+}
+
+// Load all members
+async function funLoadMembers() {
+  try {
+    const membersQuery = query(collection(db, 'members'), orderBy('name'));
+    const snapshot = await getDocs(membersQuery);
+    return snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
+    }));
+  } catch (error) {
+    console.error('Error loading members:', error);
+    showToast('Failed to load members', 'error');
+    return [];
+  }
+}
+
+// Load unavailability for a week
+async function funLoadUnavailability(weekStart) {
+  try {
+    const weekStartISO = funFormatISODate(weekStart);
+    if (!weekStartISO) return [];
+    
+    const unavailabilityQuery = query(
+      collection(db, 'unavailability'),
+      where('weekStart', '==', weekStartISO),
+      orderBy('day'),
+      orderBy('memberId')
+    );
+    
+    const snapshot = await getDocs(unavailabilityQuery);
+    return snapshot.docs.map(doc => ({ 
+      id: doc.id, 
+      ...doc.data() 
+    }));
+  } catch (error) {
+    console.error('Error loading unavailability:', error);
+    showToast('Failed to load unavailability data', 'error');
+    return [];
+  }
+}
+
+// Update week display
+function funUpdateWeekDisplay(weekStart) {
+  if (!weekStart) return;
+  
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  
+  const weekDisplay = document.getElementById('week-display');
+  const weekDates = document.getElementById('week-dates');
+  
+  if (weekDisplay) {
+    weekDisplay.textContent = `Week of ${funFormatDisplayDate(weekStart)}`;
+  }
+  
+  if (weekDates) {
+    weekDates.textContent = `${funFormatDisplayDate(weekStart)} - ${funFormatDisplayDate(weekEnd)}`;
+  }
+}
+
+// Create calendar days
+function funCreateCalendarDays(weekStart, unavailabilityData) {
+  const calendarDays = document.getElementById('calendar-days');
+  if (!calendarDays || !weekStart) return;
+  
+  // Clear existing content and skeletons
+  calendarDays.innerHTML = '';
+  
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(weekStart);
+    day.setDate(day.getDate() + i);
+    days.push(day);
+  }
+  
+  days.forEach(day => {
+    const dayEl = document.createElement('div');
+    const dateStr = funFormatISODate(day);
+    const isPast = funIsPastDate(day);
+    const isToday = funFormatISODate(new Date()) === dateStr;
+    
+    dayEl.className = `calendar-day relative h-24 border border-slate-200 rounded p-2 cursor-pointer transition-colors ${
+      isPast ? 'bg-slate-50 text-slate-400' : 'bg-white hover:bg-blue-50'
+    } ${isToday ? 'ring-2 ring-blue-500' : ''}`;
+    
+    if (isPast) {
+      dayEl.classList.add('cursor-not-allowed');
+    }
+    
+    // Day number
+    const dayNumber = document.createElement('div');
+    dayNumber.className = `text-sm font-medium ${isPast ? 'text-slate-400' : 'text-slate-900'}`;
+    dayNumber.textContent = day.getDate();
+    dayEl.appendChild(dayNumber);
+    
+    // Unavailability blocks
+    const dayUnavailability = unavailabilityData?.filter(u => u.day === dateStr) || [];
+    
+    if (dayUnavailability.length > 0) {
+      const blocksContainer = document.createElement('div');
+      blocksContainer.className = 'mt-1 space-y-1';
+      
+      dayUnavailability.forEach(unavail => {
+        const block = document.createElement('div');
+        block.className = 'text-xs bg-red-100 text-red-800 px-2 py-1 rounded truncate';
+        block.textContent = `${unavail.hoursUnavailable}h - ${unavail.reason || 'N/A'}`;
+        block.title = `${unavail.hoursUnavailable} hours: ${unavail.reason || 'N/A'}`;
+        
+        // Make individual blocks clickable for editing
+        block.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!isPast || window.confirm('This is a past date. Do you want to edit it?')) {
+            funOpenModal(dateStr, unavail);
+          }
+        });
+        
+        blocksContainer.appendChild(block);
+      });
+      
+      dayEl.appendChild(blocksContainer);
+    }
+    
+    // Click handler for adding new unavailability
+    if (!isPast) {
+      dayEl.addEventListener('click', (e) => {
+        // Only trigger if clicking the day itself, not a block
+        if (e.target === dayEl || e.target === dayNumber) {
+          funOpenModal(dateStr);
+        }
+      });
+    }
+    
+    calendarDays.appendChild(dayEl);
+  });
+}
+
+// Calculate capacity metrics
+function funCalculateCapacityMetrics(members, unavailabilityData) {
+  const metrics = {
+    totalCapacity: 0,
+    unavailableHours: 0,
+    availableCapacity: 0
+  };
+  
+  if (!members || !Array.isArray(members)) return metrics;
+  
+  members.forEach(member => {
+    const capacity = member.defaultWeeklyCapacity || 40;
+    metrics.totalCapacity += capacity;
+    
+    const memberUnavailability = unavailabilityData?.filter(u => u.memberId === member.id) || [];
+    const unavailableHours = memberUnavailability.reduce((sum, u) => sum + (u.hoursUnavailable || 0), 0);
+    metrics.unavailableHours += unavailableHours;
+  });
+  
+  metrics.availableCapacity = metrics.totalCapacity - metrics.unavailableHours;
+  return metrics;
+}
+
+// Update capacity overview
+function funUpdateCapacityOverview(members, unavailabilityData) {
+  const metrics = funCalculateCapacityMetrics(members, unavailabilityData);
+  
+  const totalCapacityEl = document.getElementById('total-capacity');
+  const unavailableHoursEl = document.getElementById('unavailable-hours');
+  const availableCapacityEl = document.getElementById('available-capacity');
+  
+  if (totalCapacityEl) totalCapacityEl.textContent = `${metrics.totalCapacity} hrs`;
+  if (unavailableHoursEl) unavailableHoursEl.textContent = `${metrics.unavailableHours} hrs`;
+  if (availableCapacityEl) availableCapacityEl.textContent = `${metrics.availableCapacity} hrs`;
+  
+  // Show content, hide skeleton
+  const skeleton = document.getElementById('overview-skeleton');
+  const content = document.getElementById('overview-content');
+  
+  if (skeleton) skeleton.classList.add('hidden');
+  if (content) content.classList.remove('hidden');
+}
+
+// Update member capacity table
+function funUpdateMemberCapacityTable(members, unavailabilityData) {
+  const tbody = document.getElementById('member-capacity-tbody');
+  if (!tbody || !members) return;
+  
+  // Clear skeletons
+  tbody.innerHTML = '';
+  
+  if (members.length === 0) {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td colspan="5" class="px-6 py-4 text-center text-slate-500">
+        No members found
+      </td>
+    `;
+    tbody.appendChild(row);
+    return;
+  }
+  
+  members.forEach(member => {
+    const capacity = member.defaultWeeklyCapacity || 40;
+    const memberUnavailability = unavailabilityData?.filter(u => u.memberId === member.id) || [];
+    const unavailableHours = memberUnavailability.reduce((sum, u) => sum + (u.hoursUnavailable || 0), 0);
+    const remainingCapacity = capacity - unavailableHours;
+    const utilization = capacity > 0 ? Math.round((unavailableHours / capacity) * 100) : 0;
+    
+    const row = document.createElement('tr');
+    row.className = 'hover:bg-slate-50';
+    
+    row.innerHTML = `
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="text-sm font-medium text-slate-900">${member.name || 'N/A'}</div>
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
+        ${capacity} hrs
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+        ${unavailableHours} hrs
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap text-sm text-emerald-600">
+        ${remainingCapacity} hrs
+      </td>
+      <td class="px-6 py-4 whitespace-nowrap">
+        <div class="flex items-center">
+          <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+            <div class="bg-red-600 h-2 rounded-full" style="width: ${utilization}%"></div>
+          </div>
+          <span class="text-sm text-slate-600">${utilization}%</span>
+        </div>
+      </td>
+    `;
+    
+    tbody.appendChild(row);
+  });
+}
+
+// Open modal for adding/editing unavailability
+function funOpenModal(dateStr, existingUnavailability = null) {
+  const modal = document.getElementById('unavailability-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const dateInput = document.getElementById('unavailability-date');
+  const hoursInput = document.getElementById('unavailable-hours');
+  const reasonInput = document.getElementById('unavailability-reason');
+  const unavailabilityIdInput = document.getElementById('unavailability-id');
+  const deleteBtn = document.getElementById('delete-unavailability');
+  const submitBtn = document.getElementById('submit-unavailability');
+  const pastDateWarning = document.getElementById('past-date-warning');
+  
+  if (!modal) return;
+  
+  // Reset form
+  hoursInput.value = '';
+  reasonInput.value = '';
+  unavailabilityIdInput.value = '';
+  
+  // Set date
+  if (dateInput) dateInput.value = dateStr;
+  
+  // Check if past date
+  const isPast = funIsPastDate(new Date(dateStr));
+  if (pastDateWarning) {
+    pastDateWarning.classList.toggle('hidden', !isPast);
+  }
+  
+  if (existingUnavailability) {
+    // Edit mode
+    isEditingMode = true;
+    editingUnavailabilityId = existingUnavailability.id;
+    
+    if (modalTitle) modalTitle.textContent = 'Edit Unavailability';
+    if (hoursInput) hoursInput.value = existingUnavailability.hoursUnavailable || '';
+    if (reasonInput) reasonInput.value = existingUnavailability.reason || '';
+    if (unavailabilityIdInput) unavailabilityIdInput.value = existingUnavailability.id || '';
+    if (deleteBtn) deleteBtn.classList.remove('hidden');
+    if (submitBtn) submitBtn.textContent = 'Update Unavailability';
+  } else {
+    // Add mode
+    isEditingMode = false;
+    editingUnavailabilityId = null;
+    
+    if (modalTitle) modalTitle.textContent = 'Add Unavailability';
+    if (deleteBtn) deleteBtn.classList.add('hidden');
+    if (submitBtn) submitBtn.textContent = 'Save Unavailability';
+  }
+  
+  modal.classList.remove('hidden');
+  if (hoursInput) hoursInput.focus();
+}
+
+// Close modal
+function funCloseModal() {
+  const modal = document.getElementById('unavailability-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    isEditingMode = false;
+    editingUnavailabilityId = null;
+  }
+}
+
+// Save unavailability
+async function funSaveUnavailability(formData) {
+  if (!currentUser || !currentWeekStart) return;
+  
+  try {
+    showLoader('Saving unavailability...');
+    
+    const unavailabilityData = {
+      memberId: currentUser.uid,
+      weekStart: funFormatISODate(currentWeekStart),
+      day: formData.date,
+      hoursUnavailable: parseInt(formData.hours),
+      reason: formData.reason,
+      createdAt: funFormatISODate(new Date())
+    };
+    
+    if (isEditingMode && editingUnavailabilityId) {
+      // Update existing
+      await updateDoc(doc(db, 'unavailability', editingUnavailabilityId), {
+        hoursUnavailable: unavailabilityData.hoursUnavailable,
+        reason: unavailabilityData.reason
+      });
+      showToast('Unavailability updated successfully');
+    } else {
+      // Create new
+      await addDoc(collection(db, 'unavailability'), unavailabilityData);
+      showToast('Unavailability added successfully');
+    }
+    
+    funCloseModal();
+    await funLoadWeekData(currentWeekStart);
+    
+  } catch (error) {
+    console.error('Error saving unavailability:', error);
+    showToast(error?.message || 'Failed to save unavailability', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Delete unavailability
+async function funDeleteUnavailability() {
+  if (!editingUnavailabilityId) return;
+  
+  if (!window.confirm('Are you sure you want to delete this unavailability record?')) {
+    return;
+  }
+  
+  try {
+    showLoader('Deleting unavailability...');
+    
+    await deleteDoc(doc(db, 'unavailability', editingUnavailabilityId));
+    showToast('Unavailability deleted successfully');
+    
+    funCloseModal();
+    await funLoadWeekData(currentWeekStart);
+    
+  } catch (error) {
+    console.error('Error deleting unavailability:', error);
+    showToast(error?.message || 'Failed to delete unavailability', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Load week data
+async function funLoadWeekData(weekStart, forceRefresh = false) {
+  if (!weekStart) return;
+  
+  try {
+    const result = await funFetchWithAbort(async () => {
+      const [members, unavailabilityData] = await Promise.all([
+        funLoadMembers(),
+        funLoadUnavailability(weekStart)
+      ]);
+      
+      return { members, unavailabilityData };
+    });
+    
+    if (!result) return; // Aborted
+    
+    const { members, unavailabilityData } = result;
+    
+    funUpdateWeekDisplay(weekStart);
+    funCreateCalendarDays(weekStart, unavailabilityData);
+    funUpdateCapacityOverview(members, unavailabilityData);
+    funUpdateMemberCapacityTable(members, unavailabilityData);
+    
+  } catch (error) {
+    console.error('Error loading week data:', error);
+    showToast('Failed to load week data', 'error');
+  }
+}
+
+// Initial load
+async function funInitialLoad(forceRefresh = false) {
+  if (!currentUser) return;
+  
+  currentWeekStart = funGetWeekStart();
+  await funLoadWeekData(currentWeekStart, forceRefresh);
+}
+
+// Navigate to previous week
+function funPreviousWeek() {
+  if (!currentWeekStart) return;
+  
+  const prevWeek = new Date(currentWeekStart);
+  prevWeek.setDate(prevWeek.getDate() - 7);
+  currentWeekStart = prevWeek;
+  
+  funLoadWeekData(currentWeekStart);
+}
+
+// Navigate to next week
+function funNextWeek() {
+  if (!currentWeekStart) return;
+  
+  const nextWeek = new Date(currentWeekStart);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  currentWeekStart = nextWeek;
+  
+  funLoadWeekData(currentWeekStart);
+}
+
+// Event Listeners
+document.getElementById('prev-week')?.addEventListener('click', funPreviousWeek);
+document.getElementById('next-week')?.addEventListener('click', funNextWeek);
+document.getElementById('refresh-data')?.addEventListener('click', () => funInitialLoad(true));
+
+// Modal event listeners
+document.getElementById('close-modal')?.addEventListener('click', funCloseModal);
+document.getElementById('cancel-modal')?.addEventListener('click', funCloseModal);
+document.getElementById('modal-backdrop')?.addEventListener('click', funCloseModal);
+document.getElementById('delete-unavailability')?.addEventListener('click', funDeleteUnavailability);
+
+// Form submission
+document.getElementById('unavailability-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const dateInput = document.getElementById('unavailability-date');
+  const hoursInput = document.getElementById('unavailable-hours');
+  const reasonInput = document.getElementById('unavailability-reason');
+  
+  if (!dateInput?.value || !hoursInput?.value || !reasonInput?.value) {
+    showToast('Please fill in all required fields', 'error');
+    return;
+  }
+  
+  const hours = parseInt(hoursInput.value);
+  if (hours < 1 || hours > 8) {
+    showToast('Hours must be between 1 and 8', 'error');
+    return;
+  }
+  
+  await funSaveUnavailability({
+    date: dateInput.value,
+    hours: hours,
+    reason: reasonInput.value.trim()
+  });
+});
+
+// Keyboard navigation for modal
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('unavailability-modal');
+  if (modal && !modal.classList.contains('hidden')) {
+    if (e.key === 'Escape') {
+      funCloseModal();
+    }
+  }
+});
+
+// Focus trap for modal
+function funSetupFocusTrap() {
+  const modal = document.getElementById('unavailability-modal');
+  if (!modal) return;
+  
+  const focusableElements = modal.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements[focusableElements.length - 1];
+  
+  modal.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+  });
+}
+
+// Initialize focus trap
+funSetupFocusTrap();
+</script>
+
+</body>
+</html>

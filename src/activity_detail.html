@@ -1,0 +1,2357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weekly Planner Team Management System</title>
+
+    <!-- Required: Main JS Script -->
+    <script type="module" src="scripts/main.js" data-tiramai="web-gen"></script>
+
+    <!-- Required: TailwindCSS -->
+    <script src="./lib/tailwindcss/tailwindcss.js" fetchpriority="high" data-tiramai="web-gen"></script>
+
+    <!-- Required: Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest" data-tiramai="web-gen"></script>
+
+    <!-- Required: Favicon -->
+    <link rel="icon" href="assets/imgs/logo.ico" type="image/x-icon" data-tiramai="web-gen"/>
+
+    <!-- ECharts Support (for charts/graphs) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js" data-tiramai="web-gen"></script>
+
+    <!-- Markdown Support (for content rendering) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" data-tiramai="web-gen"></script>
+
+    <style data-tiramai="web-gen">
+        .logo-svg {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .mobile-nav-open {
+            transform: translateX(0);
+        }
+        
+        .mobile-nav-closed {
+            transform: translateX(-100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-700">
+    <!-- Top Navigation -->
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 py-4 z-30 h-16">
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
+            </button>
+            
+            <!-- Logo and App Name -->
+            <div class="flex items-center gap-3">
+                <div class="logo-svg">
+                    <svg width="32" height="32" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="90" y="80" width="220" height="240" rx="24" stroke="#2563EB" stroke-width="16" fill="none"/>
+                        <rect x="122" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="122" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="122" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="182" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="182" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="122" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="190" y="242" width="56" height="32" rx="8" fill="#2563EB"/>
+                        <rect x="258" y="242" width="36" height="32" rx="8" fill="#2563EB"/>
+                        <path d="M90 120h220" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+                        <circle cx="122" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="154" cy="108" r="8" fill="#1E40AF"/>
+                        <circle cx="186" cy="108" r="8" fill="#1E40AF"/>
+                        <path d="M310 80v-16a14 14 0 0 0-14-14h-192a14 14 0 0 0-14 14v16" stroke="#2563EB" stroke-width="10" stroke-linecap="round" fill="none"/>
+                    </svg>
+                </div>
+                <span class="text-xl leading-8 font-semibold text-slate-900 hidden sm:block">Weekly Planner Team Management System</span>
+                <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button id="user-profile-btn" class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
+                    <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
+                    <div class="p-3 border-b border-slate-200">
+                        <p id="dropdown-user-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="dropdown-user-email" class="text-xs leading-4 text-slate-500">Loading...</p>
+                    </div>
+                    <div class="py-1">
+                        <button id="sign-out-btn" class="w-full text-left px-3 py-2 text-sm leading-5 text-slate-700 hover:bg-slate-100 flex items-center gap-2">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Side Navigation -->
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
+            <nav class="p-4 space-y-2">
+                <!-- Navigation Items -->
+                <a href="/weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    Weekly Dashboard
+                </a>
+
+                <!-- Backlog Management with Children -->
+                <div class="nav-group">
+                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                            Backlog Management
+                        </div>
+                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
+                    </button>
+                    <a href="/backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                        <i data-lucide="list" class="w-4 h-4"></i>
+                        View All Activities
+                    </a>
+                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
+                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            Activity Detail
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    Capacity Management
+                </a>
+
+                <a href="/member_management.html" data-page="member_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    Member Management
+                </a>
+            </nav>
+            
+            <!-- Footer in Sidebar -->
+            <div class="absolute bottom-4 w-full px-4">
+                <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
+                    Made with ❤️ by TiramAi
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900 bg-opacity-50 z-10 hidden md:hidden"></div>
+
+        <!-- Main Content -->
+        <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto min-h-[calc(100vh-4rem)]">
+            
+<!-- Activity Detail Page -->
+<div class="min-h-screen bg-slate-50">
+  <!-- Header with Back Button and Activity Info -->
+  <div class="bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div class="px-4 sm:px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <button id="back-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back
+          </button>
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
+              <span id="category-badge" class="inline-flex items-center px-2.5 py-0.5 rounded text-xs leading-4 font-medium bg-blue-100 text-blue-800">
+                Loading...
+              </span>
+              <span id="priority-indicator" class="h-2 w-2 rounded-full bg-slate-300"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="edit-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i data-lucide="edit" class="w-4 h-4"></i>
+            Edit
+          </button>
+          <button id="delete-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500" style="display: none;">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            Delete
+          </button>
+          <button id="reallocate-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            Reallocate to Week
+          </button>
+        </div>
+      </div>
+      <h1 id="activity-title" class="text-2xl leading-10 font-bold text-slate-900 mt-2">Loading Activity...</h1>
+    </div>
+  </div>
+
+  <!-- Main Content with Tabs -->
+  <div class="px-4 sm:px-6 py-6">
+    <!-- Tab Navigation -->
+    <div class="border-b border-slate-200 mb-6">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-tab="details">
+          Details
+        </button>
+        <button class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-tab="comments">
+          <span class="flex items-center gap-2">
+            Comments
+            <span id="comments-count" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs leading-4 bg-slate-100 text-slate-800">0</span>
+          </span>
+        </button>
+        <button class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-tab="history">
+          History
+        </button>
+        <button class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-tab="attachments">
+          <span class="flex items-center gap-2">
+            Attachments
+            <span id="attachments-count" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs leading-4 bg-slate-100 text-slate-800">0</span>
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content-container">
+      <!-- Details Tab -->
+      <div id="details-tab" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Main Details -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- Activity Information -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h3 class="text-lg leading-7 font-semibold text-slate-800 mb-4">Activity Information</h3>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Description</dt>
+                  <dd id="activity-description" class="mt-1 text-sm leading-5 text-slate-700">Loading...</dd>
+                </div>
+                <div>
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Status</dt>
+                  <dd class="mt-1">
+                    <select id="status-selector" class="w-full text-sm leading-5 border border-slate-200 rounded px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                      <option value="Not Started">Not Started</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Week Allocated</dt>
+                  <dd id="week-allocated" class="mt-1 text-sm leading-5 text-slate-700">Loading...</dd>
+                </div>
+                <div>
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Tags</dt>
+                  <dd id="activity-tags" class="mt-1 flex flex-wrap gap-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-slate-100 text-slate-700">Loading...</span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Assignment Controls -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg leading-7 font-semibold text-slate-800">Assignment</h3>
+                <button id="refresh-assignment" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh Assignment">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </button>
+              </div>
+              
+              <div id="assignment-content" class="space-y-4">
+                <!-- Current Assignment -->
+                <div id="current-assignment" style="display: none;">
+                  <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex items-center gap-3">
+                      <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                      </div>
+                      <div>
+                        <p id="assigned-member-name" class="text-sm leading-5 font-medium text-slate-900">Loading...</p>
+                        <p id="assigned-hours" class="text-xs leading-4 text-slate-500">Loading hours...</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button id="update-hours-btn" class="inline-flex items-center gap-1 px-2 py-1 text-xs leading-4 font-medium text-blue-600 bg-white border border-blue-200 rounded hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i data-lucide="edit" class="w-3 h-3"></i>
+                        Update Hours
+                      </button>
+                      <button id="unassign-btn" class="inline-flex items-center gap-1 px-2 py-1 text-xs leading-4 font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Assign Member Button -->
+                <div id="assign-member-section">
+                  <button id="assign-member-btn" class="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm leading-5 font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                    Assign Member
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <!-- Quick Stats -->
+            <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+              <h3 class="text-lg leading-7 font-semibold text-slate-800 mb-4">Quick Stats</h3>
+              <dl class="space-y-3">
+                <div class="flex justify-between">
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Created</dt>
+                  <dd id="created-date" class="text-sm leading-5 text-slate-700">Loading...</dd>
+                </div>
+                <div class="flex justify-between">
+                  <dt class="text-sm leading-5 font-medium text-slate-500">Last Updated</dt>
+                  <dd id="updated-date" class="text-sm leading-5 text-slate-700">Loading...</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Tab -->
+      <div id="comments-tab" class="tab-content" style="display: none;">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+          <!-- Comments Header -->
+          <div class="px-6 py-4 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg leading-7 font-semibold text-slate-800">Comments</h3>
+              <button id="refresh-comments" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh Comments">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Comment Input -->
+          <div class="px-6 py-4 border-b border-slate-200">
+            <div class="flex gap-3">
+              <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <i data-lucide="user" class="w-4 h-4 text-white"></i>
+              </div>
+              <div class="flex-1">
+                <textarea id="comment-input" placeholder="Add a comment..." rows="3" class="w-full resize-none border border-slate-200 rounded-lg px-3 py-2 text-sm leading-5 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                <div class="flex justify-end mt-2">
+                  <button id="add-comment-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    Add Comment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments List -->
+          <div id="comments-list" class="p-6 space-y-4">
+            <!-- Skeleton loading -->
+            <div class="comment-skeleton animate-pulse space-y-4">
+              <div class="flex gap-3">
+                <div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-slate-200 rounded w-1/4"></div>
+                  <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                  <div class="h-4 bg-slate-200 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Tab -->
+      <div id="history-tab" class="tab-content" style="display: none;">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+          <div class="px-6 py-4 border-b border-slate-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-lg leading-7 font-semibold text-slate-800">Activity History</h3>
+              <button id="refresh-history" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh History">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div id="history-list" class="p-6">
+            <!-- Skeleton loading -->
+            <div class="history-skeleton animate-pulse space-y-4">
+              <div class="flex items-start gap-4">
+                <div class="h-2 w-2 rounded-full bg-slate-200 mt-2"></div>
+                <div class="flex-1 space-y-2">
+                  <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+                  <div class="h-3 bg-slate-200 rounded w-1/4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attachments Tab -->
+      <div id="attachments-tab" class="tab-content" style="display: none;">
+        <div class="space-y-6">
+          <!-- Upload Area -->
+          <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg leading-7 font-semibold text-slate-800 mb-4">Upload Attachments</h3>
+            <div id="upload-area" class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-slate-400 transition-colors">
+              <i data-lucide="upload" class="w-8 h-8 mx-auto text-slate-400 mb-3"></i>
+              <p class="text-sm leading-5 font-medium text-slate-700 mb-2">Drag and drop files here, or click to browse</p>
+              <p class="text-xs leading-4 text-slate-500">PDF, DOC, DOCX, XLS, XLSX, JPG, PNG up to 10MB</p>
+              <input type="file" id="file-input" class="hidden" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+            </div>
+          </div>
+
+          <!-- Attachments List -->
+          <div class="bg-white rounded-lg shadow-sm border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-200">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg leading-7 font-semibold text-slate-800">Attachments</h3>
+                <button id="refresh-attachments" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh Attachments">
+                  <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <div id="attachments-list" class="p-6">
+              <!-- Skeleton loading -->
+              <div class="attachments-skeleton animate-pulse space-y-4">
+                <div class="flex items-center gap-4">
+                  <div class="h-10 w-10 bg-slate-200 rounded"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+                    <div class="h-3 bg-slate-200 rounded w-1/4"></div>
+                  </div>
+                  <div class="flex gap-2">
+                    <div class="h-8 w-16 bg-slate-200 rounded"></div>
+                    <div class="h-8 w-16 bg-slate-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <!-- Edit Activity Modal -->
+  <div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Edit Activity</h2>
+        </div>
+        <form id="edit-form" class="px-6 py-4 space-y-4">
+          <div>
+            <label for="edit-title" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Title *</label>
+            <input type="text" id="edit-title" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div>
+            <label for="edit-description" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Description</label>
+            <textarea id="edit-description" rows="3" class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+          </div>
+          <div>
+            <label for="edit-category" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Category *</label>
+            <select id="edit-category" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="Client Focused">Client Focused</option>
+              <option value="Tech Debt">Tech Debt</option>
+              <option value="R&D">R&D</option>
+            </select>
+          </div>
+          <div>
+            <label for="edit-priority" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Priority *</label>
+            <select id="edit-priority" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label for="edit-tags" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Tags</label>
+            <input type="text" id="edit-tags" placeholder="Enter tags separated by commas" class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <p class="text-xs leading-4 text-slate-500 mt-1">Separate tags with commas</p>
+          </div>
+        </form>
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <button id="edit-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Cancel</button>
+          <button id="edit-submit" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Confirm Deletion</h2>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm leading-5 text-slate-700 mb-2">Are you sure you want to delete this activity?</p>
+          <p id="delete-activity-title" class="text-sm leading-5 font-medium text-slate-900 mb-4">Activity Title</p>
+          <div class="p-3 bg-red-50 rounded border border-red-200">
+            <p class="text-sm leading-5 text-red-700">
+              <i data-lucide="alert-triangle" class="w-4 h-4 inline mr-2"></i>
+              This action cannot be undone. All comments, history, and attachments will be permanently deleted.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <button id="delete-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Cancel</button>
+          <button id="delete-confirm" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-red-600 rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">Delete Activity</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Member Modal -->
+  <div id="assign-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Assign Member</h2>
+        </div>
+        <form id="assign-form" class="px-6 py-4 space-y-4">
+          <div>
+            <label for="assign-member" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Select Member *</label>
+            <div id="member-list" class="space-y-2 max-h-48 overflow-y-auto border border-slate-200 rounded p-2">
+              <!-- Member options will be populated here -->
+            </div>
+          </div>
+          <div>
+            <label for="assign-hours" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Hours to Assign *</label>
+            <input type="number" id="assign-hours" min="1" max="40" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </form>
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <button id="assign-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Cancel</button>
+          <button id="assign-submit" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" disabled>Assign Member</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Hours Modal -->
+  <div id="update-hours-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Update Assigned Hours</h2>
+        </div>
+        <div class="px-6 py-4">
+          <div class="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <p class="text-sm leading-5 text-slate-700">
+              <strong>Member:</strong> <span id="update-hours-member">Loading...</span>
+            </p>
+            <p class="text-sm leading-5 text-slate-700">
+              <strong>Current Hours:</strong> <span id="update-hours-current">Loading...</span>
+            </p>
+            <p class="text-sm leading-5 text-slate-700">
+              <strong>Available Capacity:</strong> <span id="update-hours-capacity">Loading...</span>
+            </p>
+          </div>
+          <div>
+            <label for="new-hours" class="block text-sm leading-5 font-medium text-slate-700 mb-1">New Hours *</label>
+            <input type="number" id="new-hours" min="1" max="40" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <button id="update-hours-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Cancel</button>
+          <button id="update-hours-submit" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Update Hours</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reallocate Week Modal -->
+  <div id="reallocate-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+    <div class="flex items-center justify-center min-h-full p-4">
+      <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
+        <div class="px-6 py-4 border-b border-slate-200">
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Reallocate to Week</h2>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-sm leading-5 text-slate-700 mb-4">
+            Move <strong id="reallocate-activity-title">Activity</strong> to a different week.
+          </p>
+          <div class="mb-4 p-3 bg-blue-50 rounded border border-blue-200">
+            <p class="text-sm leading-5 text-slate-700">
+              <strong>Current Week:</strong> <span id="reallocate-current-week">Loading...</span>
+            </p>
+          </div>
+          <div>
+            <label for="reallocate-week" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Select New Week *</label>
+            <select id="reallocate-week" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <!-- Week options will be populated here -->
+            </select>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
+          <button id="reallocate-cancel" class="px-4 py-2 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">Cancel</button>
+          <button id="reallocate-submit" class="px-4 py-2 text-sm leading-5 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Reallocate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+        </main>
+    </div>
+
+    <!-- Required: JavaScript -->
+    <script type="module" data-tiramai="web-gen">
+        import { showToast, showLoader, hideLoader, env } from "./scripts/main.js";
+        import { auth, db, storage } from "./scripts/firebase.js";
+        import { onAuthStateChanged, getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+        import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM elements
+        const userNameElement = document.getElementById('user-name');
+        const dropdownUserNameElement = document.getElementById('dropdown-user-name');
+        const dropdownUserEmailElement = document.getElementById('dropdown-user-email');
+        const userProfileBtn = document.getElementById('user-profile-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        const signOutBtn = document.getElementById('sign-out-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        // User authentication state management
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // Try to get user details from Firestore
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    
+                    let displayName = 'User';
+                    let email = user.email || 'user@example.com';
+                    
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const firstName = userData.firstName || '';
+                        const lastName = userData.lastName || '';
+                        displayName = firstName && lastName ? `${firstName} ${lastName}` : (firstName || lastName || 'User');
+                        email = userData.email || user.email || 'user@example.com';
+                    } else {
+                        // Fallback to email or default
+                        displayName = user.email ? user.email.split('@')[0] : 'User';
+                    }
+                    
+                    // Update UI with user info
+                    userNameElement.textContent = displayName;
+                    dropdownUserNameElement.textContent = displayName;
+                    dropdownUserEmailElement.textContent = email;
+                } catch (error) {
+                    console.error('Error fetching user details:', error);
+                    // Fallback to basic auth info
+                    const fallbackName = user.email ? user.email.split('@')[0] : 'User';
+                    userNameElement.textContent = fallbackName;
+                    dropdownUserNameElement.textContent = fallbackName;
+                    dropdownUserEmailElement.textContent = user.email || 'user@example.com';
+                }
+            } else {
+                // Redirect to auth page if not authenticated
+                window.location.href = 'auth.html';
+            }
+        });
+
+        // Profile dropdown toggle
+        userProfileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Sign out functionality
+        signOutBtn.addEventListener('click', async () => {
+            try {
+                showLoader('Signing out...');
+                await signOut(auth);
+                window.location.href = 'auth.html';
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showToast('Error signing out', 'error');
+            } finally {
+                hideLoader();
+            }
+        });
+
+        // Mobile navigation
+        mobileMenuBtn.addEventListener('click', () => {
+            const isOpen = sidebar.classList.contains('mobile-nav-open');
+            if (isOpen) {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.remove('hidden');
+            }
+        });
+
+        // Close mobile nav when overlay is clicked
+        mobileOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-nav-open');
+            sidebar.classList.add('mobile-nav-closed');
+            mobileOverlay.classList.add('hidden');
+        });
+
+        // Close mobile nav when nav item is clicked
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    sidebar.classList.remove('mobile-nav-open');
+                    sidebar.classList.add('mobile-nav-closed');
+                    mobileOverlay.classList.add('hidden');
+                }
+            });
+        });
+
+        // Collapsible navigation groups
+        document.querySelectorAll('.nav-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = toggle.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
+                
+                if (targetElement) {
+                    targetElement.classList.toggle('hidden');
+                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                        'rotate(0deg)' : 'rotate(90deg)';
+                }
+            });
+        });
+
+        // Active navigation state
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const pageName = item.getAttribute('data-page');
+                if (pageName === currentPage) {
+                    item.classList.add('bg-blue-50', 'text-blue-700', 'border-r-2', 'border-blue-500');
+                    item.classList.remove('text-slate-700', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Set active navigation on load
+        setActiveNavigation();
+
+        // Resize handler for mobile nav
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('mobile-nav-closed');
+                sidebar.classList.add('mobile-nav-open');
+                mobileOverlay.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('mobile-nav-open');
+                sidebar.classList.add('mobile-nav-closed');
+            }
+        });
+    </script>
+
+    
+<script id="data-script" type="module" data-tiramai="web-gen">
+// Firebase and utility imports
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
+import {
+  collection, getDocs, getDoc, setDoc, addDoc, doc, updateDoc, deleteDoc, writeBatch,
+  query, where, orderBy, limit, onSnapshot, Timestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-storage.js';
+import { auth, getDb, storage } from "./scripts/firebase.js";
+import { showToast, showLoader, hideLoader } from "./scripts/main.js";
+
+const db = getDb();
+
+// Global state
+let currentActivityId = null;
+let currentActivity = null;
+let currentUser = null;
+let currentAbort = null;
+
+// Get activity ID from URL
+const urlParams = new URLSearchParams(window.location.search);
+currentActivityId = urlParams.get('activityId');
+
+if (!currentActivityId) {
+  showToast('No activity ID provided', 'error');
+  window.location.href = 'weekly_dashboard.html';
+}
+
+// Auth check
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "auth.html?redirect=" + encodeURIComponent(location.pathname);
+  } else {
+    currentUser = user;
+    funInitialLoad();
+  }
+});
+
+// Helper functions
+function formatDate(dateString) {
+  if (!dateString) return "N/A";
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  } catch (error) {
+    return "N/A";
+  }
+}
+
+function getWeekDateRange(weekStart) {
+  if (!weekStart) return "N/A";
+  try {
+    const startDate = new Date(weekStart);
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+    
+    return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  } catch (error) {
+    return "N/A";
+  }
+}
+
+function getNextWednesdays(count = 4) {
+  const weeks = [];
+  const today = new Date();
+  const currentDay = today.getDay();
+  
+  // Find next Wednesday (3 = Wednesday)
+  let daysUntilWednesday = 3 - currentDay;
+  if (daysUntilWednesday <= 0) {
+    daysUntilWednesday += 7; // Next week's Wednesday
+  }
+  
+  const nextWednesday = new Date(today);
+  nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+  
+  for (let i = 0; i < count; i++) {
+    const weekStart = new Date(nextWednesday);
+    weekStart.setDate(nextWednesday.getDate() + (i * 7));
+    weeks.push({
+      isoDate: weekStart.toISOString().split('T')[0],
+      display: getWeekDateRange(weekStart.toISOString().split('T')[0])
+    });
+  }
+  
+  return weeks;
+}
+
+function getPriorityColor(priority) {
+  switch (priority) {
+    case 'High': return 'bg-red-500';
+    case 'Medium': return 'bg-amber-500';
+    case 'Low': return 'bg-green-500';
+    default: return 'bg-slate-300';
+  }
+}
+
+function getCategoryColor(category) {
+  switch (category) {
+    case 'Client Focused': return 'bg-blue-100 text-blue-800';
+    case 'Tech Debt': return 'bg-amber-100 text-amber-800';
+    case 'R&D': return 'bg-purple-100 text-purple-800';
+    default: return 'bg-slate-100 text-slate-800';
+  }
+}
+
+// Abortable fetch helper
+function withAbort(fn) {
+  if (currentAbort) currentAbort.abort();
+  currentAbort = new AbortController();
+  return fn(currentAbort.signal);
+}
+
+// Main initialization
+async function funInitialLoad() {
+  try {
+    lucide.createIcons();
+    await funLoadActivity();
+    funSetupEventListeners();
+    funSetupTabs();
+  } catch (error) {
+    console.error('Error in initial load:', error);
+    showToast('Failed to load activity', 'error');
+  }
+}
+
+// Load activity details
+async function funLoadActivity() {
+  try {
+    const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
+    
+    if (!activityDoc.exists()) {
+      showToast('Activity not found', 'error');
+      window.location.href = 'weekly_dashboard.html';
+      return;
+    }
+    
+    currentActivity = { id: activityDoc.id, ...activityDoc.data() };
+    
+    // Update UI
+    funUpdateActivityUI();
+    
+    // Load tab content for default tab
+    await funLoadDetailsTab();
+    
+  } catch (error) {
+    console.error('Error loading activity:', error);
+    showToast('Failed to load activity details', 'error');
+  }
+}
+
+// Update main activity UI
+function funUpdateActivityUI() {
+  const activity = currentActivity;
+  
+  // Header
+  document.getElementById('activity-title').textContent = activity.title || 'Untitled Activity';
+  
+  // Category badge
+  const categoryBadge = document.getElementById('category-badge');
+  categoryBadge.textContent = activity.category || 'N/A';
+  categoryBadge.className = `inline-flex items-center px-2.5 py-0.5 rounded text-xs leading-4 font-medium ${getCategoryColor(activity.category)}`;
+  
+  // Priority indicator
+  const priorityIndicator = document.getElementById('priority-indicator');
+  priorityIndicator.className = `h-2 w-2 rounded-full ${getPriorityColor(activity.priority)}`;
+  
+  // Show/hide delete button based on assignment
+  const deleteBtn = document.getElementById('delete-btn');
+  if (activity.assignedMember) {
+    deleteBtn.style.display = 'none';
+  } else {
+    deleteBtn.style.display = 'inline-flex';
+  }
+}
+
+// Load details tab
+async function funLoadDetailsTab() {
+  const activity = currentActivity;
+  
+  // Activity information
+  document.getElementById('activity-description').textContent = activity.description || 'No description provided';
+  document.getElementById('status-selector').value = activity.status || 'Not Started';
+  document.getElementById('week-allocated').textContent = getWeekDateRange(activity.weekAllocated);
+  
+  // Tags
+  const tagsContainer = document.getElementById('activity-tags');
+  tagsContainer.innerHTML = '';
+  
+  if (activity.tags && activity.tags.length > 0) {
+    activity.tags.forEach(tag => {
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-slate-100 text-slate-700';
+      tagSpan.textContent = tag;
+      tagsContainer.appendChild(tagSpan);
+    });
+  } else {
+    const noTagsSpan = document.createElement('span');
+    noTagsSpan.className = 'text-sm leading-5 text-slate-500';
+    noTagsSpan.textContent = 'No tags';
+    tagsContainer.appendChild(noTagsSpan);
+  }
+  
+  // Dates
+  document.getElementById('created-date').textContent = formatDate(activity.createdAt);
+  document.getElementById('updated-date').textContent = formatDate(activity.updatedAt);
+  
+  // Assignment section
+  await funUpdateAssignmentSection();
+}
+
+// Update assignment section
+async function funUpdateAssignmentSection() {
+  const activity = currentActivity;
+  const currentAssignment = document.getElementById('current-assignment');
+  const assignSection = document.getElementById('assign-member-section');
+  
+  if (activity.assignedMember && activity.assignedHours) {
+    try {
+      // Load member details
+      const memberDoc = await getDoc(doc(db, 'members', activity.assignedMember));
+      
+      if (memberDoc.exists()) {
+        const memberData = memberDoc.data();
+        
+        document.getElementById('assigned-member-name').textContent = memberData.name || 'Unknown Member';
+        document.getElementById('assigned-hours').textContent = `${activity.assignedHours} hours assigned`;
+        
+        currentAssignment.style.display = 'block';
+        assignSection.style.display = 'none';
+      } else {
+        // Member not found, show as unassigned
+        currentAssignment.style.display = 'none';
+        assignSection.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Error loading member details:', error);
+      currentAssignment.style.display = 'none';
+      assignSection.style.display = 'block';
+    }
+  } else {
+    currentAssignment.style.display = 'none';
+    assignSection.style.display = 'block';
+  }
+}
+
+// Load comments
+async function funLoadComments() {
+  const commentsList = document.getElementById('comments-list');
+  
+  // Show skeleton
+  commentsList.innerHTML = `
+    <div class="comment-skeleton animate-pulse space-y-4">
+      <div class="flex gap-3">
+        <div class="h-8 w-8 bg-slate-200 rounded-full"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-4 bg-slate-200 rounded w-1/4"></div>
+          <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  try {
+    const commentsQuery = query(
+      collection(db, 'activityComments'),
+      where('activityId', '==', currentActivityId),
+      orderBy('timestamp', 'desc'),
+      limit(20)
+    );
+    
+    const commentsSnapshot = await getDocs(commentsQuery);
+    const comments = [];
+    
+    for (const commentDoc of commentsSnapshot.docs) {
+      const commentData = commentDoc.data();
+      
+      // Load member name
+      let memberName = 'Unknown Member';
+      if (commentData.memberId) {
+        try {
+          const memberDoc = await getDoc(doc(db, 'members', commentData.memberId));
+          if (memberDoc.exists()) {
+            memberName = memberDoc.data().name || 'Unknown Member';
+          }
+        } catch (error) {
+          console.error('Error loading member for comment:', error);
+        }
+      }
+      
+      comments.push({
+        id: commentDoc.id,
+        ...commentData,
+        memberName
+      });
+    }
+    
+    // Update count
+    document.getElementById('comments-count').textContent = comments.length;
+    
+    // Render comments
+    if (comments.length === 0) {
+      commentsList.innerHTML = `
+        <div class="text-center py-8">
+          <i data-lucide="message-circle" class="w-8 h-8 mx-auto text-slate-300 mb-3"></i>
+          <p class="text-sm leading-5 text-slate-500">No comments yet. Be the first to add one!</p>
+        </div>
+      `;
+    } else {
+      commentsList.innerHTML = comments.map(comment => `
+        <div class="flex gap-3">
+          <div class="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <i data-lucide="user" class="w-4 h-4 text-white"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm leading-5 font-medium text-slate-900">${comment.memberName}</span>
+              <span class="text-xs leading-4 text-slate-500">${formatDate(comment.timestamp)}</span>
+            </div>
+            <p class="text-sm leading-5 text-slate-700">${comment.comment || ''}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    lucide.createIcons();
+    
+  } catch (error) {
+    console.error('Error loading comments:', error);
+    commentsList.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto text-red-300 mb-3"></i>
+        <p class="text-sm leading-5 text-red-600">Failed to load comments</p>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+}
+
+// Load history/logs
+async function funLoadHistory() {
+  const historyList = document.getElementById('history-list');
+  
+  // Show skeleton
+  historyList.innerHTML = `
+    <div class="history-skeleton animate-pulse space-y-4">
+      <div class="flex items-start gap-4">
+        <div class="h-2 w-2 rounded-full bg-slate-200 mt-2"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+          <div class="h-3 bg-slate-200 rounded w-1/4"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  try {
+    const logsQuery = query(
+      collection(db, 'activityLogs'),
+      where('activityId', '==', currentActivityId),
+      orderBy('timestamp', 'desc'),
+      limit(50)
+    );
+    
+    const logsSnapshot = await getDocs(logsQuery);
+    const logs = [];
+    
+    for (const logDoc of logsSnapshot.docs) {
+      const logData = logDoc.data();
+      
+      // Load member name
+      let memberName = 'System';
+      if (logData.memberId) {
+        try {
+          const memberDoc = await getDoc(doc(db, 'members', logData.memberId));
+          if (memberDoc.exists()) {
+            memberName = memberDoc.data().name || 'Unknown Member';
+          }
+        } catch (error) {
+          console.error('Error loading member for log:', error);
+        }
+      }
+      
+      logs.push({
+        id: logDoc.id,
+        ...logData,
+        memberName
+      });
+    }
+    
+    // Render history
+    if (logs.length === 0) {
+      historyList.innerHTML = `
+        <div class="text-center py-8">
+          <i data-lucide="clock" class="w-8 h-8 mx-auto text-slate-300 mb-3"></i>
+          <p class="text-sm leading-5 text-slate-500">No activity history available</p>
+        </div>
+      `;
+    } else {
+      historyList.innerHTML = logs.map(log => {
+        const actionColor = getActionColor(log.action);
+        return `
+          <div class="flex items-start gap-4 py-2">
+            <span class="h-2 w-2 rounded-full ${actionColor} mt-2 flex-shrink-0"></span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm leading-5 font-medium text-slate-900">${log.action}</p>
+              <p class="text-sm leading-5 text-slate-700">${log.details || 'No additional details'}</p>
+              <p class="text-xs leading-4 text-slate-500 mt-1">
+                ${formatDate(log.timestamp)} by ${log.memberName}
+              </p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    lucide.createIcons();
+    
+  } catch (error) {
+    console.error('Error loading history:', error);
+    historyList.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto text-red-300 mb-3"></i>
+        <p class="text-sm leading-5 text-red-600">Failed to load activity history</p>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+}
+
+function getActionColor(action) {
+  switch (action) {
+    case 'Created': return 'bg-blue-500';
+    case 'Edited': return 'bg-amber-500';
+    case 'Status Changed': return 'bg-purple-500';
+    case 'Member Assigned': return 'bg-green-500';
+    case 'Member Unassigned': return 'bg-red-500';
+    case 'Attachment Added': return 'bg-blue-500';
+    case 'Attachment Deleted': return 'bg-red-500';
+    case 'Week Reallocated': return 'bg-indigo-500';
+    default: return 'bg-slate-500';
+  }
+}
+
+// Load attachments
+async function funLoadAttachments() {
+  const attachmentsList = document.getElementById('attachments-list');
+  
+  // Show skeleton
+  attachmentsList.innerHTML = `
+    <div class="attachments-skeleton animate-pulse space-y-4">
+      <div class="flex items-center gap-4">
+        <div class="h-10 w-10 bg-slate-200 rounded"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-4 bg-slate-200 rounded w-1/3"></div>
+          <div class="h-3 bg-slate-200 rounded w-1/4"></div>
+        </div>
+        <div class="flex gap-2">
+          <div class="h-8 w-16 bg-slate-200 rounded"></div>
+          <div class="h-8 w-16 bg-slate-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  try {
+    // Get current activity with latest data
+    const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
+    
+    if (!activityDoc.exists()) {
+      throw new Error('Activity not found');
+    }
+    
+    const activity = activityDoc.data();
+    const attachments = activity.attachments || [];
+    
+    // Update count
+    document.getElementById('attachments-count').textContent = attachments.length;
+    
+    // Render attachments
+    if (attachments.length === 0) {
+      attachmentsList.innerHTML = `
+        <div class="text-center py-8">
+          <i data-lucide="paperclip" class="w-8 h-8 mx-auto text-slate-300 mb-3"></i>
+          <p class="text-sm leading-5 text-slate-500">No attachments yet</p>
+        </div>
+      `;
+    } else {
+      const attachmentHtml = await Promise.all(attachments.map(async (attachment) => {
+        let uploaderName = 'Unknown';
+        if (attachment.uploadedBy) {
+          try {
+            const memberDoc = await getDoc(doc(db, 'members', attachment.uploadedBy));
+            if (memberDoc.exists()) {
+              uploaderName = memberDoc.data().name || 'Unknown';
+            }
+          } catch (error) {
+            console.error('Error loading uploader name:', error);
+          }
+        }
+        
+        return `
+          <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
+            <div class="h-10 w-10 bg-blue-100 rounded flex items-center justify-center">
+              <i data-lucide="file" class="w-5 h-5 text-blue-600"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm leading-5 font-medium text-slate-900 truncate">${attachment.filename}</p>
+              <p class="text-xs leading-4 text-slate-500">
+                Uploaded by ${uploaderName} on ${formatDate(attachment.timestamp)}
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <button class="download-btn px-3 py-1.5 text-xs leading-4 font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500" data-url="${attachment.url}">
+                <i data-lucide="download" class="w-3 h-3 mr-1"></i>
+                Download
+              </button>
+              <button class="delete-attachment-btn px-3 py-1.5 text-xs leading-4 font-medium text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500" data-filename="${attachment.filename}">
+                <i data-lucide="trash-2" class="w-3 h-3 mr-1"></i>
+                Delete
+              </button>
+            </div>
+          </div>
+        `;
+      }));
+      
+      attachmentsList.innerHTML = attachmentHtml.join('');
+    }
+    
+    lucide.createIcons();
+    
+    // Attach event listeners for download and delete
+    funSetupAttachmentListeners();
+    
+  } catch (error) {
+    console.error('Error loading attachments:', error);
+    attachmentsList.innerHTML = `
+      <div class="text-center py-8">
+        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto text-red-300 mb-3"></i>
+        <p class="text-sm leading-5 text-red-600">Failed to load attachments</p>
+      </div>
+    `;
+    lucide.createIcons();
+  }
+}
+
+// Setup attachment event listeners
+function funSetupAttachmentListeners() {
+  // Download buttons
+  document.querySelectorAll('.download-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const url = e.currentTarget.dataset.url;
+      if (url) {
+        window.open(url, '_blank');
+      }
+    });
+  });
+  
+  // Delete buttons
+  document.querySelectorAll('.delete-attachment-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const filename = e.currentTarget.dataset.filename;
+      funDeleteAttachment(filename);
+    });
+  });
+}
+
+// Delete attachment
+async function funDeleteAttachment(filename) {
+  if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
+    return;
+  }
+  
+  try {
+    showLoader('Deleting attachment...');
+    
+    // Get current activity data
+    const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
+    if (!activityDoc.exists()) {
+      throw new Error('Activity not found');
+    }
+    
+    const activity = activityDoc.data();
+    const attachments = activity.attachments || [];
+    
+    // Find attachment to delete
+    const attachmentIndex = attachments.findIndex(att => att.filename === filename);
+    if (attachmentIndex === -1) {
+      throw new Error('Attachment not found');
+    }
+    
+    const attachment = attachments[attachmentIndex];
+    
+    // Remove from storage
+    if (attachment.url) {
+      try {
+        const fileRef = ref(storage, attachment.url);
+        await deleteObject(fileRef);
+      } catch (storageError) {
+        console.warn('Could not delete file from storage:', storageError);
+        // Continue with database cleanup
+      }
+    }
+    
+    // Remove from activity
+    const updatedAttachments = attachments.filter((_, index) => index !== attachmentIndex);
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      attachments: updatedAttachments,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Attachment Deleted',
+      memberId: currentUser.uid,
+      details: `Deleted attachment: ${filename}`
+    });
+    
+    // Refresh attachments view
+    await funLoadAttachments();
+    
+    showToast('Attachment deleted successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error deleting attachment:', error);
+    showToast('Failed to delete attachment', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Tab management
+function funSetupTabs() {
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.dataset.tab;
+      funSwitchTab(targetTab);
+    });
+  });
+  
+  // Set default active tab
+  funSwitchTab('details');
+}
+
+async function funSwitchTab(tabName) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.dataset.tab === tabName) {
+      btn.className = 'tab-btn border-blue-500 text-blue-600 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+    } else {
+      btn.className = 'tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+    }
+  });
+  
+  // Update content visibility
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.style.display = 'none';
+  });
+  
+  const activeContent = document.getElementById(`${tabName}-tab`);
+  if (activeContent) {
+    activeContent.style.display = 'block';
+  }
+  
+  // Load tab-specific content
+  try {
+    switch (tabName) {
+      case 'details':
+        // Already loaded in initial load
+        break;
+      case 'comments':
+        await funLoadComments();
+        break;
+      case 'history':
+        await funLoadHistory();
+        break;
+      case 'attachments':
+        await funLoadAttachments();
+        break;
+    }
+  } catch (error) {
+    console.error('Error loading tab content:', error);
+    showToast(`Failed to load ${tabName} content`, 'error');
+  }
+}
+
+// Event listeners setup
+function funSetupEventListeners() {
+  // Back button
+  document.getElementById('back-btn').addEventListener('click', () => {
+    // Check if there's a referrer to go back to
+    if (document.referrer && (document.referrer.includes('weekly_dashboard') || document.referrer.includes('backlog_management'))) {
+      window.history.back();
+    } else {
+      window.location.href = 'weekly_dashboard.html';
+    }
+  });
+  
+  // Action buttons
+  document.getElementById('edit-btn').addEventListener('click', funOpenEditModal);
+  document.getElementById('delete-btn').addEventListener('click', funOpenDeleteModal);
+  document.getElementById('reallocate-btn').addEventListener('click', funOpenReallocateModal);
+  
+  // Status selector
+  document.getElementById('status-selector').addEventListener('change', funUpdateStatus);
+  
+  // Assignment buttons
+  document.getElementById('assign-member-btn').addEventListener('click', funOpenAssignModal);
+  document.getElementById('unassign-btn').addEventListener('click', funUnassignMember);
+  document.getElementById('update-hours-btn').addEventListener('click', funOpenUpdateHoursModal);
+  
+  // Refresh buttons
+  document.getElementById('refresh-assignment').addEventListener('click', () => {
+    funUpdateAssignmentSection();
+    showToast('Assignment refreshed', 'success');
+  });
+  
+  document.getElementById('refresh-comments').addEventListener('click', () => {
+    funLoadComments();
+    showToast('Comments refreshed', 'success');
+  });
+  
+  document.getElementById('refresh-history').addEventListener('click', () => {
+    funLoadHistory();
+    showToast('History refreshed', 'success');
+  });
+  
+  document.getElementById('refresh-attachments').addEventListener('click', () => {
+    funLoadAttachments();
+    showToast('Attachments refreshed', 'success');
+  });
+  
+  // Comment form
+  const commentInput = document.getElementById('comment-input');
+  const addCommentBtn = document.getElementById('add-comment-btn');
+  
+  commentInput.addEventListener('input', () => {
+    addCommentBtn.disabled = !commentInput.value.trim();
+  });
+  
+  addCommentBtn.addEventListener('click', funAddComment);
+  
+  // File upload
+  funSetupFileUpload();
+  
+  // Modal event listeners
+  funSetupModalEventListeners();
+}
+
+// Status update
+async function funUpdateStatus(event) {
+  const newStatus = event.target.value;
+  const oldStatus = currentActivity.status;
+  
+  if (newStatus === oldStatus) return;
+  
+  try {
+    showLoader('Updating status...');
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Status Changed',
+      memberId: currentUser.uid,
+      details: `Changed status from "${oldStatus}" to "${newStatus}"`
+    });
+    
+    // Update local state
+    currentActivity.status = newStatus;
+    currentActivity.updatedAt = new Date().toISOString();
+    
+    showToast('Status updated successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error updating status:', error);
+    showToast('Failed to update status', 'error');
+    
+    // Revert selector
+    event.target.value = oldStatus;
+  } finally {
+    hideLoader();
+  }
+}
+
+// Add comment
+async function funAddComment() {
+  const commentText = document.getElementById('comment-input').value.trim();
+  
+  if (!commentText) return;
+  
+  try {
+    showLoader('Adding comment...');
+    
+    await addDoc(collection(db, 'activityComments'), {
+      activityId: currentActivityId,
+      memberId: currentUser.uid,
+      timestamp: new Date().toISOString(),
+      comment: commentText
+    });
+    
+    // Clear input
+    document.getElementById('comment-input').value = '';
+    document.getElementById('add-comment-btn').disabled = true;
+    
+    // Refresh comments
+    await funLoadComments();
+    
+    showToast('Comment added successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    showToast('Failed to add comment', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// File upload setup
+function funSetupFileUpload() {
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('file-input');
+  
+  // Click to browse
+  uploadArea.addEventListener('click', () => {
+    fileInput.click();
+  });
+  
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('border-blue-400', 'bg-blue-50');
+  });
+  
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+  });
+  
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+    
+    const files = Array.from(e.dataTransfer.files);
+    funHandleFileUpload(files);
+  });
+  
+  // File input change
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    funHandleFileUpload(files);
+    e.target.value = ''; // Clear input
+  });
+}
+
+// Handle file upload
+async function funHandleFileUpload(files) {
+  if (!files || files.length === 0) return;
+  
+  // Validate files
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'image/jpeg',
+    'image/png'
+  ];
+  
+  const validFiles = [];
+  const errors = [];
+  
+  for (const file of files) {
+    if (file.size > maxSize) {
+      errors.push(`${file.name} is too large (max 10MB)`);
+      continue;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+      errors.push(`${file.name} has unsupported file type`);
+      continue;
+    }
+    
+    validFiles.push(file);
+  }
+  
+  if (errors.length > 0) {
+    showToast(errors.join('\n'), 'error');
+  }
+  
+  if (validFiles.length === 0) return;
+  
+  try {
+    showLoader(`Uploading ${validFiles.length} file(s)...`);
+    
+    const uploadPromises = validFiles.map(async (file) => {
+      // Create unique filename
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const fileName = `${timestamp}_${safeName}`;
+      
+      // Upload to Firebase Storage
+      const storageRef = ref(storage, `activities/${currentActivityId}/${fileName}`);
+      const uploadResult = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+      
+      return {
+        filename: file.name,
+        url: downloadURL,
+        uploadedBy: currentUser.uid,
+        timestamp: new Date().toISOString()
+      };
+    });
+    
+    const uploadedAttachments = await Promise.all(uploadPromises);
+    
+    // Update activity with new attachments
+    const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
+    if (!activityDoc.exists()) {
+      throw new Error('Activity not found');
+    }
+    
+    const activity = activityDoc.data();
+    const currentAttachments = activity.attachments || [];
+    const updatedAttachments = [...currentAttachments, ...uploadedAttachments];
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      attachments: updatedAttachments,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entries
+    for (const attachment of uploadedAttachments) {
+      await addDoc(collection(db, 'activityLogs'), {
+        activityId: currentActivityId,
+        timestamp: new Date().toISOString(),
+        action: 'Attachment Added',
+        memberId: currentUser.uid,
+        details: `Added attachment: ${attachment.filename}`
+      });
+    }
+    
+    // Refresh attachments view
+    await funLoadAttachments();
+    
+    showToast(`${validFiles.length} file(s) uploaded successfully`, 'success');
+    
+  } catch (error) {
+    console.error('Error uploading files:', error);
+    showToast('Failed to upload files', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Modal event listeners
+function funSetupModalEventListeners() {
+  // Edit modal
+  document.getElementById('edit-cancel').addEventListener('click', funCloseEditModal);
+  document.getElementById('edit-submit').addEventListener('click', funSubmitEdit);
+  
+  // Delete modal
+  document.getElementById('delete-cancel').addEventListener('click', funCloseDeleteModal);
+  document.getElementById('delete-confirm').addEventListener('click', funConfirmDelete);
+  
+  // Assign modal
+  document.getElementById('assign-cancel').addEventListener('click', funCloseAssignModal);
+  document.getElementById('assign-submit').addEventListener('click', funSubmitAssign);
+  
+  // Update hours modal
+  document.getElementById('update-hours-cancel').addEventListener('click', funCloseUpdateHoursModal);
+  document.getElementById('update-hours-submit').addEventListener('click', funSubmitUpdateHours);
+  
+  // Reallocate modal
+  document.getElementById('reallocate-cancel').addEventListener('click', funCloseReallocateModal);
+  document.getElementById('reallocate-submit').addEventListener('click', funSubmitReallocate);
+  
+  // Close modals on backdrop click
+  document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        const modalId = modal.id;
+        if (modalId === 'edit-modal') funCloseEditModal();
+        else if (modalId === 'delete-modal') funCloseDeleteModal();
+        else if (modalId === 'assign-modal') funCloseAssignModal();
+        else if (modalId === 'update-hours-modal') funCloseUpdateHoursModal();
+        else if (modalId === 'reallocate-modal') funCloseReallocateModal();
+      }
+    });
+  });
+  
+  // ESC key to close modals
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      funCloseEditModal();
+      funCloseDeleteModal();
+      funCloseAssignModal();
+      funCloseUpdateHoursModal();
+      funCloseReallocateModal();
+    }
+  });
+}
+
+// Edit modal functions
+function funOpenEditModal() {
+  const activity = currentActivity;
+  
+  document.getElementById('edit-title').value = activity.title || '';
+  document.getElementById('edit-description').value = activity.description || '';
+  document.getElementById('edit-category').value = activity.category || 'Client Focused';
+  document.getElementById('edit-priority').value = activity.priority || 'Medium';
+  document.getElementById('edit-tags').value = activity.tags ? activity.tags.join(', ') : '';
+  
+  document.getElementById('edit-modal').classList.remove('hidden');
+  document.getElementById('edit-title').focus();
+}
+
+function funCloseEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+}
+
+async function funSubmitEdit() {
+  const form = document.getElementById('edit-form');
+  
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  
+  const title = document.getElementById('edit-title').value.trim();
+  const description = document.getElementById('edit-description').value.trim();
+  const category = document.getElementById('edit-category').value;
+  const priority = document.getElementById('edit-priority').value;
+  const tagsText = document.getElementById('edit-tags').value.trim();
+  const tags = tagsText ? tagsText.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  
+  try {
+    showLoader('Updating activity...');
+    
+    const updates = {
+      title,
+      description,
+      category,
+      priority,
+      tags,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), updates);
+    
+    // Add log entry
+    const changes = [];
+    if (title !== currentActivity.title) changes.push(`Title: "${currentActivity.title}" → "${title}"`);
+    if (description !== currentActivity.description) changes.push(`Description updated`);
+    if (category !== currentActivity.category) changes.push(`Category: "${currentActivity.category}" → "${category}"`);
+    if (priority !== currentActivity.priority) changes.push(`Priority: "${currentActivity.priority}" → "${priority}"`);
+    
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Edited',
+      memberId: currentUser.uid,
+      details: changes.length > 0 ? changes.join('; ') : 'Activity details updated'
+    });
+    
+    // Update local state and refresh UI
+    Object.assign(currentActivity, updates);
+    funUpdateActivityUI();
+    await funLoadDetailsTab();
+    
+    funCloseEditModal();
+    showToast('Activity updated successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error updating activity:', error);
+    showToast('Failed to update activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Delete modal functions
+function funOpenDeleteModal() {
+  document.getElementById('delete-activity-title').textContent = currentActivity.title || 'Untitled Activity';
+  document.getElementById('delete-modal').classList.remove('hidden');
+}
+
+function funCloseDeleteModal() {
+  document.getElementById('delete-modal').classList.add('hidden');
+}
+
+async function funConfirmDelete() {
+  try {
+    showLoader('Deleting activity...');
+    
+    const batch = writeBatch(db);
+    
+    // Delete activity
+    batch.delete(doc(db, 'activities', currentActivityId));
+    
+    // Delete all comments
+    const commentsQuery = query(
+      collection(db, 'activityComments'),
+      where('activityId', '==', currentActivityId)
+    );
+    const commentsSnapshot = await getDocs(commentsQuery);
+    commentsSnapshot.forEach((commentDoc) => {
+      batch.delete(commentDoc.ref);
+    });
+    
+    // Delete all logs
+    const logsQuery = query(
+      collection(db, 'activityLogs'),
+      where('activityId', '==', currentActivityId)
+    );
+    const logsSnapshot = await getDocs(logsQuery);
+    logsSnapshot.forEach((logDoc) => {
+      batch.delete(logDoc.ref);
+    });
+    
+    await batch.commit();
+    
+    // Delete attachments from storage (best effort)
+    if (currentActivity.attachments) {
+      for (const attachment of currentActivity.attachments) {
+        try {
+          const fileRef = ref(storage, attachment.url);
+          await deleteObject(fileRef);
+        } catch (storageError) {
+          console.warn('Could not delete attachment from storage:', storageError);
+        }
+      }
+    }
+    
+    showToast('Activity deleted successfully', 'success');
+    
+    // Redirect to backlog
+    setTimeout(() => {
+      window.location.href = 'backlog_management.html';
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Error deleting activity:', error);
+    showToast('Failed to delete activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Assign modal functions
+function funOpenAssignModal() {
+  funLoadMembersForAssignment();
+  document.getElementById('assign-modal').classList.remove('hidden');
+}
+
+function funCloseAssignModal() {
+  document.getElementById('assign-modal').classList.add('hidden');
+  document.getElementById('assign-hours').value = '';
+  document.getElementById('assign-submit').disabled = true;
+}
+
+async function funLoadMembersForAssignment() {
+  const memberList = document.getElementById('member-list');
+  const assignSubmit = document.getElementById('assign-submit');
+  
+  memberList.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div></div>';
+  
+  try {
+    // Get all members
+    const membersSnapshot = await getDocs(collection(db, 'members'));
+    const members = [];
+    
+    for (const memberDoc of membersSnapshot.docs) {
+      const member = { id: memberDoc.id, ...memberDoc.data() };
+      
+      // Calculate remaining capacity for the activity's week
+      let remainingCapacity = member.defaultWeeklyCapacity || 40;
+      
+      if (currentActivity.weekAllocated) {
+        // Get unavailability for this week
+        const unavailabilityQuery = query(
+          collection(db, 'unavailability'),
+          where('memberId', '==', member.id),
+          where('weekStart', '==', currentActivity.weekAllocated)
+        );
+        const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
+        
+        let unavailableHours = 0;
+        unavailabilitySnapshot.forEach(doc => {
+          unavailableHours += doc.data().hoursUnavailable || 0;
+        });
+        
+        // Get assigned hours for this week (excluding current activity)
+        const activitiesQuery = query(
+          collection(db, 'activities'),
+          where('weekAllocated', '==', currentActivity.weekAllocated),
+          where('assignedMember', '==', member.id)
+        );
+        const activitiesSnapshot = await getDocs(activitiesQuery);
+        
+        let assignedHours = 0;
+        activitiesSnapshot.forEach(doc => {
+          const activityData = doc.data();
+          if (doc.id !== currentActivityId) { // Exclude current activity
+            assignedHours += activityData.assignedHours || 0;
+          }
+        });
+        
+        remainingCapacity = remainingCapacity - unavailableHours - assignedHours;
+      }
+      
+      member.remainingCapacity = Math.max(0, remainingCapacity);
+      members.push(member);
+    }
+    
+    // Sort by remaining capacity (highest first)
+    members.sort((a, b) => b.remainingCapacity - a.remainingCapacity);
+    
+    if (members.length === 0) {
+      memberList.innerHTML = '<p class="text-sm leading-5 text-slate-500 text-center py-4">No members found</p>';
+      return;
+    }
+    
+    memberList.innerHTML = members.map(member => `
+      <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer">
+        <input type="radio" name="selectedMember" value="${member.id}" class="text-blue-600 focus:ring-blue-500" ${member.remainingCapacity === 0 ? 'disabled' : ''}>
+        <div class="flex-1">
+          <p class="text-sm leading-5 font-medium text-slate-900">${member.name || 'Unnamed Member'}</p>
+          <p class="text-xs leading-4 text-slate-500">
+            ${member.remainingCapacity} hours available
+            ${member.remainingCapacity === 0 ? '(No capacity)' : ''}
+          </p>
+        </div>
+      </label>
+    `).join('');
+    
+    // Setup event listeners for member selection
+    const memberRadios = document.querySelectorAll('input[name="selectedMember"]');
+    const hoursInput = document.getElementById('assign-hours');
+    
+    function updateAssignButton() {
+      const selectedMember = document.querySelector('input[name="selectedMember"]:checked');
+      const hours = parseInt(hoursInput.value);
+      
+      assignSubmit.disabled = !selectedMember || !hours || hours < 1;
+      
+      if (selectedMember && hours > 0) {
+        const memberData = members.find(m => m.id === selectedMember.value);
+        if (memberData && hours > memberData.remainingCapacity) {
+          assignSubmit.disabled = true;
+          hoursInput.setCustomValidity(`Cannot exceed ${memberData.remainingCapacity} available hours`);
+        } else {
+          hoursInput.setCustomValidity('');
+        }
+      }
+    }
+    
+    memberRadios.forEach(radio => {
+      radio.addEventListener('change', updateAssignButton);
+    });
+    
+    hoursInput.addEventListener('input', updateAssignButton);
+    
+  } catch (error) {
+    console.error('Error loading members:', error);
+    memberList.innerHTML = '<p class="text-sm leading-5 text-red-600 text-center py-4">Failed to load members</p>';
+  }
+}
+
+async function funSubmitAssign() {
+  const selectedMember = document.querySelector('input[name="selectedMember"]:checked');
+  const hours = parseInt(document.getElementById('assign-hours').value);
+  
+  if (!selectedMember || !hours) {
+    showToast('Please select a member and enter hours', 'error');
+    return;
+  }
+  
+  try {
+    showLoader('Assigning member...');
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      assignedMember: selectedMember.value,
+      assignedHours: hours,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Get member name for logging
+    const memberDoc = await getDoc(doc(db, 'members', selectedMember.value));
+    const memberName = memberDoc.exists() ? memberDoc.data().name || 'Unknown Member' : 'Unknown Member';
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Member Assigned',
+      memberId: currentUser.uid,
+      details: `Assigned ${memberName} for ${hours} hours`
+    });
+    
+    // Update local state
+    currentActivity.assignedMember = selectedMember.value;
+    currentActivity.assignedHours = hours;
+    currentActivity.updatedAt = new Date().toISOString();
+    
+    // Update UI
+    funUpdateActivityUI();
+    await funUpdateAssignmentSection();
+    
+    funCloseAssignModal();
+    showToast('Member assigned successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error assigning member:', error);
+    showToast('Failed to assign member', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Unassign member
+async function funUnassignMember() {
+  if (!confirm('Are you sure you want to remove the assigned member?')) {
+    return;
+  }
+  
+  try {
+    showLoader('Removing assignment...');
+    
+    // Get member name for logging
+    const memberDoc = await getDoc(doc(db, 'members', currentActivity.assignedMember));
+    const memberName = memberDoc.exists() ? memberDoc.data().name || 'Unknown Member' : 'Unknown Member';
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      assignedMember: null,
+      assignedHours: null,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Member Unassigned',
+      memberId: currentUser.uid,
+      details: `Removed assignment from ${memberName}`
+    });
+    
+    // Update local state
+    currentActivity.assignedMember = null;
+    currentActivity.assignedHours = null;
+    currentActivity.updatedAt = new Date().toISOString();
+    
+    // Update UI
+    funUpdateActivityUI();
+    await funUpdateAssignmentSection();
+    
+    showToast('Assignment removed successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error removing assignment:', error);
+    showToast('Failed to remove assignment', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Update hours modal functions
+function funOpenUpdateHoursModal() {
+  funLoadUpdateHoursData();
+  document.getElementById('update-hours-modal').classList.remove('hidden');
+  document.getElementById('new-hours').focus();
+}
+
+function funCloseUpdateHoursModal() {
+  document.getElementById('update-hours-modal').classList.add('hidden');
+  document.getElementById('new-hours').value = '';
+}
+
+async function funLoadUpdateHoursData() {
+  try {
+    const memberDoc = await getDoc(doc(db, 'members', currentActivity.assignedMember));
+    
+    if (!memberDoc.exists()) {
+      showToast('Assigned member not found', 'error');
+      funCloseUpdateHoursModal();
+      return;
+    }
+    
+    const member = memberDoc.data();
+    
+    // Calculate remaining capacity (excluding current assignment)
+    let remainingCapacity = member.defaultWeeklyCapacity || 40;
+    
+    if (currentActivity.weekAllocated) {
+      // Get unavailability
+      const unavailabilityQuery = query(
+        collection(db, 'unavailability'),
+        where('memberId', '==', member.id || currentActivity.assignedMember),
+        where('weekStart', '==', currentActivity.weekAllocated)
+      );
+      const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
+      
+      let unavailableHours = 0;
+      unavailabilitySnapshot.forEach(doc => {
+        unavailableHours += doc.data().hoursUnavailable || 0;
+      });
+      
+      // Get other assigned hours
+      const activitiesQuery = query(
+        collection(db, 'activities'),
+        where('weekAllocated', '==', currentActivity.weekAllocated),
+        where('assignedMember', '==', currentActivity.assignedMember)
+      );
+      const activitiesSnapshot = await getDocs(activitiesQuery);
+      
+      let otherAssignedHours = 0;
+      activitiesSnapshot.forEach(doc => {
+        if (doc.id !== currentActivityId) {
+          otherAssignedHours += doc.data().assignedHours || 0;
+        }
+      });
+      
+      remainingCapacity = remainingCapacity - unavailableHours - otherAssignedHours;
+    }
+    
+    document.getElementById('update-hours-member').textContent = member.name || 'Unknown Member';
+    document.getElementById('update-hours-current').textContent = `${currentActivity.assignedHours} hours`;
+    document.getElementById('update-hours-capacity').textContent = `${Math.max(0, remainingCapacity)} hours`;
+    document.getElementById('new-hours').value = currentActivity.assignedHours;
+    
+    // Set max value
+    document.getElementById('new-hours').max = remainingCapacity + currentActivity.assignedHours;
+    
+  } catch (error) {
+    console.error('Error loading update hours data:', error);
+    showToast('Failed to load member data', 'error');
+    funCloseUpdateHoursModal();
+  }
+}
+
+async function funSubmitUpdateHours() {
+  const newHours = parseInt(document.getElementById('new-hours').value);
+  const oldHours = currentActivity.assignedHours;
+  
+  if (!newHours || newHours < 1) {
+    showToast('Please enter valid hours', 'error');
+    return;
+  }
+  
+  if (newHours === oldHours) {
+    funCloseUpdateHoursModal();
+    return;
+  }
+  
+  try {
+    showLoader('Updating assigned hours...');
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      assignedHours: newHours,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Edited',
+      memberId: currentUser.uid,
+      details: `Updated assigned hours from ${oldHours} to ${newHours}`
+    });
+    
+    // Update local state
+    currentActivity.assignedHours = newHours;
+    currentActivity.updatedAt = new Date().toISOString();
+    
+    // Update UI
+    await funUpdateAssignmentSection();
+    
+    funCloseUpdateHoursModal();
+    showToast('Hours updated successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error updating hours:', error);
+    showToast('Failed to update hours', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Reallocate modal functions
+function funOpenReallocateModal() {
+  document.getElementById('reallocate-activity-title').textContent = currentActivity.title || 'Untitled Activity';
+  document.getElementById('reallocate-current-week').textContent = getWeekDateRange(currentActivity.weekAllocated);
+  
+  funLoadWeekOptions();
+  document.getElementById('reallocate-modal').classList.remove('hidden');
+}
+
+function funCloseReallocateModal() {
+  document.getElementById('reallocate-modal').classList.add('hidden');
+}
+
+function funLoadWeekOptions() {
+  const weekSelect = document.getElementById('reallocate-week');
+  const weeks = getNextWednesdays(4);
+  
+  weekSelect.innerHTML = weeks.map(week => `
+    <option value="${week.isoDate}">${week.display}</option>
+  `).join('');
+}
+
+async function funSubmitReallocate() {
+  const newWeek = document.getElementById('reallocate-week').value;
+  const oldWeek = currentActivity.weekAllocated;
+  
+  if (newWeek === oldWeek) {
+    funCloseReallocateModal();
+    return;
+  }
+  
+  try {
+    showLoader('Reallocating to new week...');
+    
+    await updateDoc(doc(db, 'activities', currentActivityId), {
+      weekAllocated: newWeek,
+      updatedAt: new Date().toISOString()
+    });
+    
+    // Add log entry
+    await addDoc(collection(db, 'activityLogs'), {
+      activityId: currentActivityId,
+      timestamp: new Date().toISOString(),
+      action: 'Week Reallocated',
+      memberId: currentUser.uid,
+      details: `Moved from ${getWeekDateRange(oldWeek)} to ${getWeekDateRange(newWeek)}`
+    });
+    
+    // Update local state
+    currentActivity.weekAllocated = newWeek;
+    currentActivity.updatedAt = new Date().toISOString();
+    
+    // Update UI
+    await funLoadDetailsTab();
+    
+    funCloseReallocateModal();
+    showToast('Activity reallocated successfully', 'success');
+    
+  } catch (error) {
+    console.error('Error reallocating activity:', error);
+    showToast('Failed to reallocate activity', 'error');
+  } finally {
+    hideLoader();
+  }
+}
+
+// Initialize page
+lucide.createIcons();
+</script>
+
+</body>
+</html>
