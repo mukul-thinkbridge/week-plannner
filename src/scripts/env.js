@@ -25,14 +25,14 @@ const env = {
   },
   // this key wil be used to setup the firebase config
   FIREBASE_CONFIG: {
-    FIREBASE_API_KEY: 'AIzaSyAldxfNbCwJ8FgvIKkZs0YldxSuvD5Tros',
-    FIREBASE_AUTH_DOMAIN: 'tiram-gen-apps-dev.firebaseapp.com',
-    FIREBASE_PROJECT_ID: 'tiram-gen-apps-dev',
-    FIREBASE_STORAGE_BUCKET: 'tiram-gen-apps-dev.firebasestorage.app',
-    FIREBASE_MESSAGING_SENDER_ID: '840404686153',
-    FIREBASE_APP_ID: '1:840404686153:web:61f5748dd23271f09f7698',
-    MEASUREMENT_ID: 'G-0WTW65DNJF',
-    FIRESTORE_DB_NAME: 'gen-app-db-3',
+    FIREBASE_API_KEY: "AIzaSyCAVtxCZIktJsPPK-7byRBLn_LltSuhM38",
+    FIREBASE_AUTH_DOMAIN: "new-fb-1.firebaseapp.com",
+    FIREBASE_PROJECT_ID: "new-fb-1",
+    FIREBASE_STORAGE_BUCKET:  "new-fb-1.firebasestorage.app",
+    FIREBASE_MESSAGING_SENDER_ID: "709142706104",
+    FIREBASE_APP_ID: "1:709142706104:web:b936c0df5f97dc55bc814d",
+    MEASUREMENT_ID: "G-WK4CXFTEXQ",
+    FIRESTORE_DB_NAME: '',
   },
   BASE_URL: 'https://qvm-api-wp-abhishek-cha-a654.azurewebsites.net/team_member',
   REFINER: {
