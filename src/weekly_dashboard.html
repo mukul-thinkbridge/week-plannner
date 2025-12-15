@@ -111,26 +111,10 @@
                     Weekly Dashboard
                 </a>
 
-                <!-- Backlog Management with Children -->
-                <div class="nav-group">
-                    <button class="nav-toggle w-full flex items-center justify-between gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors" data-target="backlog-children">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="list" class="w-5 h-5"></i>
-                            Backlog Management
-                        </div>
-                        <i data-lucide="chevron-right" class="w-4 h-4 transition-transform duration-200"></i>
-                    </button>
-                    <a href="backlog_management.html" data-page="backlog_management" class="nav-item ml-2 flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-600 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
-                        <i data-lucide="list" class="w-4 h-4"></i>
-                        View All Activities
-                    </a>
-                    <div id="backlog-children" class="ml-6 space-y-1 hidden">
-                        <div class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-500 rounded cursor-not-allowed" title="Coming Soon - Requires activity selection">
-                            <i data-lucide="file-text" class="w-4 h-4"></i>
-                            Activity Detail
-                        </div>
-                    </div>
-                </div>
+                <a href="backlog_management.html" data-page="backlog_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
+                    <i data-lucide="list" class="w-5 h-5"></i>
+                    Backlog Management
+                </a>
 
                 <a href="capacity_management.html" data-page="capacity_management" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
                     <i data-lucide="calendar" class="w-5 h-5"></i>
@@ -144,7 +128,7 @@
             </nav>
             
             <!-- Footer in Sidebar -->
-            <div class="absolute bottom-4 w-full px-4">
+            <div class="hidden absolute bottom-4 w-full px-4">
                 <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
                     Made with ❤️ by TiramAi
                 </div>
