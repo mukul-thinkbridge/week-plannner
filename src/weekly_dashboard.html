@@ -149,17 +149,25 @@
       <div>
         <h1 class="text-2xl leading-10 font-bold text-slate-900">Weekly Dashboard</h1>
         <p class="text-sm leading-5 text-slate-600 mt-1">Current week activities and team capacity overview</p>
+        <p class="text-sm leading-5 text-slate-500 mt-1" id="current-date-display">Loading...</p>
       </div>
       
-      <!-- Week Selector -->
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-2">
-          <label for="week-select" class="text-sm leading-5 font-medium text-slate-700">Week:</label>
-          <input type="week" id="week-select" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+      <!-- Week Navigation -->
+      <div class="flex items-center gap-3">
+        <button id="prev-week" class="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
+          Previous
+        </button>
+        <div class="flex flex-col">
+          <span class="text-lg font-semibold text-slate-900" id="week-display">Loading...</span>
+          <span class="text-sm text-slate-500" id="week-dates">
+            <span id="week-start-date">Loading...</span> - <span id="week-end-date">Loading...</span>
+          </span>
         </div>
-        <div class="text-sm leading-5 text-slate-600" id="week-range">
-          <span id="week-start-date">Loading...</span> - <span id="week-end-date">Loading...</span>
-        </div>
+        <button id="next-week" class="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          Next
+          <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -619,9 +627,11 @@ let currentUser = null;
 let currentAbort = null;
 
 // DOM elements
-const weekSelect = document.getElementById('week-select');
 const weekStartDate = document.getElementById('week-start-date');
 const weekEndDate = document.getElementById('week-end-date');
+const weekDisplay = document.getElementById('week-display');
+const prevWeekBtn = document.getElementById('prev-week');
+const nextWeekBtn = document.getElementById('next-week');
 const btnAddActivity = document.getElementById('btn-add-activity');
 const modalAddActivity = document.getElementById('modal-add-activity');
 const btnCloseModal = document.getElementById('btn-close-modal');
@@ -668,10 +678,31 @@ function createSemaphore(max = 2) {
 const withLimit = createSemaphore(2);
 
 function getWednesdayOfWeek(date) {
-  const d = new Date(date);
+  // Create date object and normalize to avoid timezone issues
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1) + 2; // Wednesday
-  return new Date(d.setDate(diff));
+  
+  // Calculate days to subtract to get to the most recent Wednesday (including today if it's Wednesday)
+  let daysToSubtract;
+  if (day === 0) { // Sunday
+    daysToSubtract = 4; // Sunday -> previous Wednesday
+  } else if (day === 1) { // Monday  
+    daysToSubtract = 5; // Monday -> previous Wednesday
+  } else if (day === 2) { // Tuesday
+    daysToSubtract = 6; // Tuesday -> previous Wednesday
+  } else if (day === 3) { // Wednesday
+    daysToSubtract = 0; // Already Wednesday
+  } else if (day === 4) { // Thursday
+    daysToSubtract = 1; // Thursday -> Wednesday (1 day back)
+  } else if (day === 5) { // Friday
+    daysToSubtract = 2; // Friday -> Wednesday (2 days back)
+  } else if (day === 6) { // Saturday
+    daysToSubtract = 3; // Saturday -> Wednesday (3 days back)
+  }
+  
+  // Create new date for Wednesday using date arithmetic without time
+  const wednesday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - daysToSubtract);
+  return wednesday;
 }
 
 function formatDateForDisplay(date) {
@@ -683,14 +714,17 @@ function formatDateForDisplay(date) {
 }
 
 function formatDateForISO(date) {
-  return date.toISOString().split('T')[0];
+  // Use local date components to avoid timezone issues
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getCurrentWeekDates() {
   const today = new Date();
   const wednesday = getWednesdayOfWeek(today);
-  const tuesday = new Date(wednesday);
-  tuesday.setDate(wednesday.getDate() + 6);
+  const tuesday = new Date(wednesday.getFullYear(), wednesday.getMonth(), wednesday.getDate() + 6);
   return { wednesday, tuesday };
 }
 
@@ -721,25 +755,56 @@ function funInitializeWeek() {
   const { wednesday, tuesday } = getCurrentWeekDates();
   currentWeekStart = wednesday;
   
-  // Set week picker to current week
-  const year = wednesday.getFullYear();
-  const weekNumber = Math.ceil(((wednesday - new Date(year, 0, 1)) / 86400000 + 1) / 7);
-  weekSelect.value = `${year}-W${weekNumber.toString().padStart(2, '0')}`;
-  
   // Update display
-  weekStartDate.textContent = formatDateForDisplay(wednesday);
-  weekEndDate.textContent = formatDateForDisplay(tuesday);
+  funUpdateWeekDisplay();
+  
+  // Update current date display
+  funUpdateCurrentDateDisplay();
 }
 
-// Week selector change handler
-weekSelect.addEventListener('change', (e) => {
-  if (e.target.value) {
-    const { wednesday, tuesday } = getWeekFromValue(e.target.value);
-    currentWeekStart = wednesday;
-    weekStartDate.textContent = formatDateForDisplay(wednesday);
-    weekEndDate.textContent = formatDateForDisplay(tuesday);
-    funLoadActivities();
+// Update current date display
+function funUpdateCurrentDateDisplay() {
+  const currentDateElement = document.getElementById('current-date-display');
+  if (currentDateElement) {
+    const today = new Date();
+    const dateString = today.toLocaleDateString('en-US', { 
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+    currentDateElement.textContent = `Today: ${dateString}`;
   }
+}
+
+// Update week display
+function funUpdateWeekDisplay() {
+  if (!currentWeekStart) return;
+  
+  const tuesday = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), currentWeekStart.getDate() + 6);
+  
+  // Format week display title
+  const weekStart = formatDateForDisplay(currentWeekStart);
+  const weekEnd = formatDateForDisplay(tuesday);
+  
+  weekDisplay.textContent = `Week of ${currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
+  weekStartDate.textContent = weekStart;
+  weekEndDate.textContent = weekEnd;
+}
+
+// Week navigation handlers
+prevWeekBtn.addEventListener('click', () => {
+  const prevWeek = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), currentWeekStart.getDate() - 7);
+  currentWeekStart = prevWeek;
+  funUpdateWeekDisplay();
+  funLoadActivities();
+});
+
+nextWeekBtn.addEventListener('click', () => {
+  const nextWeek = new Date(currentWeekStart.getFullYear(), currentWeekStart.getMonth(), currentWeekStart.getDate() + 7);
+  currentWeekStart = nextWeek;
+  funUpdateWeekDisplay();
+  funLoadActivities();
 });
 
 // Activity card creation
