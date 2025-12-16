@@ -622,7 +622,7 @@
             if (user) {
                 try {
                     // Try to get user details from Firestore
-                    const userDoc = await getDoc(doc(db, 'memebers', user.uid));
+                    const userDoc = await getDoc(doc(db, 'members', user.uid));
                     
                     let displayName = 'User';
                     let email = user.email || 'user@example.com';
