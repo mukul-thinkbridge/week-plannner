@@ -1070,35 +1070,30 @@ function funPopulateWeekOptions() {
     document.getElementById('week-options')
   ];
   
-  // Generate next 4 weeks starting from current Wednesday
+  // Always include the current business week (Wednesday–Tuesday) as the first option
   const weeks = [];
   const today = new Date();
-  const currentDay = today.getDay(); // 0 = Sunday, 3 = Wednesday
-  
-  // Find next/current Wednesday
-  let daysUntilWednesday = (3 - currentDay + 7) % 7;
-  if (daysUntilWednesday === 0 && today.getHours() >= 0) {
-    // If it's Wednesday, include this week
-    daysUntilWednesday = 0;
-  }
-  
-  const nextWednesday = new Date(today);
-  nextWednesday.setDate(today.getDate() + daysUntilWednesday);
-  
+  // Find the most recent Wednesday (or today if today is Wednesday)
+  const day = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 3 = Wednesday
+  // Calculate how many days to subtract to get to the most recent Wednesday
+  const daysBack = (day + 7 - 3) % 7;
+  const currentWednesday = new Date(today);
+  currentWednesday.setDate(today.getDate() - daysBack);
+  // Now generate 4 weeks starting from this Wednesday
   for (let i = 0; i < 4; i++) {
-    const weekDate = new Date(nextWednesday);
-    weekDate.setDate(nextWednesday.getDate() + (i * 7));
-    
+    const weekDate = new Date(currentWednesday);
+    weekDate.setDate(currentWednesday.getDate() + (i * 7));
     const isoDate = weekDate.toISOString().split('T')[0];
     const displayDate = weekDate.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
-    
+    let label = `Week of ${displayDate}`;
+    if (i === 0) label += ' (Current Week)';
     weeks.push({
       value: isoDate,
-      label: `Week of ${displayDate}`
+      label
     });
   }
   
