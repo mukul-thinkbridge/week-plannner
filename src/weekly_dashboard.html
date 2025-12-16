@@ -888,8 +888,11 @@ async function funFetchWithAbort(buildQuery) {
 }
 
 // Load members for filters and cards
-async function funLoadMembers() {
+async function funLoadMembers(preserveSelection = false) {
   try {
+    // Preserve current selection if requested
+    const currentSelection = preserveSelection ? filterMember.value : '';
+    
     const membersData = await withLimit(() => getDocs(collection(db, 'members')));
     const members = {};
     membersData.docs.forEach(doc => {
@@ -904,6 +907,11 @@ async function funLoadMembers() {
       option.textContent = member.firstName || 'Unnamed Member';
       filterMember.appendChild(option);
     });
+    
+    // Restore selection if it still exists
+    if (preserveSelection && currentSelection) {
+      filterMember.value = currentSelection;
+    }
     
     return members;
   } catch (error) {
@@ -923,7 +931,7 @@ async function funLoadActivities() {
       skeleton.style.display = 'block';
     });
     
-    const members = await funLoadMembers();
+    const members = await funLoadMembers(true);
     
     // Build query for activities in current week
     const weekISODate = formatDateForISO(currentWeekStart);
