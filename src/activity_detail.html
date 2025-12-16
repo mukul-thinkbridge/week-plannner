@@ -1956,17 +1956,27 @@ async function funLoadMembersForAssignment() {
       let remainingCapacity = member.defaultWeeklyCapacity || 40;
       
       if (currentActivity.weekAllocated) {
-        // Get unavailability for this week
+        // Calculate the week date range (Wednesday to Tuesday)
+        const weekStartDate = new Date(currentActivity.weekAllocated);
+        const weekEndDate = new Date(weekStartDate);
+        weekEndDate.setDate(weekStartDate.getDate() + 6); // 6 days after Wednesday = Tuesday
+        
+        // Get all unavailability for this member
         const unavailabilityQuery = query(
           collection(db, 'unavailability'),
-          where('memberId', '==', member.id),
-          where('weekStart', '==', currentActivity.weekAllocated)
+          where('memberId', '==', member.id)
         );
         const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
         
         let unavailableHours = 0;
         unavailabilitySnapshot.forEach(doc => {
-          unavailableHours += doc.data().hoursUnavailable || 0;
+          const unavailData = doc.data();
+          const unavailDate = new Date(unavailData.day);
+          
+          // Check if the unavailability date falls within this week
+          if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
+            unavailableHours += unavailData.hoursUnavailable || 0;
+          }
         });
         
         // Get assigned hours for this week (excluding current activity)
@@ -2172,17 +2182,27 @@ async function funLoadUpdateHoursData() {
     let remainingCapacity = member.defaultWeeklyCapacity || 40;
     
     if (currentActivity.weekAllocated) {
-      // Get unavailability
+      // Calculate the week date range (Wednesday to Tuesday)
+      const weekStartDate = new Date(currentActivity.weekAllocated);
+      const weekEndDate = new Date(weekStartDate);
+      weekEndDate.setDate(weekStartDate.getDate() + 6); // 6 days after Wednesday = Tuesday
+      
+      // Get all unavailability for this member
       const unavailabilityQuery = query(
         collection(db, 'unavailability'),
-        where('memberId', '==', member.id || currentActivity.assignedMember),
-        where('weekStart', '==', currentActivity.weekAllocated)
+        where('memberId', '==', member.id || currentActivity.assignedMember)
       );
       const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
       
       let unavailableHours = 0;
       unavailabilitySnapshot.forEach(doc => {
-        unavailableHours += doc.data().hoursUnavailable || 0;
+        const unavailData = doc.data();
+        const unavailDate = new Date(unavailData.day);
+        
+        // Check if the unavailability date falls within this week
+        if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
+          unavailableHours += unavailData.hoursUnavailable || 0;
+        }
       });
       
       // Get other assigned hours

@@ -771,26 +771,25 @@ function funAbortPreviousQuery() {
 
 // Load members
 async function funLoadMembers() {
-  const signal = funAbortPreviousQuery();
-  
   try {
-    const membersQuery = query(
-      collection(db, 'members'),
-      orderBy('name', 'asc')
-    );
-    
-    const snapshot = await getDocs(membersQuery);
-    if (signal.aborted) return;
+    // Load members without orderBy to avoid index requirement
+    const snapshot = await getDocs(collection(db, 'members'));
     
     members = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
     
+    // Sort in memory by firstName
+    members.sort((a, b) => {
+      const nameA = (a.firstName || '').toLowerCase();
+      const nameB = (b.firstName || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+    
     funPopulateMemberFilter();
     
   } catch (error) {
-    if (signal.aborted) return;
     console.error('Error loading members:', error);
     showToast('Failed to load members', 'error');
   }
@@ -940,6 +939,7 @@ function funRenderActivities() {
     }[activity.priority] || 'bg-slate-500';
 
     const canDelete = !activity.assignedMember;
+    const canQuickAssign = !activity.assignedMember;
     
     return `
       <div class="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" data-activity-id="${activity.id}" onclick="funNavigateToDetail('${activity.id}')">
@@ -952,9 +952,11 @@ function funRenderActivities() {
                 <button onclick="event.stopPropagation(); funEditActivity('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Edit Activity">
                   <i data-lucide="edit-2" class="w-4 h-4"></i>
                 </button>
-                <button onclick="event.stopPropagation(); funShowQuickAssign('${activity.id}')" class="p-1 text-slate-400 hover:text-emerald-600" title="Quick Assign">
-                  <i data-lucide="user-plus" class="w-4 h-4"></i>
-                </button>
+                ${canQuickAssign ? `
+                  <button onclick="event.stopPropagation(); funShowQuickAssign('${activity.id}')" class="p-1 text-slate-400 hover:text-emerald-600" title="Quick Assign">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                  </button>
+                ` : ''}
                 <button onclick="event.stopPropagation(); funShowAllocateModal('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Allocate to Week">
                   <i data-lucide="calendar" class="w-4 h-4"></i>
                 </button>
@@ -1529,31 +1531,143 @@ function funShowQuickAssign(activityId) {
     radio.checked = false;
   });
   
-  funRenderMemberOptions();
+  funRenderMemberOptions(activity);
   modalAssign.classList.remove('hidden');
 }
 
-function funRenderMemberOptions() {
+async function funRenderMemberOptions(activity) {
   const container = document.getElementById('member-options');
+  const assignSubmit = document.getElementById('btn-confirm-assign');
+  const hoursInput = document.getElementById('assign-hours');
   
-  if (members.length === 0) {
-    container.innerHTML = '<p class="text-sm leading-5 text-slate-500">No members available</p>';
-    return;
-  }
+  if (!container) return;
   
-  // For now, show all members - in real app you'd calculate capacity
-  container.innerHTML = members.map(member => `
-    <label class="flex items-center justify-between p-3 border border-slate-200 rounded cursor-pointer hover:bg-slate-50">
-      <div class="flex items-center gap-3">
-        <input type="radio" name="assign-member" value="${member.id}" class="text-blue-500 focus:ring-blue-500">
-        <div>
-          <span class="text-sm leading-5 text-slate-700 font-medium">${funEscapeHtml(member.firstName)}</span>
-          <p class="text-xs leading-4 text-slate-500">${member.defaultWeeklyCapacity || 40}h weekly capacity</p>
+  // Show loading state
+  container.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div></div>';
+  
+  try {
+    if (members.length === 0) {
+      container.innerHTML = '<p class="text-sm leading-5 text-slate-500 text-center py-4">No members available</p>';
+      return;
+    }
+    
+    // Calculate capacity for each member
+    const membersWithCapacity = [];
+    
+    for (const member of members) {
+      let remainingCapacity = member.defaultWeeklyCapacity || 40;
+      
+      // Only calculate capacity if activity has a weekAllocated
+      if (activity.weekAllocated) {
+        // Calculate the week date range (Wednesday to Tuesday)
+        const weekStartDate = new Date(activity.weekAllocated);
+        const weekEndDate = new Date(weekStartDate);
+        weekEndDate.setDate(weekStartDate.getDate() + 6); // 6 days after Wednesday = Tuesday
+        
+        // Get all unavailability for this member
+        const unavailabilityQuery = query(
+          collection(db, 'unavailability'),
+          where('memberId', '==', member.id)
+        );
+        const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
+        
+        let unavailableHours = 0;
+        unavailabilitySnapshot.forEach(doc => {
+          const unavailData = doc.data();
+          const unavailDate = new Date(unavailData.day);
+          
+          // Check if the unavailability date falls within this week
+          if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
+            unavailableHours += unavailData.hoursUnavailable || 0;
+          }
+        });
+        
+        // Get assigned hours for this week (excluding current activity)
+        const activitiesQuery = query(
+          collection(db, 'activities'),
+          where('weekAllocated', '==', activity.weekAllocated),
+          where('assignedMember', '==', member.id)
+        );
+        const activitiesSnapshot = await getDocs(activitiesQuery);
+        
+        let assignedHours = 0;
+        activitiesSnapshot.forEach(doc => {
+          const activityData = doc.data();
+          if (doc.id !== currentActivityId) { // Exclude current activity
+            assignedHours += activityData.assignedHours || 0;
+          }
+        });
+        
+        remainingCapacity = remainingCapacity - unavailableHours - assignedHours;
+      }
+      
+      membersWithCapacity.push({
+        ...member,
+        remainingCapacity: Math.max(0, remainingCapacity)
+      });
+    }
+    
+    // Sort by remaining capacity (highest first)
+    membersWithCapacity.sort((a, b) => b.remainingCapacity - a.remainingCapacity);
+    
+    // Filter out members with no capacity
+    const availableMembers = membersWithCapacity.filter(m => m.remainingCapacity > 0);
+    
+    if (availableMembers.length === 0) {
+      container.innerHTML = '<p class="text-sm leading-5 text-amber-600 text-center py-4">No members available with remaining capacity for this week</p>';
+      return;
+    }
+    
+    container.innerHTML = availableMembers.map(member => `
+      <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer">
+        <input type="radio" name="assign-member" value="${member.id}" class="text-blue-600 focus:ring-blue-500">
+        <div class="flex-1">
+          <p class="text-sm leading-5 font-medium text-slate-900">${funEscapeHtml(member.firstName)}</p>
+          <p class="text-xs leading-4 text-slate-500">
+            ${member.remainingCapacity} hours available${activity.weekAllocated ? '' : ' (week not allocated)'}
+          </p>
         </div>
-      </div>
-      <span class="text-xs leading-4 text-emerald-600 font-medium">Available</span>
-    </label>
-  `).join('');
+      </label>
+    `).join('');
+    
+    // Setup event listeners for validation
+    const memberRadios = document.querySelectorAll('input[name="assign-member"]');
+    
+    function updateAssignButton() {
+      const selectedMember = document.querySelector('input[name="assign-member"]:checked');
+      const hours = parseInt(hoursInput?.value);
+      
+      if (!assignSubmit) return;
+      
+      assignSubmit.disabled = !selectedMember || !hours || hours < 1;
+      
+      if (selectedMember && hours > 0 && activity.weekAllocated) {
+        const memberData = availableMembers.find(m => m.id === selectedMember.value);
+        if (memberData && hours > memberData.remainingCapacity) {
+          assignSubmit.disabled = true;
+          if (hoursInput) {
+            hoursInput.setCustomValidity(`Cannot exceed ${memberData.remainingCapacity} available hours`);
+          }
+        } else {
+          if (hoursInput) {
+            hoursInput.setCustomValidity('');
+          }
+        }
+      }
+    }
+    
+    memberRadios.forEach(radio => {
+      radio.addEventListener('change', updateAssignButton);
+    });
+    
+    if (hoursInput) {
+      hoursInput.addEventListener('input', updateAssignButton);
+    }
+    
+  } catch (error) {
+    console.error('Error loading members:', error);
+    container.innerHTML = '<p class="text-sm leading-5 text-red-600 text-center py-4">Failed to load members</p>';
+  }
 }
 
 function funCloseAssignModal() {
