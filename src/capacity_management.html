@@ -303,7 +303,7 @@
         
         <div>
           <label for="unavailable-hours" class="block text-sm font-medium text-slate-700 mb-2">Hours Unavailable</label>
-          <input type="number" id="unavailable-hours" min="1" max="8" step="1" class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+          <input type="number" id="unavailable-hours-input" min="1" max="8" step="1" class="w-full px-3 py-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" required>
           <p class="mt-1 text-sm text-slate-500">Enter 1-8 hours</p>
         </div>
         
@@ -546,10 +546,17 @@ function funGetWeekStart(date = new Date()) {
 // Format date to ISO string (YYYY-MM-DD)
 function funFormatISODate(date) {
   if (!date) return null;
+
   const d = new Date(date);
   if (isNaN(d.getTime())) return null;
-  return d.toISOString().split('T')[0];
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
+
 
 // Format display date
 function funFormatDisplayDate(date) {
@@ -650,7 +657,7 @@ function funUpdateWeekDisplay(weekStart) {
 }
 
 // Create calendar days
-function funCreateCalendarDays(weekStart, unavailabilityData) {
+function funCreateCalendarDays(weekStart, unavailabilityData, members) {
   const calendarDays = document.getElementById('calendar-days');
   if (!calendarDays || !weekStart) return;
   
@@ -669,12 +676,14 @@ function funCreateCalendarDays(weekStart, unavailabilityData) {
     const dateStr = funFormatISODate(day);
     const isPast = funIsPastDate(day);
     const isToday = funFormatISODate(new Date()) === dateStr;
+    const dayOfWeek = day.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday = 0, Saturday = 6
     
     dayEl.className = `calendar-day relative h-24 border border-slate-200 rounded p-2 cursor-pointer transition-colors ${
-      isPast ? 'bg-slate-50 text-slate-400' : 'bg-white hover:bg-blue-50'
+      isPast || isWeekend ? 'bg-slate-50 text-slate-400' : 'bg-white hover:bg-blue-50'
     } ${isToday ? 'ring-2 ring-blue-500' : ''}`;
     
-    if (isPast) {
+    if (isPast || isWeekend) {
       dayEl.classList.add('cursor-not-allowed');
     }
     
@@ -692,14 +701,25 @@ function funCreateCalendarDays(weekStart, unavailabilityData) {
       blocksContainer.className = 'mt-1 space-y-1';
       
       dayUnavailability.forEach(unavail => {
+        // Find member name
+        const member = members?.find(m => m.id === unavail.memberId);
+        const memberName = member ? (member.firstName || 'Unknown') : 'Unknown';
+        
         const block = document.createElement('div');
         block.className = 'text-xs bg-red-100 text-red-800 px-2 py-1 rounded truncate';
-        block.textContent = `${unavail.hoursUnavailable}h - ${unavail.reason || 'N/A'}`;
-        block.title = `${unavail.hoursUnavailable} hours: ${unavail.reason || 'N/A'}`;
+        block.textContent = `${memberName}: ${unavail.hoursUnavailable}h - ${unavail.reason || 'N/A'}`;
+        block.title = `${memberName}: ${unavail.hoursUnavailable} hours - ${unavail.reason || 'N/A'}`;
         
         // Make individual blocks clickable for editing
         block.addEventListener('click', (e) => {
           e.stopPropagation();
+          
+          // Check if current user owns this unavailability
+          if (unavail.memberId !== currentUser?.uid) {
+            showToast('You can only edit your own unavailability', 'error');
+            return;
+          }
+          
           if (!isPast || window.confirm('This is a past date. Do you want to edit it?')) {
             funOpenModal(dateStr, unavail);
           }
@@ -712,12 +732,16 @@ function funCreateCalendarDays(weekStart, unavailabilityData) {
     }
     
     // Click handler for adding new unavailability
-    if (!isPast) {
+    if (!isPast && !isWeekend) {
       dayEl.addEventListener('click', (e) => {
         // Only trigger if clicking the day itself, not a block
         if (e.target === dayEl || e.target === dayNumber) {
           funOpenModal(dateStr);
         }
+      });
+    } else if (isWeekend) {
+      dayEl.addEventListener('click', () => {
+        showToast('Cannot record unavailability for weekends', 'error');
       });
     }
     
@@ -829,7 +853,7 @@ function funOpenModal(dateStr, existingUnavailability = null) {
   const modal = document.getElementById('unavailability-modal');
   const modalTitle = document.getElementById('modal-title');
   const dateInput = document.getElementById('unavailability-date');
-  const hoursInput = document.getElementById('unavailable-hours');
+  const hoursInput = document.getElementById('unavailable-hours-input');
   const reasonInput = document.getElementById('unavailability-reason');
   const unavailabilityIdInput = document.getElementById('unavailability-id');
   const deleteBtn = document.getElementById('delete-unavailability');
@@ -853,6 +877,12 @@ function funOpenModal(dateStr, existingUnavailability = null) {
   }
   
   if (existingUnavailability) {
+    // Validate ownership
+    if (existingUnavailability.memberId !== currentUser?.uid) {
+      showToast('You can only edit your own unavailability', 'error');
+      return;
+    }
+    
     // Edit mode
     isEditingMode = true;
     editingUnavailabilityId = existingUnavailability.id;
@@ -904,8 +934,22 @@ async function funSaveUnavailability(formData) {
     };
     
     if (isEditingMode && editingUnavailabilityId) {
+      // Verify ownership before updating
+      const docRef = doc(db, 'unavailability', editingUnavailabilityId);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        showToast('Unavailability record not found', 'error');
+        return;
+      }
+      
+      if (docSnap.data().memberId !== currentUser.uid) {
+        showToast('You can only edit your own unavailability', 'error');
+        return;
+      }
+      
       // Update existing
-      await updateDoc(doc(db, 'unavailability', editingUnavailabilityId), {
+      await updateDoc(docRef, {
         hoursUnavailable: unavailabilityData.hoursUnavailable,
         reason: unavailabilityData.reason
       });
@@ -938,7 +982,21 @@ async function funDeleteUnavailability() {
   try {
     showLoader('Deleting unavailability...');
     
-    await deleteDoc(doc(db, 'unavailability', editingUnavailabilityId));
+    // Verify ownership before deleting
+    const docRef = doc(db, 'unavailability', editingUnavailabilityId);
+    const docSnap = await getDoc(docRef);
+    
+    if (!docSnap.exists()) {
+      showToast('Unavailability record not found', 'error');
+      return;
+    }
+    
+    if (docSnap.data().memberId !== currentUser?.uid) {
+      showToast('You can only delete your own unavailability', 'error');
+      return;
+    }
+    
+    await deleteDoc(docRef);
     showToast('Unavailability deleted successfully');
     
     funCloseModal();
@@ -971,7 +1029,7 @@ async function funLoadWeekData(weekStart, forceRefresh = false) {
     const { members, unavailabilityData } = result;
     
     funUpdateWeekDisplay(weekStart);
-    funCreateCalendarDays(weekStart, unavailabilityData);
+    funCreateCalendarDays(weekStart, unavailabilityData, members);
     funUpdateCapacityOverview(members, unavailabilityData);
     funUpdateMemberCapacityTable(members, unavailabilityData);
     
@@ -1027,7 +1085,7 @@ document.getElementById('unavailability-form')?.addEventListener('submit', async
   e.preventDefault();
   
   const dateInput = document.getElementById('unavailability-date');
-  const hoursInput = document.getElementById('unavailable-hours');
+  const hoursInput = document.getElementById('unavailable-hours-input');
   const reasonInput = document.getElementById('unavailability-reason');
   
   if (!dateInput?.value || !hoursInput?.value || !reasonInput?.value) {
@@ -1038,6 +1096,14 @@ document.getElementById('unavailability-form')?.addEventListener('submit', async
   const hours = parseInt(hoursInput.value);
   if (hours < 1 || hours > 8) {
     showToast('Hours must be between 1 and 8', 'error');
+    return;
+  }
+  
+  // Validate that date is not a weekend
+  const selectedDate = new Date(dateInput.value);
+  const dayOfWeek = selectedDate.getDay();
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    showToast('Cannot record unavailability for weekends (Saturday and Sunday)', 'error');
     return;
   }
   
