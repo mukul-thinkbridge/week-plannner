@@ -942,33 +942,30 @@ function funRenderActivities() {
     const canDelete = !activity.assignedMember;
     
     return `
-      <div class="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors" data-activity-id="${activity.id}">
+      <div class="p-4 border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" data-activity-id="${activity.id}" onclick="funNavigateToDetail('${activity.id}')">
         <div class="flex items-start gap-4">
           <span class="h-3 w-3 rounded-full ${priorityColor} mt-1 flex-shrink-0" title="${activity.priority} Priority"></span>
-          
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-4 mb-2">
-              <h3 class="text-sm leading-5 font-medium text-slate-900 cursor-pointer hover:text-blue-600" onclick="funNavigateToDetail('${activity.id}')">${funEscapeHtml(activity.title || 'Untitled')}</h3>
+              <h3 class="text-sm leading-5 font-medium text-slate-900 hover:text-blue-600">${funEscapeHtml(activity.title || 'Untitled')}</h3>
               <div class="flex items-center gap-2 flex-shrink-0">
-                <button onclick="funEditActivity('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Edit Activity">
+                <button onclick="event.stopPropagation(); funEditActivity('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Edit Activity">
                   <i data-lucide="edit-2" class="w-4 h-4"></i>
                 </button>
-                <button onclick="funShowQuickAssign('${activity.id}')" class="p-1 text-slate-400 hover:text-emerald-600" title="Quick Assign">
+                <button onclick="event.stopPropagation(); funShowQuickAssign('${activity.id}')" class="p-1 text-slate-400 hover:text-emerald-600" title="Quick Assign">
                   <i data-lucide="user-plus" class="w-4 h-4"></i>
                 </button>
-                <button onclick="funShowAllocateModal('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Allocate to Week">
+                <button onclick="event.stopPropagation(); funShowAllocateModal('${activity.id}')" class="p-1 text-slate-400 hover:text-blue-600" title="Allocate to Week">
                   <i data-lucide="calendar" class="w-4 h-4"></i>
                 </button>
                 ${canDelete ? `
-                  <button onclick="funShowDeleteModal('${activity.id}')" class="p-1 text-slate-400 hover:text-red-600" title="Delete Activity">
+                  <button onclick="event.stopPropagation(); funShowDeleteModal('${activity.id}')" class="p-1 text-slate-400 hover:text-red-600" title="Delete Activity">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 ` : ''}
               </div>
             </div>
-            
             ${activity.description ? `<p class="text-xs leading-4 text-slate-600 mb-2 line-clamp-2">${funEscapeHtml(activity.description)}</p>` : ''}
-            
             <div class="flex flex-wrap items-center gap-4 mb-2 text-xs leading-4 text-slate-600">
               <span class="flex items-center gap-1">
                 <i data-lucide="tag" class="w-3 h-3"></i>
@@ -987,13 +984,11 @@ function funRenderActivities() {
                 ${activity.assignedHours}h
               </span>` : ''}
             </div>
-            
             <div class="flex items-center gap-2">
               <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-xs leading-4 font-medium text-slate-700 rounded">
                 <span class="h-2 w-2 rounded-full ${statusColor}"></span>
                 ${activity.status || 'Not Started'}
               </span>
-              
               ${activity.tags && activity.tags.length > 0 ? 
                 activity.tags.map(tag => `
                   <span class="inline-flex px-2 py-1 bg-blue-50 text-xs leading-4 text-blue-700 rounded">${funEscapeHtml(tag)}</span>
