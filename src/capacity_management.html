@@ -128,7 +128,7 @@
             </nav>
             
             <!-- Footer in Sidebar -->
-            <div class="hidden absolute bottom-4 w-full px-4">
+            <div class="fixed bottom-0 w-64 p-4">
                 <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
                     Made with ❤️ by TiramAi
                 </div>
@@ -151,7 +151,7 @@
 <!-- Week Navigation -->
 <div class="bg-white rounded-lg border border-slate-200 shadow-sm p-6 mb-6">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div class="flex items-center gap-3">
+    <div class="flex flex-col sm:flex-row items-center gap-3">
       <button id="prev-week" class="inline-flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i>
         Previous
@@ -194,7 +194,7 @@
     </div>
   </div>
   
-  <div id="overview-content" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
+  <div id="overview-content" class="grid grid-cols-3 gap-4 hidden">
     <div class="text-center">
       <p class="text-sm text-slate-500 mb-1">Total Capacity</p>
       <p class="text-2xl font-bold text-slate-900" id="total-capacity">0 hrs</p>

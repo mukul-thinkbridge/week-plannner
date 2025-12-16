@@ -77,8 +77,8 @@
     </style>
   </head>
   <body class="bg-neutral-100 text-neutral-900 relative">
-    <div class="w-screen h-screen bg-pattern absolute top-0 left-0 -z-10"></div>
-    <main class="w-screen h-screen p-4 lg:p-10 z-10 flex flex-col">
+    <div class="w-screen h-screen bg-pattern absolute top-0 left-0 -z-10 "></div>
+    <main class="w-screen h-screen p-4 lg:p-10 z-10 flex flex-col overflow-auto">
       <div
         class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center justify-center h-full"
       >
@@ -116,7 +116,7 @@
               id="app-name-main"
               class="text-4xl leading-[2rem] font-semibold text-primary"
             >
-              Weekly Planner Team Management System
+              Weekly Planner 
             </h1>
           </div>
 
@@ -125,7 +125,7 @@
               id="persona-name"
               class="text-2xl font-bold mb-6 rounded capitalize text-primary"
             >
-              Team Manager
+              Team Member
             </h2>
             <p id="description" class="text-lg text-muted-foreground mb-8">
               Streamline your team's workflow with intelligent weekly planning and resource allocation. Manage activities, track capacity, and optimize team performance with real-time insights and seamless collaboration tools designed for modern teams.
@@ -145,7 +145,7 @@
               Sign in to
             </p>
             <p class="text-center text-lg mb-6" id="app-name-sub">
-              Weekly Planner Team Management System
+              Weekly Planner 
             </p>
 
             <!-- Phone Auth View -->
@@ -378,7 +378,7 @@
                   type="submit"
                   class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity"
                 >
-                  Sign in as team manager
+                  Sign in as team member
                 </button>
               </form>
 
@@ -472,7 +472,7 @@
                   type="submit"
                   class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity"
                 >
-                  Sign up as team manager
+                  Sign up as team member
                 </button>
               </form>
 
@@ -653,10 +653,10 @@
         }
 
         // Auto-fill credentials in development mode
-        if (env?.ENVIRONMENT?.toLowerCase()?.includes('dev')) {
-          document.getElementById('signin-email').value = 'johndoe@example.com';
-          document.getElementById('signin-password').value = 'JohnDoe@2023';
-        }
+        // if (env?.ENVIRONMENT?.toLowerCase()?.includes('dev')) {
+        //   document.getElementById('signin-email').value = 'johndoe@example.com';
+        //   document.getElementById('signin-password').value = 'JohnDoe@2023';
+        // }
 
         const year = new Date().getFullYear();
         document.getElementById('rights-year').textContent = year;
@@ -1206,7 +1206,7 @@
         document.getElementById('signin-link').classList.remove('hidden');
         document.getElementById('forgot-password-link').classList.add('hidden');
         document.getElementById('greeting-text').textContent =
-          'Create your Weekly Planner Team Management System account';
+          'Create your Weekly Planner System account';
       }
 
       function showForgotPassword() {
