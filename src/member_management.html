@@ -724,7 +724,7 @@
       }
 
       const newMember = {
-        name: memberData.name,
+        name: memberData.firstName,
         email: memberData.email,
         joinDate: new Date().toISOString(),
         defaultWeeklyCapacity: 40
@@ -818,7 +818,7 @@
     memberToDelete = member;
     
     // Update modal content
-    document.getElementById('delete-member-name').textContent = member.name || 'Unknown';
+    document.getElementById('delete-member-name').textContent = member.firstName || 'Unknown';
     
     // Get activity count
     try {

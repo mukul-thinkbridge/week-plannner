@@ -925,7 +925,7 @@ function funRenderActivities() {
     const weekText = activity.weekAllocated ? 
       `Week of ${funFormatDate(activity.weekAllocated)}` : 'Unallocated';
     
-    const assignedText = member ? member.name : 'Unassigned';
+    const assignedText = member ? member.firstName : 'Unassigned';
     
     const statusColor = {
       'Not Started': 'bg-slate-500',
@@ -1058,7 +1058,7 @@ function funNavigateToDetail(activityId) {
 // Populate member filter dropdown
 function funPopulateMemberFilter() {
   const memberOptions = members.map(member => 
-    `<option value="${member.id}">${funEscapeHtml(member.name)}</option>`
+    `<option value="${member.id}">${funEscapeHtml(member.firstName)}</option>`
   ).join('');
   
   filterMember.innerHTML = `
@@ -1557,7 +1557,7 @@ function funRenderMemberOptions() {
       <div class="flex items-center gap-3">
         <input type="radio" name="assign-member" value="${member.id}" class="text-blue-500 focus:ring-blue-500">
         <div>
-          <span class="text-sm leading-5 text-slate-700 font-medium">${funEscapeHtml(member.name)}</span>
+          <span class="text-sm leading-5 text-slate-700 font-medium">${funEscapeHtml(member.firstName)}</span>
           <p class="text-xs leading-4 text-slate-500">${member.defaultWeeklyCapacity || 40}h weekly capacity</p>
         </div>
       </div>
