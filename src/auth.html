@@ -125,7 +125,7 @@
               id="persona-name"
               class="text-2xl font-bold mb-6 rounded capitalize text-primary"
             >
-              Team Manager
+              Weekly Planner 
             </h2>
             <p id="description" class="text-lg text-muted-foreground mb-8">
               Streamline your team's workflow with intelligent weekly planning and resource allocation. Manage activities, track capacity, and optimize team performance with real-time insights and seamless collaboration tools designed for modern teams.
@@ -378,7 +378,7 @@
                   type="submit"
                   class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity"
                 >
-                  Sign in as team manager
+                  Sign in 
                 </button>
               </form>
 
@@ -472,7 +472,7 @@
                   type="submit"
                   class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity"
                 >
-                  Sign up as team manager
+                  Sign up 
                 </button>
               </form>
 
@@ -654,8 +654,8 @@
 
         // Auto-fill credentials in development mode
         if (env?.ENVIRONMENT?.toLowerCase()?.includes('dev')) {
-          document.getElementById('signin-email').value = 'johndoe@example.com';
-          document.getElementById('signin-password').value = 'JohnDoe@2023';
+          document.getElementById('signin-email').value = '';
+          document.getElementById('signin-password').value = '';
         }
 
         const year = new Date().getFullYear();

@@ -901,7 +901,7 @@ async function funLoadMembers() {
     Object.values(members).forEach(member => {
       const option = document.createElement('option');
       option.value = member.id;
-      option.textContent = member.name || 'Unnamed Member';
+      option.textContent = member.firstName || 'Unnamed Member';
       filterMember.appendChild(option);
     });
     
