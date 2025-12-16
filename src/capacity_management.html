@@ -591,7 +591,8 @@ async function funFetchWithAbort(fetchFn) {
 // Load all members
 async function funLoadMembers() {
   try {
-    const membersQuery = query(collection(db, 'members'), orderBy('name'));
+    // Changed 'name' to 'firstName' to match Firestore field
+    const membersQuery = query(collection(db, 'members'), orderBy('firstName'));
     const snapshot = await getDocs(membersQuery);
     return snapshot.docs.map(doc => ({ 
       id: doc.id, 
@@ -798,7 +799,7 @@ function funUpdateMemberCapacityTable(members, unavailabilityData) {
     
     row.innerHTML = `
       <td class="px-6 py-4 whitespace-nowrap">
-        <div class="text-sm font-medium text-slate-900">${member.name || 'N/A'}</div>
+        <div class="text-sm font-medium text-slate-900">${member.firstName || 'N/A'}</div>
       </td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
         ${capacity} hrs
