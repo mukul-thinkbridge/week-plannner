@@ -892,6 +892,10 @@ async function funInitialLoad() {
   try {
     lucide.createIcons();
     await funLoadActivity();
+    await Promise.all([
+      funLoadComments(),
+      funLoadAttachments()
+    ]);
     funSetupEventListeners();
     funSetupTabs();
   } catch (error) {
