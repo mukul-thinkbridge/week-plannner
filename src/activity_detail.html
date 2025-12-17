@@ -1539,6 +1539,14 @@ async function funUpdateStatus(event) {
   
   if (newStatus === oldStatus) return;
   
+  // Validation: Cannot change status for unassigned activities
+  if (!currentActivity.assignedMember) {
+    showToast('Cannot change status for unassigned activities. Please assign a member first.', 'error');
+    // Revert selector to old status
+    event.target.value = oldStatus;
+    return;
+  }
+  
   try {
     showLoader('Updating status...');
     
