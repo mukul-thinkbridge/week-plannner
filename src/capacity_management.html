@@ -698,8 +698,8 @@ function funCreateCalendarDays(weekStart, unavailabilityData, members) {
     dayNumber.textContent = day.getDate();
     dayEl.appendChild(dayNumber);
     
-    // Unavailability blocks
-    const dayUnavailability = unavailabilityData?.filter(u => u.day === dateStr) || [];
+    // Unavailability blocks - show only current user's unavailability
+    const dayUnavailability = unavailabilityData?.filter(u => u.day === dateStr && u.memberId === currentUser?.uid) || [];
     
     if (dayUnavailability.length > 0) {
       const blocksContainer = document.createElement('div');
@@ -718,13 +718,6 @@ function funCreateCalendarDays(weekStart, unavailabilityData, members) {
         // Make individual blocks clickable for editing
         block.addEventListener('click', (e) => {
           e.stopPropagation();
-          
-          // Check if current user owns this unavailability
-          if (unavail.memberId !== currentUser?.uid) {
-            showToast('You can only edit your own unavailability', 'error');
-            return;
-          }
-          
           if (!isPast || window.confirm('This is a past date. Do you want to edit it?')) {
             funOpenModal(dateStr, unavail);
           }
@@ -882,12 +875,6 @@ function funOpenModal(dateStr, existingUnavailability = null) {
   }
   
   if (existingUnavailability) {
-    // Validate ownership
-    if (existingUnavailability.memberId !== currentUser?.uid) {
-      showToast('You can only edit your own unavailability', 'error');
-      return;
-    }
-    
     // Edit mode
     isEditingMode = true;
     editingUnavailabilityId = existingUnavailability.id;
@@ -939,22 +926,8 @@ async function funSaveUnavailability(formData) {
     };
     
     if (isEditingMode && editingUnavailabilityId) {
-      // Verify ownership before updating
-      const docRef = doc(db, 'unavailability', editingUnavailabilityId);
-      const docSnap = await getDoc(docRef);
-      
-      if (!docSnap.exists()) {
-        showToast('Unavailability record not found', 'error');
-        return;
-      }
-      
-      if (docSnap.data().memberId !== currentUser.uid) {
-        showToast('You can only edit your own unavailability', 'error');
-        return;
-      }
-      
       // Update existing
-      await updateDoc(docRef, {
+      await updateDoc(doc(db, 'unavailability', editingUnavailabilityId), {
         hoursUnavailable: unavailabilityData.hoursUnavailable,
         reason: unavailabilityData.reason
       });
@@ -987,21 +960,7 @@ async function funDeleteUnavailability() {
   try {
     showLoader('Deleting unavailability...');
     
-    // Verify ownership before deleting
-    const docRef = doc(db, 'unavailability', editingUnavailabilityId);
-    const docSnap = await getDoc(docRef);
-    
-    if (!docSnap.exists()) {
-      showToast('Unavailability record not found', 'error');
-      return;
-    }
-    
-    if (docSnap.data().memberId !== currentUser?.uid) {
-      showToast('You can only delete your own unavailability', 'error');
-      return;
-    }
-    
-    await deleteDoc(docRef);
+    await deleteDoc(doc(db, 'unavailability', editingUnavailabilityId));
     showToast('Unavailability deleted successfully');
     
     funCloseModal();
