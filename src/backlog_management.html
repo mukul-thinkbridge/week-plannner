@@ -203,6 +203,10 @@
       </div>
     </div>
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-4 pt-4 border-t border-slate-200 gap-4">
+      <button id="btn-clear-filters" class="inline-flex items-center gap-2 px-3 py-1.5 text-xs leading-4 text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded transition-colors">
+        <i data-lucide="x" class="w-4 h-4"></i>
+        Clear Filters
+      </button>
       <div class="flex items-center gap-2 text-sm leading-5 text-slate-600">
         <span id="activities-count">0</span> activities found
       </div>
@@ -695,6 +699,7 @@ const filterPriority = document.getElementById('filter-priority');
 const filterAllocation = document.getElementById('filter-allocation');
 const filterMember = document.getElementById('filter-member');
 const sortBy = document.getElementById('sort-by');
+const btnClearFilters = document.getElementById('btn-clear-filters');
 
 // Modal elements
 const modalActivity = document.getElementById('modal-activity');
@@ -1728,6 +1733,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Refresh button
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
     funInitialLoad(true);
+  });
+  
+  // Clear filters button
+  btnClearFilters?.addEventListener('click', () => {
+    filterCategory.value = '';
+    filterPriority.value = '';
+    filterAllocation.value = '';
+    filterMember.value = '';
+    currentFilters = {};
+    currentPage = 1;
+    lastDoc = null;
+    funLoadActivities();
+    showToast('Filters cleared', 'success');
   });
   
   // Filter change handlers
