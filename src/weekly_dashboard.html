@@ -179,83 +179,16 @@
   </div>
 
   <!-- Quick Actions -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-    <button id="btn-add-activity" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+  <div class="grid grid-cols-2 gap-4">
+    <button id="btn-add-activity" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center justify-center gap-2">
       <i data-lucide="plus" class="w-4 h-4"></i>
       Add Activity
     </button>
-    <a href="capacity_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
-      <i data-lucide="calendar" class="w-4 h-4"></i>
-      Manage Capacity
-    </a>
-    <a href="backlog_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
-      <i data-lucide="list" class="w-4 h-4"></i>
-      View Backlog
-    </a>
-    <a href="member_management.html" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center gap-2">
+    
+    <button id="btn-show-capacity" class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm leading-5 font-medium shadow-sm transition-colors flex items-center justify-center gap-2">
       <i data-lucide="users" class="w-4 h-4"></i>
-      Manage Members
-    </a>
-  </div>
-
-  <!-- Dashboard Content Grid -->
-  <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-    <!-- Member Capacity Overview -->
-    <div class="xl:col-span-2">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl leading-8 font-semibold text-slate-900">Team Capacity</h2>
-          <button id="btn-refresh-capacity" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh capacity">
-            <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
-            Refresh
-          </button>
-        </div>
-        <div id="capacity-chart-container" class="h-64">
-          <div id="capacity-chart-skeleton" class="space-y-3">
-            <!-- Skeleton for capacity bars -->
-            <div class="animate-pulse">
-              <div class="h-4 bg-slate-200 rounded w-24 mb-2"></div>
-              <div class="h-6 bg-slate-200 rounded"></div>
-            </div>
-            <div class="animate-pulse">
-              <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
-              <div class="h-6 bg-slate-200 rounded"></div>
-            </div>
-            <div class="animate-pulse">
-              <div class="h-4 bg-slate-200 rounded w-28 mb-2"></div>
-              <div class="h-6 bg-slate-200 rounded"></div>
-            </div>
-          </div>
-          <canvas id="capacity-chart" class="hidden"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Category Breakdown -->
-    <div class="xl:col-span-2">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl leading-8 font-semibold text-slate-900">Category Distribution</h2>
-          <button id="btn-refresh-categories" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh categories">
-            <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
-            Refresh
-          </button>
-        </div>
-        <div id="category-chart-container" class="h-64">
-          <div id="category-chart-skeleton" class="flex items-center justify-center h-full">
-            <div class="animate-pulse">
-              <div class="w-32 h-32 bg-slate-200 rounded-full"></div>
-              <div class="mt-4 space-y-2">
-                <div class="h-3 bg-slate-200 rounded w-24 mx-auto"></div>
-                <div class="h-3 bg-slate-200 rounded w-20 mx-auto"></div>
-                <div class="h-3 bg-slate-200 rounded w-28 mx-auto"></div>
-              </div>
-            </div>
-          </div>
-          <canvas id="category-chart" class="hidden"></canvas>
-        </div>
-      </div>
-    </div>
+      View Team Capacity
+    </button>
   </div>
 
   <!-- Activities Board -->
@@ -440,6 +373,48 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Team Capacity Modal -->
+<div id="modal-capacity" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50">
+  <div class="flex items-center justify-center min-h-screen p-2 sm:p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <div class="p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg sm:text-xl leading-8 font-semibold text-slate-900">Team Capacity</h2>
+          <div class="flex items-center gap-2">
+            <button id="btn-refresh-capacity" class="inline-flex items-center text-sm text-slate-500 hover:text-slate-700" aria-label="Refresh capacity">
+              <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
+              <span class="hidden sm:inline">Refresh</span>
+            </button>
+            <button id="btn-close-capacity-modal" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Close">
+              <i data-lucide="x" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center justify-center">
+          <div id="capacity-chart-container" class="min-h-80 w-full sm:max-w-3xl" style="height: auto;">
+            <div id="capacity-chart-skeleton" class="space-y-3">
+              <!-- Skeleton for capacity bars -->
+              <div class="animate-pulse">
+                <div class="h-4 bg-slate-200 rounded w-24 mb-2"></div>
+                <div class="h-6 bg-slate-200 rounded"></div>
+              </div>
+              <div class="animate-pulse">
+                <div class="h-4 bg-slate-200 rounded w-32 mb-2"></div>
+                <div class="h-6 bg-slate-200 rounded"></div>
+              </div>
+              <div class="animate-pulse">
+                <div class="h-4 bg-slate-200 rounded w-28 mb-2"></div>
+                <div class="h-6 bg-slate-200 rounded"></div>
+              </div>
+            </div>
+            <div id="capacity-chart" class="hidden w-full"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -641,6 +616,9 @@ const nextWeekBtn = document.getElementById('next-week');
 const btnAddActivity = document.getElementById('btn-add-activity');
 const modalAddActivity = document.getElementById('modal-add-activity');
 const btnCloseModal = document.getElementById('btn-close-modal');
+const btnShowCapacity = document.getElementById('btn-show-capacity');
+const modalCapacity = document.getElementById('modal-capacity');
+const btnCloseCapacityModal = document.getElementById('btn-close-capacity-modal');
 const btnCancelModal = document.getElementById('btn-cancel-modal');
 const formAddActivity = document.getElementById('form-add-activity');
 
@@ -660,7 +638,6 @@ const completedCount = document.getElementById('completed-count');
 
 // Refresh buttons
 const btnRefreshCapacity = document.getElementById('btn-refresh-capacity');
-const btnRefreshCategories = document.getElementById('btn-refresh-categories');
 const btnRefreshActivities = document.getElementById('btn-refresh-activities');
 
 // Utility functions
@@ -1056,40 +1033,6 @@ async function funLoadCapacity() {
   }
 }
 
-// Load category distribution
-async function funLoadCategoryDistribution() {
-  try {
-    if (!currentWeekStart) return;
-    
-    const weekISODate = formatDateForISO(currentWeekStart);
-    
-    // Use count aggregation for better performance
-    const categories = ['Client Focused', 'Tech Debt', 'R&D'];
-    const categoryData = [];
-    
-    for (const category of categories) {
-      const categoryQuery = query(
-        collection(db, 'activities'),
-        where('weekAllocated', '==', weekISODate),
-        where('category', '==', category)
-      );
-      
-      const countSnapshot = await withLimit(() => getCountFromServer(categoryQuery));
-      categoryData.push({
-        name: category,
-        count: countSnapshot.data().count
-      });
-    }
-    
-    await yieldToFrame();
-    funRenderCategoryChart(categoryData);
-    
-  } catch (error) {
-    console.error('Error loading category distribution:', error);
-    showToast('Failed to load category data', 'error');
-  }
-}
-
 // Render capacity chart using ECharts
 async function funRenderCapacityChart(data) {
   try {
@@ -1097,6 +1040,15 @@ async function funRenderCapacityChart(data) {
     
     const skeleton = document.getElementById('capacity-chart-skeleton');
     const chartElement = document.getElementById('capacity-chart');
+    const container = document.getElementById('capacity-chart-container');
+    
+    // Calculate dynamic height: minimum 320px, or 50px per member, whichever is larger
+    const minHeightPerMember = 50;
+    const calculatedHeight = Math.max(320, data.length * minHeightPerMember);
+    
+    // Set container and chart height dynamically
+    container.style.height = `${calculatedHeight}px`;
+    chartElement.style.height = `${calculatedHeight}px`;
     
     skeleton.style.display = 'none';
     chartElement.style.display = 'block';
@@ -1118,9 +1070,10 @@ async function funRenderCapacityChart(data) {
         }
       },
       grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '3%',
+        left: '15%',
+        right: '10%',
+        bottom: '2%',
+        top: '2%',
         containLabel: true
       },
       xAxis: {
@@ -1129,7 +1082,20 @@ async function funRenderCapacityChart(data) {
       },
       yAxis: {
         type: 'category',
-        data: data.map(d => d.name)
+        data: data.map(d => d.name),
+        axisLabel: {
+          interval: 0,
+          overflow: 'truncate',
+          width: 120,
+          fontSize: 11,
+          ellipsis: '...'
+        },
+        axisTick: {
+          show: false
+        },
+        axisLine: {
+          show: true
+        }
       },
       series: [
         {
@@ -1164,84 +1130,9 @@ async function funRenderCapacityChart(data) {
   }
 }
 
-// Render category chart using ECharts
-async function funRenderCategoryChart(data) {
-  try {
-    await yieldToFrame();
-    
-    const skeleton = document.getElementById('category-chart-skeleton');
-    const chartElement = document.getElementById('category-chart');
-    
-    skeleton.style.display = 'none';
-    chartElement.style.display = 'block';
-    
-    const chart = echarts.init(chartElement);
-    
-    const colors = ['#3b82f6', '#f59e0b', '#8b5cf6'];
-    
-    const option = {
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b}: {c} ({d}%)'
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        textStyle: {
-          fontSize: 12
-        }
-      },
-      series: [
-        {
-          name: 'Activities',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          center: ['60%', '50%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center'
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: '18',
-              fontWeight: 'bold'
-            }
-          },
-          labelLine: {
-            show: false
-          },
-          data: data.map((item, index) => ({
-            value: item.count,
-            name: item.name,
-            itemStyle: {
-              color: colors[index % colors.length]
-            }
-          }))
-        }
-      ]
-    };
-    
-    chart.setOption(option);
-    
-    // Resize chart on window resize
-    const resizeChart = () => chart.resize();
-    window.addEventListener('resize', resizeChart);
-    
-  } catch (error) {
-    console.error('Error rendering category chart:', error);
-    showToast('Failed to render category chart', 'error');
-  }
-}
-
 // Initial data load
 async function funInitialLoad() {
-  await Promise.all([
-    funLoadActivities(),
-    funLoadCapacity(),
-    funLoadCategoryDistribution()
-  ]);
+  await funLoadActivities();
 }
 
 // Filter event listeners
@@ -1252,12 +1143,28 @@ async function funInitialLoad() {
 // Refresh button handlers
 btnRefreshActivities.addEventListener('click', funLoadActivities);
 btnRefreshCapacity.addEventListener('click', funLoadCapacity);
-btnRefreshCategories.addEventListener('click', funLoadCategoryDistribution);
 
 // Modal handling
 btnAddActivity.addEventListener('click', () => {
   modalAddActivity.classList.remove('hidden');
   document.getElementById('activity-title').focus();
+});
+
+// Team Capacity Modal handling
+btnShowCapacity.addEventListener('click', () => {
+  modalCapacity.classList.remove('hidden');
+  funLoadCapacity();
+});
+
+btnCloseCapacityModal.addEventListener('click', () => {
+  modalCapacity.classList.add('hidden');
+});
+
+// Close capacity modal on backdrop click
+modalCapacity.addEventListener('click', (e) => {
+  if (e.target === modalCapacity) {
+    modalCapacity.classList.add('hidden');
+  }
 });
 
 btnCloseModal.addEventListener('click', () => {
@@ -1283,10 +1190,15 @@ modalAddActivity.addEventListener('click', (e) => {
 
 // Close modal on ESC key
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modalAddActivity.classList.contains('hidden')) {
-    modalAddActivity.classList.add('hidden');
-    formAddActivity.reset();
-    funClearValidationErrors();
+  if (e.key === 'Escape') {
+    if (!modalAddActivity.classList.contains('hidden')) {
+      modalAddActivity.classList.add('hidden');
+      formAddActivity.reset();
+      funClearValidationErrors();
+    }
+    if (!modalCapacity.classList.contains('hidden')) {
+      modalCapacity.classList.add('hidden');
+    }
   }
 });
 
