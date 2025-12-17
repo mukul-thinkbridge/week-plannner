@@ -1172,11 +1172,11 @@ async function funCreateActivity(activityData, files) {
       updatedAt: new Date().toISOString()
     };
     
-    await addDoc(collection(db, 'activities'), newActivity);
+    const docRef = await addDoc(collection(db, 'activities'), newActivity);
     
-    // Log activity creation
+    // Log activity creation with the actual activityId
     await addDoc(collection(db, 'activityLogs'), {
-      activityId: 'pending', // Will be updated by backend trigger if needed
+      activityId: docRef.id,
       timestamp: new Date().toISOString(),
       action: 'Created',
       memberId: currentUser.uid,
