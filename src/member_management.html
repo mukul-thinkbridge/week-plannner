@@ -36,6 +36,11 @@
         .mobile-nav-closed {
             transform: translateX(-100%);
         }
+         @media (min-width: 768px) {
+            #sidebar {
+                transform: translateX(0) !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-700">
@@ -103,7 +108,7 @@
 
     <div class="flex pt-16">
         <!-- Side Navigation -->
-        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20  md:mobile-nav-open transition-transform duration-300 ease-in-out">
+        <aside id="sidebar" class="fixed md:static left-0 top-16 w-64 bg-white border-r border-slate-200 h-screen md:h-[calc(100vh-4rem)] overflow-y-auto z-20 mobile-nav-closed md:mobile-nav-open transition-transform duration-300 ease-in-out">
             <nav class="p-4 space-y-2">
                 <!-- Navigation Items -->
                 <a href="weekly_dashboard.html" data-page="weekly_dashboard" class="nav-item flex items-center gap-3 px-3 py-2 text-sm leading-5 font-medium text-slate-700 rounded hover:bg-slate-100 hover:text-slate-900 transition-colors">
@@ -128,7 +133,7 @@
             </nav>
             
             <!-- Footer in Sidebar -->
-            <div class="hidden absolute bottom-4 w-full px-4">
+            <div class="fixed bottom-0 w-64 p-4">
                 <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
                     Made with ❤️ by TiramAi
                 </div>
