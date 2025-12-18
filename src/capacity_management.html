@@ -604,7 +604,7 @@ async function funFetchWithAbort(fetchFn) {
 async function funLoadMembers() {
   try {
     // Changed 'name' to 'firstName' to match Firestore field
-    const membersQuery = query(collection(db, 'members'), orderBy('firstName'));
+    const membersQuery = query(collection(db, 'members'), orderBy('name'));
     const snapshot = await getDocs(membersQuery);
     return snapshot.docs.map(doc => ({ 
       id: doc.id, 
