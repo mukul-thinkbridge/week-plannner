@@ -847,9 +847,9 @@ function funCreateActivityCard(activity, members = {}) {
       ${assignedMember ? `
         <div class="flex items-center gap-2 mt-2">
           <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-            <span class="text-xs leading-4 text-white font-medium">${assignedMember.firstName.charAt(0).toUpperCase()}</span>
+            <span class="text-xs leading-4 text-white font-medium">${assignedMember.name.charAt(0).toUpperCase()}</span>
           </div>
-          <span class="text-xs leading-4 text-slate-600">${assignedMember.firstName}</span>
+          <span class="text-xs leading-4 text-slate-600">${assignedMember.name}</span>
         </div>
       ` : ''}
       ${activity.assignedHours ? `
@@ -903,7 +903,7 @@ async function funLoadMembers(preserveSelection = false) {
     Object.values(members).forEach(member => {
       const option = document.createElement('option');
       option.value = member.id;
-      option.textContent = member.firstName || 'Unnamed Member';
+      option.textContent = member.name || 'Unnamed Member';
       filterMember.appendChild(option);
     });
     
@@ -1034,7 +1034,7 @@ async function funLoadCapacity() {
       const availableHours = Math.max(0, defaultCapacity - totalUnavailable);
       
       memberData.push({
-        name: member.firstName || 'Unnamed Member',
+        name: member.name || 'Unnamed Member',
         available: availableHours,
         total: defaultCapacity
       });

@@ -708,7 +708,7 @@ function funCreateCalendarDays(weekStart, unavailabilityData, members) {
       dayUnavailability.forEach(unavail => {
         // Find member name
         const member = members?.find(m => m.id === unavail.memberId);
-        const memberName = member ? (member.firstName || 'Unknown') : 'Unknown';
+        const memberName = member ? (member.name || 'Unknown') : 'Unknown';
         
         const block = document.createElement('div');
         block.className = 'text-xs bg-red-100 text-red-800 px-2 py-1 rounded truncate';
@@ -821,7 +821,7 @@ function funUpdateMemberCapacityTable(members, unavailabilityData) {
     
     row.innerHTML = `
       <td class="px-6 py-4 whitespace-nowrap">
-        <div class="text-sm font-medium text-slate-900">${member.firstName || 'N/A'}</div>
+        <div class="text-sm font-medium text-slate-900">${member.name || 'N/A'}</div>
       </td>
       <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
         ${capacity} hrs
