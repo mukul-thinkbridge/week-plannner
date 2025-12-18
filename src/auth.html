@@ -382,100 +382,6 @@
                 </button>
               </form>
 
-              <!-- Sign Up Form -->
-              <form id="signup-form" class="hidden space-y-4">
-                <!-- Similar structure to sign in form -->
-                <div class="flex items-center justify-center gap-4 w-full">
-                  <div class="w-1/2">
-                    <label
-                      for="signup-first-name"
-                      class="block text-sm font-medium mb-1"
-                    >
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      id="signup-first-name"
-                      name="first-name"
-                      class="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="John"
-                      required
-                    />
-                  </div>
-                  <div class="w-1/2">
-                    <label
-                      for="signup-last-name"
-                      class="block text-sm font-medium mb-1"
-                    >
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      id="signup-last-name"
-                      name="last-name"
-                      class="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Doe"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label
-                    for="signup-email"
-                    class="block text-sm font-medium mb-1"
-                  >
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="signup-email"
-                    name="email"
-                    class="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="name@example.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label
-                    for="signup-password"
-                    class="block text-sm font-medium mb-1"
-                  >
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="signup-password"
-                    name="password"
-                    class="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Password"
-                    required
-                  />
-                </div>
-                <div>
-                  <label
-                    for="signup-confirm-password"
-                    class="block text-sm font-medium mb-1"
-                  >
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    id="signup-confirm-password"
-                    name="confirm-password"
-                    class="w-full px-3 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Confirm Password"
-                    required
-                  />
-                </div>
-                <button
-                  id="signup-button"
-                  type="submit"
-                  class="w-full bg-primary text-white py-2 px-4 rounded-lg hover:opacity-90 transition-opacity"
-                >
-                  Sign up 
-                </button>
-              </form>
-
               <!-- Forgot Password Form -->
               <form id="forgot-password-form" class="hidden space-y-4">
                 <div>
@@ -550,18 +456,6 @@
 
               <!-- Form Navigation Links -->
               <div class="mt-6 text-center space-y-2">
-                <p id="signup-link">
-                  Don't have an account?
-                  <a href="#signup-form" class="text-secondary hover:underline">
-                    Sign Up
-                  </a>
-                </p>
-                <p id="signin-link" class="hidden">
-                  Already have an account?
-                  <a href="#signin-form" class="text-secondary hover:underline">
-                    Sign In
-                  </a>
-                </p>
               </div>
             </div>
           </div>
@@ -614,8 +508,6 @@
       import { auth, getDb } from './scripts/firebase.js';
       import {
         signInWithEmailAndPassword,
-        createUserWithEmailAndPassword,
-        sendEmailVerification,
         sendPasswordResetEmail,
         GoogleAuthProvider,
         OAuthProvider,
@@ -625,7 +517,6 @@
       } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
 
       import {
-        setDoc,
         doc,
         updateDoc,
       } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
@@ -686,28 +577,6 @@
             signIn(email, password);
           });
 
-        // Sign Up Form
-        document
-          .getElementById('signup-form')
-          .addEventListener('submit', function (event) {
-            event.preventDefault();
-            const firstName =
-              document.getElementById('signup-first-name').value;
-            const lastName = document.getElementById('signup-last-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = document.getElementById(
-              'signup-confirm-password',
-            ).value;
-
-            if (password !== confirmPassword) {
-              alert('Passwords do not match');
-              return;
-            }
-
-            signUp(firstName, lastName, email, password);
-          });
-
         // Forgot Password Form
         document
           .getElementById('forgot-password-form')
@@ -750,19 +619,6 @@
         // OTP Input Auto-focus Logic
         setupOTPInputs();
 
-        // Password confirmation validation
-        document
-          .getElementById('signup-confirm-password')
-          .addEventListener('input', function () {
-            const password = document.getElementById('signup-password').value;
-            const confirmPassword = this.value;
-            if (password !== confirmPassword) {
-              this.setCustomValidity('Passwords do not match');
-            } else {
-              this.setCustomValidity('');
-            }
-          });
-
         formSwitch();
       });
 
@@ -771,9 +627,6 @@
       function formSwitch() {
         if (window.location.hash === '#forgot-password-form') {
           showForgotPassword();
-        }
-        if (window.location.hash === '#signup-form') {
-          showSignUp();
         }
         if (window.location.hash === '#signin-form') {
           showSignIn();
@@ -812,31 +665,6 @@
           .then((userCredential) => {
             const user = userCredential.user;
 
-            if (email !== 'johndoe@example.com' && !user.emailVerified) {
-              hideLoader();
-              alert(
-                'Your email address has not been verified. Please check your inbox for a verification link.',
-              );
-
-              if (
-                confirm('Would you like us to resend the verification email?')
-              ) {
-                sendEmailVerification(user)
-                  .then(() => {
-                    alert(
-                      'A new verification email has been sent to your address.',
-                    );
-                  })
-                  .catch((error) => {
-                    console.error('Error resending verification email:', error);
-                    alert(
-                      'Failed to resend verification email: ' + error.message,
-                    );
-                  });
-              }
-              return;
-            }
-
             user.getIdToken().then(async (idToken) => {
               localStorage.setItem('lastAuthState', 'authenticated');
               localStorage.setItem('lastAuthTime', Date.now().toString());
@@ -859,41 +687,6 @@
           .catch((error) => {
             console.error('Error signing in:', error);
             alert('Error signing in. Please check your email and password.');
-            hideLoader();
-          });
-      }
-
-      function signUp(firstName, lastName, email, password) {
-        showLoader('Creating your account... Please wait...');
-        createUserWithEmailAndPassword(auth, email, password)
-          .then(async (userCredential) => {
-            const user = userCredential.user;
-            const userData = {
-              uid: user.uid,
-              firstName,
-              lastName,
-              email,
-              name: `${firstName} ${lastName}`,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              lastLoginAt: new Date().toISOString(),
-            };
-            try {
-              await setDoc(doc(db, 'members', user.uid), userData);
-            } catch (e) {
-              console.error('Failed to create user profile:', e);
-            }
-            sendEmailVerification(user).then(() => {
-              alert(
-                'Account created successfully. Please check your email to verify your account.',
-              );
-              showSignIn();
-              hideLoader();
-            });
-          })
-          .catch((error) => {
-            console.error('Error signing up:', error);
-            alert('Error creating account. ' + error.message);
             hideLoader();
           });
       }
@@ -1189,35 +982,18 @@
 
       function showSignIn() {
         document.getElementById('signin-form').classList.remove('hidden');
-        document.getElementById('signup-form').classList.add('hidden');
         document.getElementById('forgot-password-form').classList.add('hidden');
-        document.getElementById('signup-link').classList.remove('hidden');
-        document.getElementById('signin-link').classList.add('hidden');
         document
           .getElementById('forgot-password-link')
           .classList.remove('hidden');
         document.getElementById('greeting-text').textContent = 'Sign in to';
       }
 
-      function showSignUp() {
-        document.getElementById('signin-form').classList.add('hidden');
-        document.getElementById('signup-form').classList.remove('hidden');
-        document.getElementById('forgot-password-form').classList.add('hidden');
-        document.getElementById('signup-link').classList.add('hidden');
-        document.getElementById('signin-link').classList.remove('hidden');
-        document.getElementById('forgot-password-link').classList.add('hidden');
-        document.getElementById('greeting-text').textContent =
-          'Create your Weekly Planner Team Management System account';
-      }
-
       function showForgotPassword() {
         document.getElementById('signin-form').classList.add('hidden');
-        document.getElementById('signup-form').classList.add('hidden');
         document
           .getElementById('forgot-password-form')
           .classList.remove('hidden');
-        document.getElementById('signup-link').classList.add('hidden');
-        document.getElementById('signin-link').classList.remove('hidden');
         document.getElementById('forgot-password-link').classList.add('hidden');
         document.getElementById('greeting-text').textContent =
           'Reset your Weekly Planner Team Management System password';
