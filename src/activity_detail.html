@@ -1003,7 +1003,7 @@ async function funUpdateAssignmentSection() {
       if (memberDoc.exists()) {
         const memberData = memberDoc.data();
         
-        document.getElementById('assigned-member-name').textContent = memberData.firstName || 'Unknown Member';
+        document.getElementById('assigned-member-name').textContent = memberData.name || 'Unknown Member';
         document.getElementById('assigned-hours').textContent = `${activity.assignedHours} hours assigned`;
         
         currentAssignment.style.display = 'block';
@@ -2034,7 +2034,7 @@ async function funLoadMembersForAssignment() {
       <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer">
         <input type="radio" name="selectedMember" value="${member.id}" class="text-blue-600 focus:ring-blue-500" ${member.remainingCapacity === 0 ? 'disabled' : ''}>
         <div class="flex-1">
-          <p class="text-sm leading-5 font-medium text-slate-900">${member.firstName || 'Unnamed Member'}</p>
+          <p class="text-sm leading-5 font-medium text-slate-900">${member.name || 'Unnamed Member'}</p>
           <p class="text-xs leading-4 text-slate-500">
             ${member.remainingCapacity} hours available
             ${member.remainingCapacity === 0 ? '(No capacity)' : ''}
@@ -2058,6 +2058,7 @@ async function funLoadMembersForAssignment() {
         if (memberData && hours > memberData.remainingCapacity) {
           assignSubmit.disabled = true;
           hoursInput.setCustomValidity(`Cannot exceed ${memberData.remainingCapacity} available hours`);
+          showToast(`Cannot assign ${hours} hours. Only ${memberData.remainingCapacity} hours available for ${memberData.name || 'this member'}`, 'error');
         } else {
           hoursInput.setCustomValidity('');
         }
@@ -2243,7 +2244,7 @@ async function funLoadUpdateHoursData() {
       remainingCapacity = remainingCapacity - unavailableHours - otherAssignedHours;
     }
     
-    document.getElementById('update-hours-member').textContent = member.firstName || 'Unknown Member';
+    document.getElementById('update-hours-member').textContent = member.name || 'Unknown Member';
     document.getElementById('update-hours-current').textContent = `${currentActivity.assignedHours} hours`;
     document.getElementById('update-hours-capacity').textContent = `${Math.max(0, remainingCapacity)} hours`;
     document.getElementById('new-hours').value = currentActivity.assignedHours;

@@ -593,7 +593,7 @@
       
       const membersQuery = query(
         collection(db, 'members'),
-        orderBy('firstName', 'asc')
+        orderBy('name', 'asc')
       );
       
       await yieldToFrame(); // Yield to prevent UI blocking
@@ -658,11 +658,11 @@
           <td class="px-6 py-4 whitespace-nowrap">
             <div class="flex items-center gap-3">
               <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                ${getInitials(member.firstName)}
+                ${getInitials(member.name)}
               </div>
               <div>
                 <div class="text-sm leading-5 font-medium text-slate-900">
-                  ${member.firstName || 'N/A'}
+                  ${member.name || 'N/A'}
                   ${isCurrentUser ? '<span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">You</span>' : ''}
                 </div>
               </div>
@@ -729,7 +729,7 @@
       }
 
       const newMember = {
-        firstName: memberData.name,
+        name: memberData.name,
         email: memberData.email,
         joinDate: new Date().toISOString(),
         defaultWeeklyCapacity: 40
@@ -823,7 +823,7 @@
     memberToDelete = member;
     
     // Update modal content
-    document.getElementById('delete-member-name').textContent = member.firstName || 'Unknown';
+    document.getElementById('delete-member-name').textContent = member.name || 'Unknown';
     
     // Get activity count
     try {
