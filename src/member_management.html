@@ -527,7 +527,7 @@
     getCountFromServer
   } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
   import { auth, getDb } from './scripts/firebase.js';
-  import { showToast, showLoader, hideLoader } from './scripts/main.js';
+  import { showToast, showLoader, hideLoader, env } from './scripts/main.js';
 
   const db = getDb();
 
@@ -716,7 +716,7 @@
     try {
       showLoader('Adding member...');
       
-      // Check if email already exists
+      // Check if email already exists in Firestore
       const existingQuery = query(
         collection(db, 'members'),
         where('email', '==', memberData.email)
@@ -728,14 +728,55 @@
         return false;
       }
 
+      // Make API call to get user details and UID
+      showLoader('Creating user account...');
+      
+      // Get Firebase ID token for authentication
+      const idToken = await auth.currentUser.getIdToken();
+      
+      const apiResponse = await fetch(`${env.BASE_URL}/persona/auth/get-or-create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          email: memberData.email
+        })
+      });
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || `API error: ${apiResponse.status}`);
+      }
+
+      const userData = await apiResponse.json();
+      
+      if (!userData.userId) {
+        throw new Error('API did not return a valid UID');
+      }
+
+      // Create member document in Firestore with the UID as document ID
+      const currentTimestamp = new Date().toISOString();
+      
+      // Extract first and last name from memberData.name
+      const nameParts = (memberData.name || '').trim().split(' ');
+      const extractedFirstName = nameParts[0] || '';
+      const extractedLastName = nameParts.slice(1).join(' ') || '';
+    
       const newMember = {
-        name: memberData.name,
-        email: memberData.email,
-        joinDate: new Date().toISOString(),
-        defaultWeeklyCapacity: 40
+        uid: userData.userId,
+        email: userData.email || memberData.email,
+        firstName: extractedFirstName || userData.firstName || '',
+        lastName: extractedLastName || userData.lastName || '',
+        name: memberData.name || `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || memberData.email.split('@')[0],
+        createdAt: currentTimestamp,
+        updatedAt: currentTimestamp,
+        lastLoginAt: userData.lastLoginAt || currentTimestamp
       };
 
-      await addDoc(collection(db, 'members'), newMember);
+      // Use setDoc with the UID as the document ID
+      await setDoc(doc(db, 'members', userData.userId), newMember);
       showToast('Member added successfully', 'success');
       
       // Refresh the members list
@@ -743,7 +784,7 @@
       return true;
     } catch (error) {
       console.error('Error adding member:', error);
-      showToast('Failed to add member', 'error');
+      showToast(error.message || 'Failed to add member', 'error');
       return false;
     } finally {
       hideLoader();
