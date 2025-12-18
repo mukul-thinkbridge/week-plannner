@@ -473,8 +473,9 @@
           </div>
           <div>
             <label for="edit-tags" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Tags</label>
-            <input type="text" id="edit-tags" placeholder="Enter tags separated by commas" class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            <p class="text-xs leading-4 text-slate-500 mt-1">Separate tags with commas</p>
+            <input type="text" id="edit-tags" placeholder="Type a tag and press Enter" class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div id="edit-selected-tags" class="flex flex-wrap gap-2 mt-3"></div>
+            <p class="text-xs leading-4 text-slate-500 mt-1">Press Enter to add a tag</p>
           </div>
         </form>
         <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
@@ -1808,7 +1809,24 @@ function funOpenEditModal() {
   document.getElementById('edit-description').value = activity.description || '';
   document.getElementById('edit-category').value = activity.category || 'Client Focused';
   document.getElementById('edit-priority').value = activity.priority || 'Medium';
-  document.getElementById('edit-tags').value = activity.tags ? activity.tags.join(', ') : '';
+  document.getElementById('edit-tags').value = '';
+  const selectedTagsContainer = document.getElementById('edit-selected-tags');
+  selectedTagsContainer.innerHTML = '';
+  if (activity.tags && activity.tags.length > 0) {
+    activity.tags.forEach(tag => {
+      const tagBadge = document.createElement('span');
+      tagBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-blue-100 text-blue-800';
+      tagBadge.textContent = tag;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'ml-1 text-blue-600 hover:text-blue-800 focus:outline-none';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.addEventListener('click', () => {
+        selectedTagsContainer.removeChild(tagBadge);
+      });
+      tagBadge.appendChild(removeBtn);
+      selectedTagsContainer.appendChild(tagBadge);
+    });
+  }
   
   document.getElementById('edit-modal').classList.remove('hidden');
   document.getElementById('edit-title').focus();
@@ -1830,8 +1848,8 @@ async function funSubmitEdit() {
   const description = document.getElementById('edit-description').value.trim();
   const category = document.getElementById('edit-category').value;
   const priority = document.getElementById('edit-priority').value;
-  const tagsText = document.getElementById('edit-tags').value.trim();
-  const tags = tagsText ? tagsText.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+  const selectedTagsContainer = document.getElementById('edit-selected-tags');
+  const tags = Array.from(selectedTagsContainer.children).map(tagBadge => tagBadge.firstChild.textContent.trim());
   
   try {
     showLoader('Updating activity...');
@@ -2373,6 +2391,29 @@ async function funSubmitReallocate() {
     hideLoader();
   }
 }
+
+// Tag input functionality
+const editTagsInput = document.getElementById('edit-tags');
+const editSelectedTagsContainer = document.getElementById('edit-selected-tags');
+ 
+editTagsInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && editTagsInput.value.trim()) {
+    e.preventDefault();
+    const tagText = editTagsInput.value.trim();
+    const tagBadge = document.createElement('span');
+    tagBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-blue-100 text-blue-800';
+    tagBadge.textContent = tagText;
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'ml-1 text-blue-600 hover:text-blue-800 focus:outline-none';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.addEventListener('click', () => {
+      editSelectedTagsContainer.removeChild(tagBadge);
+    });
+    tagBadge.appendChild(removeBtn);
+    editSelectedTagsContainer.appendChild(tagBadge);
+    editTagsInput.value = '';
+  }
+});
 
 // Initialize page
 lucide.createIcons();
