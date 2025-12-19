@@ -2396,22 +2396,56 @@ async function funSubmitReallocate() {
 const editTagsInput = document.getElementById('edit-tags');
 const editSelectedTagsContainer = document.getElementById('edit-selected-tags');
  
+// Function to add tags from input
+function addTagsFromInput(inputValue) {
+  if (!inputValue.trim()) return;
+  
+  // Split by comma and process each tag
+  inputValue.split(',').forEach(tagText => {
+    const trimmedTag = tagText.trim();
+    if (trimmedTag && !isTagAlreadyAdded(trimmedTag)) {
+      addTagBadge(trimmedTag);
+    }
+  });
+}
+
+// Function to check if tag already exists
+function isTagAlreadyAdded(tagText) {
+  const existingTags = Array.from(editSelectedTagsContainer.children).map(
+    badge => badge.firstChild.textContent.trim()
+  );
+  return existingTags.includes(tagText);
+}
+
+// Function to create and add tag badge
+function addTagBadge(tagText) {
+  const tagBadge = document.createElement('span');
+  tagBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-blue-100 text-blue-800';
+  tagBadge.textContent = tagText;
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'ml-1 text-blue-600 hover:text-blue-800 focus:outline-none';
+  removeBtn.innerHTML = '&times;';
+  removeBtn.addEventListener('click', () => {
+    editSelectedTagsContainer.removeChild(tagBadge);
+  });
+  tagBadge.appendChild(removeBtn);
+  editSelectedTagsContainer.appendChild(tagBadge);
+}
+
+// Handle Enter key to add tags
 editTagsInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && editTagsInput.value.trim()) {
     e.preventDefault();
-    const tagText = editTagsInput.value.trim();
-    const tagBadge = document.createElement('span');
-    tagBadge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs leading-4 bg-blue-100 text-blue-800';
-    tagBadge.textContent = tagText;
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'ml-1 text-blue-600 hover:text-blue-800 focus:outline-none';
-    removeBtn.innerHTML = '&times;';
-    removeBtn.addEventListener('click', () => {
-      editSelectedTagsContainer.removeChild(tagBadge);
-    });
-    tagBadge.appendChild(removeBtn);
-    editSelectedTagsContainer.appendChild(tagBadge);
+    addTagsFromInput(editTagsInput.value);
     editTagsInput.value = '';
+  }
+});
+
+// Handle blur event to add tags (comma-separated support)
+editTagsInput.addEventListener('blur', (e) => {
+  if (e.target.value.trim()) {
+    addTagsFromInput(e.target.value);
+    e.target.value = '';
   }
 });
 

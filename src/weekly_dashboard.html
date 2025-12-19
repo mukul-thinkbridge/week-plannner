@@ -344,9 +344,9 @@
             </label>
             <select id="activity-priority" name="priority" required 
                     class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="">Select priority</option>
+              <option value=""selected>Select priority</option>
               <option value="High">High</option>
-              <option value="Medium" selected>Medium</option>
+              <option value="Medium" >Medium</option>
               <option value="Low">Low</option>
             </select>
             <div id="priority-error" class="text-red-600 text-xs leading-4 mt-1 hidden"></div>
@@ -1196,13 +1196,14 @@ btnCloseModal.addEventListener('click', () => {
   modalAddActivity.classList.add('hidden');
   formAddActivity.reset();
   funClearValidationErrors();
-  selectedTags = [];
+  funClearTags();
 });
 
 btnCancelModal.addEventListener('click', () => {
   modalAddActivity.classList.add('hidden');
   formAddActivity.reset();
   funClearValidationErrors();
+  funClearTags();
 });
 
 // Close modal on backdrop click
@@ -1211,6 +1212,7 @@ modalAddActivity.addEventListener('click', (e) => {
     modalAddActivity.classList.add('hidden');
     formAddActivity.reset();
     funClearValidationErrors();
+    funClearTags();
   }
 });
 
@@ -1221,6 +1223,7 @@ document.addEventListener('keydown', (e) => {
       modalAddActivity.classList.add('hidden');
       formAddActivity.reset();
       funClearValidationErrors();
+      funClearTags();
     }
     if (!modalCapacity.classList.contains('hidden')) {
       modalCapacity.classList.add('hidden');
@@ -1236,6 +1239,18 @@ function funClearValidationErrors() {
   document.querySelectorAll('input, select').forEach(input => {
     input.classList.remove('border-red-500');
   });
+}
+
+function funClearTags() {
+  selectedTags = [];
+  const tagsContainer = document.getElementById('selected-tags');
+  if (tagsContainer) {
+    tagsContainer.innerHTML = '';
+  }
+  const tagsInput = document.getElementById('activity-tags-input');
+  if (tagsInput) {
+    tagsInput.value = '';
+  }
 }
 
 function funShowValidationError(fieldId, message) {
@@ -1392,6 +1407,7 @@ formAddActivity.addEventListener('submit', async (e) => {
     modalAddActivity.classList.add('hidden');
     formAddActivity.reset();
     funClearValidationErrors();
+    funClearTags();
     
     // Reload activities if added to current week
     if (addToCurrentWeek && currentWeekStart) {

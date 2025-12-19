@@ -1855,11 +1855,34 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('activity-tags-input')?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const tag = e.target.value.trim();
-      if (tag) {
-        funAddTag(tag);
+      const input = e.target.value.trim();
+      if (input) {
+        // Split by comma and add each tag
+        input.split(',').forEach(tag => {
+          const t = tag.trim();
+          if (t && !selectedTags.includes(t)) {
+            selectedTags.push(t);
+          }
+        });
         e.target.value = '';
+        funRenderSelectedTags();
       }
+    }
+  });
+  
+  // Also handle blur event to capture tags when user leaves the input
+  document.getElementById('activity-tags-input')?.addEventListener('blur', (e) => {
+    const input = e.target.value.trim();
+    if (input) {
+      // Split by comma and add each tag
+      input.split(',').forEach(tag => {
+        const t = tag.trim();
+        if (t && !selectedTags.includes(t)) {
+          selectedTags.push(t);
+        }
+      });
+      e.target.value = '';
+      funRenderSelectedTags();
     }
   });
   
