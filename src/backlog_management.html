@@ -157,10 +157,16 @@
           Refresh
         </button>
       </div>
-      <button id="btn-create-activity" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        Create New Activity
-      </button>
+      <div class="flex items-center gap-3">
+        <button id="btn-show-completed" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm leading-5 font-medium rounded hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-colors">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          Show Completed Activities
+        </button>
+        <button id="btn-create-activity" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Create New Activity
+        </button>
+      </div>
     </div>
   </div>
 
@@ -442,6 +448,51 @@
   </div>
 </div>
 
+<!-- Completed Activities Modal -->
+<div id="modal-completed" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between p-6 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl leading-8 font-semibold text-slate-900">Completed Activities</h2>
+          <p class="text-sm leading-5 text-slate-600 mt-1">View all completed activities</p>
+        </div>
+        <button id="btn-close-completed-modal" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="p-6">
+        <!-- Loading Skeleton -->
+        <div id="completed-skeleton" class="space-y-4 hidden">
+          <div class="animate-pulse p-4 border border-slate-200 rounded-lg">
+            <div class="h-4 bg-slate-200 rounded w-3/4 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-2/3"></div>
+          </div>
+          <div class="animate-pulse p-4 border border-slate-200 rounded-lg">
+            <div class="h-4 bg-slate-200 rounded w-2/3 mb-3"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/3 mb-2"></div>
+            <div class="h-3 bg-slate-200 rounded w-1/2"></div>
+          </div>
+        </div>
+        
+        <!-- Completed Activities Container -->
+        <div id="completed-activities-container" class="space-y-4">
+          <!-- Completed activities will be populated here -->
+        </div>
+        
+        <!-- Empty State -->
+        <div id="completed-empty-state" class="hidden text-center py-12">
+          <i data-lucide="check-circle" class="w-12 h-12 text-slate-400 mx-auto mb-4"></i>
+          <h3 class="text-lg leading-7 font-semibold text-slate-800 mb-2">No Completed Activities</h3>
+          <p class="text-sm leading-5 text-slate-600">There are no completed activities to display.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Quick Assign Modal -->
 <div id="modal-assign" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden">
   <div class="flex items-center justify-center min-h-screen p-4">
@@ -706,6 +757,7 @@ const modalActivity = document.getElementById('modal-activity');
 const modalDelete = document.getElementById('modal-delete');
 const modalAllocate = document.getElementById('modal-allocate');
 const modalAssign = document.getElementById('modal-assign');
+const modalCompleted = document.getElementById('modal-completed');
 
 // Pagination elements
 const paginationContainer = document.getElementById('pagination-container');
@@ -927,7 +979,10 @@ function funBuildCountQuery() {
 
 // Render activities list
 function funRenderActivities() {
-  if (activities.length === 0) {
+  // Filter out completed activities from the main list
+  const nonCompletedActivities = activities.filter(a => a.status !== 'Completed');
+  
+  if (nonCompletedActivities.length === 0) {
     activitiesContainer.innerHTML = '';
     emptyState.classList.remove('hidden');
     paginationContainer.classList.add('hidden');
@@ -937,7 +992,7 @@ function funRenderActivities() {
 
   emptyState.classList.add('hidden');
   
-  const html = activities.map(activity => {
+  const html = nonCompletedActivities.map(activity => {
     const member = activity.assignedMember ? 
       members.find(m => m.id === activity.assignedMember) : null;
     
@@ -1024,7 +1079,8 @@ function funRenderActivities() {
   }).join('');
 
   activitiesContainer.innerHTML = html;
-  activitiesCount.textContent = totalCount.toString();
+  // Show count of non-completed activities
+  activitiesCount.textContent = nonCompletedActivities.length.toString();
   
   // Reinitialize Lucide icons
   if (window.lucide) {
@@ -1720,6 +1776,129 @@ function funCloseAssignModal() {
   currentActivityId = null;
 }
 
+// Completed Activities Modal Functions
+function funShowCompletedModal() {
+  modalCompleted.classList.remove('hidden');
+  funLoadCompletedActivities();
+}
+
+function funCloseCompletedModal() {
+  modalCompleted.classList.add('hidden');
+}
+
+async function funLoadCompletedActivities() {
+  const container = document.getElementById('completed-activities-container');
+  const skeleton = document.getElementById('completed-skeleton');
+  const emptyState = document.getElementById('completed-empty-state');
+  
+  try {
+    // Show skeleton
+    skeleton.classList.remove('hidden');
+    container.innerHTML = '';
+    emptyState.classList.add('hidden');
+    
+    // Query for completed activities
+    const completedQuery = query(
+      collection(db, 'activities'),
+      where('status', '==', 'Completed'),
+      orderBy('updatedAt', 'desc'),
+      limit(100)
+    );
+    
+    const snapshot = await getDocs(completedQuery);
+    const completedActivities = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    // Hide skeleton
+    skeleton.classList.add('hidden');
+    
+    if (completedActivities.length === 0) {
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    
+    // Render completed activities
+    const html = completedActivities.map(activity => {
+      const member = activity.assignedMember ? 
+        members.find(m => m.id === activity.assignedMember) : null;
+      
+      const weekText = activity.weekAllocated ? 
+        `Week of ${funFormatDate(activity.weekAllocated)}` : 'Unallocated';
+      
+      const assignedText = member ? member.name : 'Unassigned';
+      
+      const priorityColor = {
+        'High': 'bg-red-500',
+        'Medium': 'bg-amber-500',
+        'Low': 'bg-emerald-500'
+      }[activity.priority] || 'bg-slate-500';
+      
+      return `
+        <div class="p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer" data-activity-id="${activity.id}" onclick="funNavigateToDetail('${activity.id}')">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="h-2 w-2 rounded-full bg-emerald-500 mt-2"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-4 mb-2">
+                <div class="flex-1">
+                  <h3 class="text-base leading-6 font-semibold text-slate-900 mb-1">${funEscapeHtml(activity.title || 'Untitled')}</h3>
+                  ${activity.description ? `<p class="text-sm leading-5 text-slate-600 line-clamp-2">${funEscapeHtml(activity.description)}</p>` : ''}
+                </div>
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs leading-4 font-medium bg-emerald-100 text-emerald-800">
+                  <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                  Completed
+                </span>
+              </div>
+              
+              <div class="flex flex-wrap items-center gap-3 text-xs leading-4 text-slate-600">
+                <span class="inline-flex items-center gap-1">
+                  <i data-lucide="tag" class="w-3 h-3"></i>
+                  ${activity.category || 'N/A'}
+                </span>
+                <span class="inline-flex items-center gap-1">
+                  <span class="h-2 w-2 rounded-full ${priorityColor}"></span>
+                  ${activity.priority || 'Medium'} Priority
+                </span>
+                <span class="inline-flex items-center gap-1">
+                  <i data-lucide="calendar" class="w-3 h-3"></i>
+                  ${weekText}
+                </span>
+                ${member ? `
+                  <span class="inline-flex items-center gap-1">
+                    <i data-lucide="user" class="w-3 h-3"></i>
+                    ${funEscapeHtml(member.name)}
+                  </span>
+                ` : ''}
+                ${activity.assignedHours ? `
+                  <span class="inline-flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    ${activity.assignedHours}h
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    container.innerHTML = html;
+    
+    // Reinitialize Lucide icons
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+    
+  } catch (error) {
+    console.error('Error loading completed activities:', error);
+    skeleton.classList.add('hidden');
+    container.innerHTML = '<p class="text-sm leading-5 text-red-600 text-center py-8">Failed to load completed activities</p>';
+  }
+}
+
 async function funAssignActivity(memberId, hours) {
   try {
     showLoader('Assigning activity...');
@@ -1764,6 +1943,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Create activity buttons
   document.getElementById('btn-create-activity')?.addEventListener('click', funShowCreateModal);
   document.getElementById('btn-create-activity-empty')?.addEventListener('click', funShowCreateModal);
+  
+  // Show completed activities button
+  document.getElementById('btn-show-completed')?.addEventListener('click', funShowCompletedModal);
+  
+  // Completed modal handlers
+  document.getElementById('btn-close-completed-modal')?.addEventListener('click', funCloseCompletedModal);
   
   // Refresh button
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
@@ -1971,13 +2156,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Modal backdrop click handlers
-  [modalActivity, modalDelete, modalAllocate, modalAssign].forEach(modal => {
+  [modalActivity, modalDelete, modalAllocate, modalAssign, modalCompleted].forEach(modal => {
     modal?.addEventListener('click', (e) => {
       if (e.target === modal) {
         if (modal === modalActivity) funCloseActivityModal();
         if (modal === modalDelete) funCloseDeleteModal();
         if (modal === modalAllocate) funCloseAllocateModal();
         if (modal === modalAssign) funCloseAssignModal();
+        if (modal === modalCompleted) funCloseCompletedModal();
       }
     });
   });
@@ -1989,6 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!modalDelete.classList.contains('hidden')) funCloseDeleteModal();
       if (!modalAllocate.classList.contains('hidden')) funCloseAllocateModal();
       if (!modalAssign.classList.contains('hidden')) funCloseAssignModal();
+      if (!modalCompleted.classList.contains('hidden')) funCloseCompletedModal();
     }
   });
 });
