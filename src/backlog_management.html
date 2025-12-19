@@ -1211,6 +1211,18 @@ async function funCreateActivity(activityData, files) {
       });
     }
     
+    // Log attachments if any were added during creation
+    if (attachments.length > 0) {
+      await addDoc(collection(db, 'activityLogs'), {
+        activityId: docRef.id,
+        timestamp: new Date().toISOString(),
+        action: 'Attachments Added',
+        memberId: currentUser.uid,
+        details: `${attachments.length} attachment${attachments.length > 1 ? 's' : ''} added: ${attachments.map(a => a.filename).join(', ')}`,
+        previousState: '{}'
+      });
+    }
+    
     showToast('Activity created successfully', 'success');
     funCloseActivityModal();
     await funLoadActivities(); // Refresh the list

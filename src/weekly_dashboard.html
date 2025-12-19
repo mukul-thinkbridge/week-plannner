@@ -1403,6 +1403,17 @@ formAddActivity.addEventListener('submit', async (e) => {
       });
     }
     
+    // Create attachment log if attachments were added during creation
+    if (attachments.length > 0) {
+      await addDoc(collection(db, 'activityLogs'), {
+        activityId: activityRef.id,
+        timestamp: Timestamp.now().toDate().toISOString(),
+        action: 'Attachments Added',
+        memberId: currentUser.uid,
+        details: `${attachments.length} attachment${attachments.length > 1 ? 's' : ''} added: ${attachments.map(a => a.filename).join(', ')}`
+      });
+    }
+    
     showToast('Activity created successfully', 'success');
     modalAddActivity.classList.add('hidden');
     formAddActivity.reset();
