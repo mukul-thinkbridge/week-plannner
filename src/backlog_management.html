@@ -1199,6 +1199,18 @@ async function funCreateActivity(activityData, files) {
       previousState: '{}'
     });
     
+    // Log allocation if week is allocated during creation
+    if (activityData.weekAllocated) {
+      await addDoc(collection(db, 'activityLogs'), {
+        activityId: docRef.id,
+        timestamp: new Date().toISOString(),
+        action: 'Week Allocated',
+        memberId: currentUser.uid,
+        details: `Activity allocated to week of ${activityData.weekAllocated}`,
+        previousState: '{}'
+      });
+    }
+    
     showToast('Activity created successfully', 'success');
     funCloseActivityModal();
     await funLoadActivities(); // Refresh the list
