@@ -1377,6 +1377,17 @@ formAddActivity.addEventListener('submit', async (e) => {
       details: `Activity "${title}" created`
     });
     
+    // Create allocation log if activity was allocated during creation
+    if (addToCurrentWeek && currentWeekStart) {
+      await addDoc(collection(db, 'activityLogs'), {
+        activityId: activityRef.id,
+        timestamp: Timestamp.now().toDate().toISOString(),
+        action: 'Allocated',
+        memberId: currentUser.uid,
+        details: `Activity allocated to week of ${formatDateForDisplay(currentWeekStart)}`
+      });
+    }
+    
     showToast('Activity created successfully', 'success');
     modalAddActivity.classList.add('hidden');
     formAddActivity.reset();
