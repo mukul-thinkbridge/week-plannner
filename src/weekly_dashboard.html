@@ -198,6 +198,19 @@
       
       <!-- Filters -->
       <div class="flex flex-wrap items-center gap-3">
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search activities..." 
+            class="pl-10 pr-8 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-52"
+          />
+          <button id="btn-clear-search" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
         <select id="filter-category" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option value="">All Categories</option>
           <option value="Client Focused">Client Focused</option>
@@ -622,8 +635,11 @@ let currentWeekStart = null;
 let currentUser = null;
 let currentAbort = null;
 let selectedTags = [];
+let searchTerm = '';
 
 // DOM elements
+const searchInput = document.getElementById('search-input');
+const btnClearSearch = document.getElementById('btn-clear-search');
 const weekStartDate = document.getElementById('week-start-date');
 const weekEndDate = document.getElementById('week-end-date');
 const weekDisplay = document.getElementById('week-display');
@@ -789,6 +805,20 @@ function funUpdateWeekDisplay() {
   weekDisplay.textContent = `Week of ${currentWeekStart.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
   weekStartDate.textContent = weekStart;
   weekEndDate.textContent = weekEnd;
+  
+  // Disable add activity button for past weeks
+  const today = new Date();
+  const currentWeekWednesday = getWednesdayOfWeek(today);
+  const isPastWeek = currentWeekStart < currentWeekWednesday;
+  
+  btnAddActivity.disabled = isPastWeek;
+  if (isPastWeek) {
+    btnAddActivity.classList.add('opacity-50', 'cursor-not-allowed');
+    btnAddActivity.title = 'Cannot add activities to past weeks';
+  } else {
+    btnAddActivity.classList.remove('opacity-50', 'cursor-not-allowed');
+    btnAddActivity.title = 'Add Activity';
+  }
 }
 
 // Week navigation handlers
@@ -946,6 +976,18 @@ async function funLoadActivities() {
     
     // Apply filters
     const filteredActivities = activities.filter(activity => {
+      // Search filter
+      if (searchTerm.trim()) {
+        const search = searchTerm.toLowerCase();
+        const title = (activity.title || '').toLowerCase();
+        const description = (activity.description || '').toLowerCase();
+        const tags = (activity.tags || []).map(t => t.toLowerCase()).join(' ');
+        
+        if (!title.includes(search) && !description.includes(search) && !tags.includes(search)) {
+          return false;
+        }
+      }
+      
       if (filterCategory.value && activity.category !== filterCategory.value) return false;
       if (filterPriority.value && activity.priority !== filterPriority.value) return false;
       if (filterAssignment.value === 'assigned' && !activity.assignedMember) return false;
@@ -1148,6 +1190,28 @@ async function funRenderCapacityChart(data) {
 
 // Initial data load
 async function funInitialLoad() {
+  // Load members first and set default filter to current user
+  const membersData = await withLimit(() => getDocs(collection(db, 'members')));
+  const members = {};
+  membersData.docs.forEach(doc => {
+    members[doc.id] = { id: doc.id, ...doc.data() };
+  });
+  
+  // Populate member filter
+  filterMember.innerHTML = '<option value="">All Members</option>';
+  Object.values(members).forEach(member => {
+    const option = document.createElement('option');
+    option.value = member.id;
+    option.textContent = member.name || 'Unnamed Member';
+    filterMember.appendChild(option);
+  });
+  
+  // Set default filter to current user
+  if (currentUser && currentUser.uid) {
+    filterMember.value = currentUser.uid;
+  }
+  
+  // Now load activities with the user filter applied
   await funLoadActivities();
 }
 
@@ -1159,18 +1223,54 @@ async function funInitialLoad() {
 // Refresh button handlers
 btnRefreshCapacity.addEventListener('click', funLoadCapacity);
 
+// Search input handler with debounce
+let searchTimeout;
+searchInput?.addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  
+  // Show/hide clear button
+  if (searchTerm) {
+    btnClearSearch?.classList.remove('hidden');
+  } else {
+    btnClearSearch?.classList.add('hidden');
+  }
+  
+  // Debounce search to avoid excessive re-renders
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    funLoadActivities();
+  }, 300);
+});
+
+// Clear search button
+btnClearSearch?.addEventListener('click', () => {
+  searchInput.value = '';
+  searchTerm = '';
+  btnClearSearch.classList.add('hidden');
+  funLoadActivities();
+});
+
 // Clear filters button handler
 btnClearFilters.addEventListener('click', () => {
   filterCategory.value = '';
   filterPriority.value = '';
   filterAssignment.value = '';
   filterMember.value = '';
+  searchInput.value = '';
+  searchTerm = '';
+  btnClearSearch?.classList.add('hidden');
   funLoadActivities();
   showToast('Filters cleared', 'success');
 });
 
 // Modal handling
 btnAddActivity.addEventListener('click', () => {
+  const today = new Date();
+  const currentWeekWednesday = getWednesdayOfWeek(today);
+  if (currentWeekStart < currentWeekWednesday) {
+    showToast('Cannot add activities to past weeks', 'error');
+    return;
+  }
   modalAddActivity.classList.remove('hidden');
   document.getElementById('activity-title').focus();
 });

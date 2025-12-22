@@ -28,11 +28,11 @@
             width: 32px;
             height: 32px;
         }
-        
+       
         .mobile-nav-open {
             transform: translateX(0);
         }
-        
+       
         .mobile-nav-closed {
             transform: translateX(-100%);
         }
@@ -51,7 +51,7 @@
             <button id="mobile-menu-btn" class="md:hidden p-2 rounded hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <i data-lucide="menu" class="w-5 h-5 text-slate-600"></i>
             </button>
-            
+           
             <!-- Logo and App Name -->
             <div class="flex items-center gap-3">
                 <div class="logo-svg">
@@ -77,7 +77,7 @@
                 <span class="text-lg leading-7 font-semibold text-slate-800 sm:hidden">Weekly Planner</span>
             </div>
         </div>
-        
+       
         <div class="flex items-center gap-4">
             <!-- User Profile Dropdown -->
             <div class="relative">
@@ -88,7 +88,7 @@
                     <span id="user-name" class="text-sm leading-5 font-medium text-slate-700 hidden sm:block">Loading...</span>
                     <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500"></i>
                 </button>
-                
+               
                 <!-- Dropdown Menu -->
                 <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-lg hidden z-40">
                     <div class="p-3 border-b border-slate-200">
@@ -131,7 +131,7 @@
                     Member Management
                 </a>
             </nav>
-            
+           
             <!-- Footer in Sidebar -->
             <div  class="fixed bottom-0 w-64 p-4">
                 <div class="text-center text-xs leading-4 text-slate-500 bg-white py-2 rounded border border-slate-200">
@@ -145,7 +145,7 @@
 
         <!-- Main Content -->
         <main id="pageContent" class="flex-1 md:ml-0 p-4 sm:p-6 overflow-y-auto  h-screen overflow-hidden">
-            
+           
 <!-- Activity Detail Page -->
 <div class="bg-slate-50 pt-16">
   <!-- Header with Back Button and Activity Info -->
@@ -157,7 +157,7 @@
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             Back
           </button>
-          
+         
         </div>
         <div class="flex flex-wrap items-center gap-5 sm:gap-3">
           <button id="edit-btn" class="inline-flex items-center gap-2 px-3 py-1.5 text-sm leading-5 font-medium text-slate-700 bg-white border border-slate-200 rounded hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -260,7 +260,7 @@
                   <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                 </button>
               </div>
-              
+             
               <div id="assignment-content" class="space-y-4">
                 <!-- Current Assignment -->
                 <div id="current-assignment" style="display: none;">
@@ -528,6 +528,9 @@
           <div>
             <label for="assign-hours" class="block text-sm leading-5 font-medium text-slate-700 mb-1">Hours to Assign *</label>
             <input type="number" id="assign-hours" min="1" max="40" required class="w-full border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div id="member-availability-info" class="mt-2 hidden">
+              <!-- Availability info will be shown here -->
+            </div>
           </div>
         </form>
         <div class="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
@@ -632,10 +635,10 @@
                 try {
                     // Try to get user details from Firestore
                     const userDoc = await getDoc(doc(db, 'members', user.uid));
-                    
+                   
                     let displayName = 'User';
                     let email = user.email || 'user@example.com';
-                    
+                   
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
                         const firstName = userData.firstName || '';
@@ -646,7 +649,7 @@
                         // Fallback to email or default
                         displayName = user.email ? user.email.split('@')[0] : 'User';
                     }
-                    
+                   
                     // Update UI with user info
                     userNameElement.textContent = displayName;
                     dropdownUserNameElement.textContent = displayName;
@@ -731,10 +734,10 @@
                 const targetId = toggle.getAttribute('data-target');
                 const targetElement = document.getElementById(targetId);
                 const chevron = toggle.querySelector('[data-lucide="chevron-right"]');
-                
+               
                 if (targetElement) {
                     targetElement.classList.toggle('hidden');
-                    chevron.style.transform = targetElement.classList.contains('hidden') ? 
+                    chevron.style.transform = targetElement.classList.contains('hidden') ?
                         'rotate(0deg)' : 'rotate(90deg)';
                 }
             });
@@ -744,7 +747,7 @@
         function setActiveNavigation() {
             const currentPath = window.location.pathname;
             const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1).replace('.html', '');
-            
+           
             document.querySelectorAll('.nav-item').forEach(item => {
                 const pageName = item.getAttribute('data-page');
                 if (pageName === currentPage) {
@@ -770,7 +773,7 @@
         });
     </script>
 
-    
+   
 <script id="data-script" type="module" data-tiramai="web-gen">
 // Firebase and utility imports
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
@@ -814,10 +817,10 @@ function formatDate(dateString) {
   if (!dateString) return "N/A";
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   } catch (error) {
     return "N/A";
@@ -830,7 +833,7 @@ function getWeekDateRange(weekStart) {
     const startDate = new Date(weekStart);
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 6);
-    
+   
     return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   } catch (error) {
     return "N/A";
@@ -841,16 +844,16 @@ function getNextWednesdays(count = 4) {
   const weeks = [];
   const today = new Date();
   const currentDay = today.getDay();
-  
+ 
   // Find next Wednesday (3 = Wednesday)
   let daysUntilWednesday = 3 - currentDay;
   if (daysUntilWednesday <= 0) {
     daysUntilWednesday += 7; // Next week's Wednesday
   }
-  
+ 
   const nextWednesday = new Date(today);
   nextWednesday.setDate(today.getDate() + daysUntilWednesday);
-  
+ 
   for (let i = 0; i < count; i++) {
     const weekStart = new Date(nextWednesday);
     weekStart.setDate(nextWednesday.getDate() + (i * 7));
@@ -859,7 +862,7 @@ function getNextWednesdays(count = 4) {
       display: getWeekDateRange(weekStart.toISOString().split('T')[0])
     });
   }
-  
+ 
   return weeks;
 }
 
@@ -909,21 +912,21 @@ async function funInitialLoad() {
 async function funLoadActivity() {
   try {
     const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
-    
+   
     if (!activityDoc.exists()) {
       showToast('Activity not found', 'error');
       window.location.href = 'weekly_dashboard.html';
       return;
     }
-    
+   
     currentActivity = { id: activityDoc.id, ...activityDoc.data() };
-    
+   
     // Update UI
     funUpdateActivityUI();
-    
+   
     // Load tab content for default tab
     await funLoadDetailsTab();
-    
+   
   } catch (error) {
     console.error('Error loading activity:', error);
     showToast('Failed to load activity details', 'error');
@@ -933,19 +936,19 @@ async function funLoadActivity() {
 // Update main activity UI
 function funUpdateActivityUI() {
   const activity = currentActivity;
-  
+ 
   // Header
   document.getElementById('activity-title').textContent = activity.title || 'Untitled Activity';
-  
+ 
   // Category badge
   const categoryBadge = document.getElementById('category-badge');
   categoryBadge.textContent = activity.category || 'N/A';
   categoryBadge.className = `inline-flex items-center px-2.5 py-0.5 rounded text-xs leading-4 font-medium ${getCategoryColor(activity.category)}`;
-  
+ 
   // Priority indicator
   const priorityIndicator = document.getElementById('priority-indicator');
   priorityIndicator.className = `h-2 w-2 rounded-full ${getPriorityColor(activity.priority)}`;
-  
+ 
   // Show/hide delete button based on assignment
   const deleteBtn = document.getElementById('delete-btn');
   if (activity.assignedMember) {
@@ -958,16 +961,16 @@ function funUpdateActivityUI() {
 // Load details tab
 async function funLoadDetailsTab() {
   const activity = currentActivity;
-  
+ 
   // Activity information
   document.getElementById('activity-description').textContent = activity.description || 'No description provided';
   document.getElementById('status-selector').value = activity.status || 'Not Started';
   document.getElementById('week-allocated').textContent = getWeekDateRange(activity.weekAllocated);
-  
+ 
   // Tags
   const tagsContainer = document.getElementById('activity-tags');
   tagsContainer.innerHTML = '';
-  
+ 
   if (activity.tags && activity.tags.length > 0) {
     activity.tags.forEach(tag => {
       const tagSpan = document.createElement('span');
@@ -981,11 +984,11 @@ async function funLoadDetailsTab() {
     noTagsSpan.textContent = 'No tags';
     tagsContainer.appendChild(noTagsSpan);
   }
-  
+ 
   // Dates
   document.getElementById('created-date').textContent = formatDate(activity.createdAt);
   document.getElementById('updated-date').textContent = formatDate(activity.updatedAt);
-  
+ 
   // Assignment section
   await funUpdateAssignmentSection();
 }
@@ -995,18 +998,18 @@ async function funUpdateAssignmentSection() {
   const activity = currentActivity;
   const currentAssignment = document.getElementById('current-assignment');
   const assignSection = document.getElementById('assign-member-section');
-  
+ 
   if (activity.assignedMember && activity.assignedHours) {
     try {
       // Load member details
       const memberDoc = await getDoc(doc(db, 'members', activity.assignedMember));
-      
+     
       if (memberDoc.exists()) {
         const memberData = memberDoc.data();
-        
+       
         document.getElementById('assigned-member-name').textContent = memberData.name || 'Unknown Member';
         document.getElementById('assigned-hours').textContent = `${activity.assignedHours} hours assigned`;
-        
+       
         currentAssignment.style.display = 'block';
         assignSection.style.display = 'none';
       } else {
@@ -1028,7 +1031,7 @@ async function funUpdateAssignmentSection() {
 // Load comments
 async function funLoadComments() {
   const commentsList = document.getElementById('comments-list');
-  
+ 
   // Show skeleton
   commentsList.innerHTML = `
     <div class="comment-skeleton animate-pulse space-y-4">
@@ -1041,7 +1044,7 @@ async function funLoadComments() {
       </div>
     </div>
   `;
-  
+ 
   try {
     const commentsQuery = query(
       collection(db, 'activityComments'),
@@ -1049,13 +1052,13 @@ async function funLoadComments() {
       orderBy('timestamp', 'desc'),
       limit(20)
     );
-    
+   
     const commentsSnapshot = await getDocs(commentsQuery);
     const comments = [];
-    
+   
     for (const commentDoc of commentsSnapshot.docs) {
       const commentData = commentDoc.data();
-      
+     
       // Load member name
       let memberName = 'Unknown Member';
       if (commentData.memberId) {
@@ -1068,17 +1071,17 @@ async function funLoadComments() {
           console.error('Error loading member for comment:', error);
         }
       }
-      
+     
       comments.push({
         id: commentDoc.id,
         ...commentData,
         memberName
       });
     }
-    
+   
     // Update count
     document.getElementById('comments-count').textContent = comments.length;
-    
+   
     // Render comments
     if (comments.length === 0) {
       commentsList.innerHTML = `
@@ -1103,9 +1106,9 @@ async function funLoadComments() {
         </div>
       `).join('');
     }
-    
+   
     lucide.createIcons();
-    
+   
   } catch (error) {
     console.error('Error loading comments:', error);
     commentsList.innerHTML = `
@@ -1121,7 +1124,7 @@ async function funLoadComments() {
 // Load history/logs
 async function funLoadHistory() {
   const historyList = document.getElementById('history-list');
-  
+ 
   // Show skeleton
   historyList.innerHTML = `
     <div class="history-skeleton animate-pulse space-y-4">
@@ -1134,7 +1137,7 @@ async function funLoadHistory() {
       </div>
     </div>
   `;
-  
+ 
   try {
     const logsQuery = query(
       collection(db, 'activityLogs'),
@@ -1142,13 +1145,13 @@ async function funLoadHistory() {
       orderBy('timestamp', 'desc'),
       limit(50)
     );
-    
+   
     const logsSnapshot = await getDocs(logsQuery);
     const logs = [];
-    
+   
     for (const logDoc of logsSnapshot.docs) {
       const logData = logDoc.data();
-      
+     
       // Load member name
       let memberName = 'System';
       if (logData.memberId) {
@@ -1161,14 +1164,14 @@ async function funLoadHistory() {
           console.error('Error loading member for log:', error);
         }
       }
-      
+     
       logs.push({
         id: logDoc.id,
         ...logData,
         memberName
       });
     }
-    
+   
     // Render history
     if (logs.length === 0) {
       historyList.innerHTML = `
@@ -1194,9 +1197,9 @@ async function funLoadHistory() {
         `;
       }).join('');
     }
-    
+   
     lucide.createIcons();
-    
+   
   } catch (error) {
     console.error('Error loading history:', error);
     historyList.innerHTML = `
@@ -1226,7 +1229,7 @@ function getActionColor(action) {
 // Load attachments
 async function funLoadAttachments() {
   const attachmentsList = document.getElementById('attachments-list');
-  
+ 
   // Show skeleton
   attachmentsList.innerHTML = `
     <div class="attachments-skeleton animate-pulse space-y-4">
@@ -1243,21 +1246,21 @@ async function funLoadAttachments() {
       </div>
     </div>
   `;
-  
+ 
   try {
     // Get current activity with latest data
     const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
-    
+   
     if (!activityDoc.exists()) {
       throw new Error('Activity not found');
     }
-    
+   
     const activity = activityDoc.data();
     const attachments = activity.attachments || [];
-    
+   
     // Update count
     document.getElementById('attachments-count').textContent = attachments.length;
-    
+   
     // Render attachments
     if (attachments.length === 0) {
       attachmentsList.innerHTML = `
@@ -1279,7 +1282,7 @@ async function funLoadAttachments() {
             console.error('Error loading uploader name:', error);
           }
         }
-        
+       
         return `
           <div class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
             <div class="h-10 w-10 bg-blue-100 rounded flex items-center justify-center">
@@ -1304,15 +1307,15 @@ async function funLoadAttachments() {
           </div>
         `;
       }));
-      
+     
       attachmentsList.innerHTML = attachmentHtml.join('');
     }
-    
+   
     lucide.createIcons();
-    
+   
     // Attach event listeners for download and delete
     funSetupAttachmentListeners();
-    
+   
   } catch (error) {
     console.error('Error loading attachments:', error);
     attachmentsList.innerHTML = `
@@ -1336,7 +1339,7 @@ function funSetupAttachmentListeners() {
       }
     });
   });
-  
+ 
   // Delete buttons
   document.querySelectorAll('.delete-attachment-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -1351,27 +1354,27 @@ async function funDeleteAttachment(filename) {
   if (!confirm(`Are you sure you want to delete "${filename}"?`)) {
     return;
   }
-  
+ 
   try {
     showLoader('Deleting attachment...');
-    
+   
     // Get current activity data
     const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
     if (!activityDoc.exists()) {
       throw new Error('Activity not found');
     }
-    
+   
     const activity = activityDoc.data();
     const attachments = activity.attachments || [];
-    
+   
     // Find attachment to delete
     const attachmentIndex = attachments.findIndex(att => att.filename === filename);
     if (attachmentIndex === -1) {
       throw new Error('Attachment not found');
     }
-    
+   
     const attachment = attachments[attachmentIndex];
-    
+   
     // Remove from storage
     if (attachment.url) {
       try {
@@ -1382,15 +1385,15 @@ async function funDeleteAttachment(filename) {
         // Continue with database cleanup
       }
     }
-    
+   
     // Remove from activity
     const updatedAttachments = attachments.filter((_, index) => index !== attachmentIndex);
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       attachments: updatedAttachments,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -1399,12 +1402,12 @@ async function funDeleteAttachment(filename) {
       memberId: currentUser.uid,
       details: `Deleted attachment: ${filename}`
     });
-    
+   
     // Refresh attachments view
     await funLoadAttachments();
-    
+   
     showToast('Attachment deleted successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error deleting attachment:', error);
     showToast('Failed to delete attachment', 'error');
@@ -1416,14 +1419,14 @@ async function funDeleteAttachment(filename) {
 // Tab management
 function funSetupTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
-  
+ 
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.dataset.tab;
       funSwitchTab(targetTab);
     });
   });
-  
+ 
   // Set default active tab
   funSwitchTab('details');
 }
@@ -1437,17 +1440,17 @@ async function funSwitchTab(tabName) {
       btn.className = 'tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
     }
   });
-  
+ 
   // Update content visibility
   document.querySelectorAll('.tab-content').forEach(content => {
     content.style.display = 'none';
   });
-  
+ 
   const activeContent = document.getElementById(`${tabName}-tab`);
   if (activeContent) {
     activeContent.style.display = 'block';
   }
-  
+ 
   // Load tab-specific content
   try {
     switch (tabName) {
@@ -1481,54 +1484,54 @@ function funSetupEventListeners() {
       window.location.href = 'weekly_dashboard.html';
     }
   });
-  
+ 
   // Action buttons
   document.getElementById('edit-btn').addEventListener('click', funOpenEditModal);
   document.getElementById('delete-btn').addEventListener('click', funOpenDeleteModal);
   document.getElementById('reallocate-btn').addEventListener('click', funOpenReallocateModal);
-  
+ 
   // Status selector
   document.getElementById('status-selector').addEventListener('change', funUpdateStatus);
-  
+ 
   // Assignment buttons
   document.getElementById('assign-member-btn').addEventListener('click', funOpenAssignModal);
   document.getElementById('unassign-btn').addEventListener('click', funUnassignMember);
   document.getElementById('update-hours-btn').addEventListener('click', funOpenUpdateHoursModal);
-  
+ 
   // Refresh buttons
   document.getElementById('refresh-assignment').addEventListener('click', () => {
     funUpdateAssignmentSection();
     showToast('Assignment refreshed', 'success');
   });
-  
+ 
   document.getElementById('refresh-comments').addEventListener('click', () => {
     funLoadComments();
     showToast('Comments refreshed', 'success');
   });
-  
+ 
   document.getElementById('refresh-history').addEventListener('click', () => {
     funLoadHistory();
     showToast('History refreshed', 'success');
   });
-  
+ 
   document.getElementById('refresh-attachments').addEventListener('click', () => {
     funLoadAttachments();
     showToast('Attachments refreshed', 'success');
   });
-  
+ 
   // Comment form
   const commentInput = document.getElementById('comment-input');
   const addCommentBtn = document.getElementById('add-comment-btn');
-  
+ 
   commentInput.addEventListener('input', () => {
     addCommentBtn.disabled = !commentInput.value.trim();
   });
-  
+ 
   addCommentBtn.addEventListener('click', funAddComment);
-  
+ 
   // File upload
   funSetupFileUpload();
-  
+ 
   // Modal event listeners
   funSetupModalEventListeners();
 }
@@ -1537,9 +1540,9 @@ function funSetupEventListeners() {
 async function funUpdateStatus(event) {
   const newStatus = event.target.value;
   const oldStatus = currentActivity.status;
-  
+ 
   if (newStatus === oldStatus) return;
-  
+ 
   // Validation: Cannot change status for unassigned activities
   if (!currentActivity.assignedMember) {
     showToast('Cannot change status for unassigned activities. Please assign a member first.', 'error');
@@ -1547,15 +1550,15 @@ async function funUpdateStatus(event) {
     event.target.value = oldStatus;
     return;
   }
-  
+ 
   try {
     showLoader('Updating status...');
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       status: newStatus,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -1564,17 +1567,17 @@ async function funUpdateStatus(event) {
       memberId: currentUser.uid,
       details: `Changed status from "${oldStatus}" to "${newStatus}"`
     });
-    
+   
     // Update local state
     currentActivity.status = newStatus;
     currentActivity.updatedAt = new Date().toISOString();
-    
+   
     showToast('Status updated successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error updating status:', error);
     showToast('Failed to update status', 'error');
-    
+   
     // Revert selector
     event.target.value = oldStatus;
   } finally {
@@ -1585,28 +1588,28 @@ async function funUpdateStatus(event) {
 // Add comment
 async function funAddComment() {
   const commentText = document.getElementById('comment-input').value.trim();
-  
+ 
   if (!commentText) return;
-  
+ 
   try {
     showLoader('Adding comment...');
-    
+   
     await addDoc(collection(db, 'activityComments'), {
       activityId: currentActivityId,
       memberId: currentUser.uid,
       timestamp: new Date().toISOString(),
       comment: commentText
     });
-    
+   
     // Clear input
     document.getElementById('comment-input').value = '';
     document.getElementById('add-comment-btn').disabled = true;
-    
+   
     // Refresh comments
     await funLoadComments();
-    
+   
     showToast('Comment added successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error adding comment:', error);
     showToast('Failed to add comment', 'error');
@@ -1619,30 +1622,30 @@ async function funAddComment() {
 function funSetupFileUpload() {
   const uploadArea = document.getElementById('upload-area');
   const fileInput = document.getElementById('file-input');
-  
+ 
   // Click to browse
   uploadArea.addEventListener('click', () => {
     fileInput.click();
   });
-  
+ 
   // Drag and drop
   uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadArea.classList.add('border-blue-400', 'bg-blue-50');
   });
-  
+ 
   uploadArea.addEventListener('dragleave', () => {
     uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
   });
-  
+ 
   uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
-    
+   
     const files = Array.from(e.dataTransfer.files);
     funHandleFileUpload(files);
   });
-  
+ 
   // File input change
   fileInput.addEventListener('change', (e) => {
     const files = Array.from(e.target.files);
@@ -1654,7 +1657,7 @@ function funSetupFileUpload() {
 // Handle file upload
 async function funHandleFileUpload(files) {
   if (!files || files.length === 0) return;
-  
+ 
   // Validate files
   const maxSize = 10 * 1024 * 1024; // 10MB
   const allowedTypes = [
@@ -1666,44 +1669,44 @@ async function funHandleFileUpload(files) {
     'image/jpeg',
     'image/png'
   ];
-  
+ 
   const validFiles = [];
   const errors = [];
-  
+ 
   for (const file of files) {
     if (file.size > maxSize) {
       errors.push(`${file.name} is too large (max 10MB)`);
       continue;
     }
-    
+   
     if (!allowedTypes.includes(file.type)) {
       errors.push(`${file.name} has unsupported file type`);
       continue;
     }
-    
+   
     validFiles.push(file);
   }
-  
+ 
   if (errors.length > 0) {
     showToast(errors.join('\n'), 'error');
   }
-  
+ 
   if (validFiles.length === 0) return;
-  
+ 
   try {
     showLoader(`Uploading ${validFiles.length} file(s)...`);
-    
+   
     const uploadPromises = validFiles.map(async (file) => {
       // Create unique filename
       const timestamp = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       const fileName = `${timestamp}_${safeName}`;
-      
+     
       // Upload to Firebase Storage
       const storageRef = ref(storage, `activities/${currentActivityId}/${fileName}`);
       const uploadResult = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
-      
+     
       return {
         filename: file.name,
         url: downloadURL,
@@ -1711,24 +1714,24 @@ async function funHandleFileUpload(files) {
         timestamp: new Date().toISOString()
       };
     });
-    
+   
     const uploadedAttachments = await Promise.all(uploadPromises);
-    
+   
     // Update activity with new attachments
     const activityDoc = await getDoc(doc(db, 'activities', currentActivityId));
     if (!activityDoc.exists()) {
       throw new Error('Activity not found');
     }
-    
+   
     const activity = activityDoc.data();
     const currentAttachments = activity.attachments || [];
     const updatedAttachments = [...currentAttachments, ...uploadedAttachments];
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       attachments: updatedAttachments,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entries
     for (const attachment of uploadedAttachments) {
       await addDoc(collection(db, 'activityLogs'), {
@@ -1739,12 +1742,12 @@ async function funHandleFileUpload(files) {
         details: `Added attachment: ${attachment.filename}`
       });
     }
-    
+   
     // Refresh attachments view
     await funLoadAttachments();
-    
+   
     showToast(`${validFiles.length} file(s) uploaded successfully`, 'success');
-    
+   
   } catch (error) {
     console.error('Error uploading files:', error);
     showToast('Failed to upload files', 'error');
@@ -1758,23 +1761,23 @@ function funSetupModalEventListeners() {
   // Edit modal
   document.getElementById('edit-cancel').addEventListener('click', funCloseEditModal);
   document.getElementById('edit-submit').addEventListener('click', funSubmitEdit);
-  
+ 
   // Delete modal
   document.getElementById('delete-cancel').addEventListener('click', funCloseDeleteModal);
   document.getElementById('delete-confirm').addEventListener('click', funConfirmDelete);
-  
+ 
   // Assign modal
   document.getElementById('assign-cancel').addEventListener('click', funCloseAssignModal);
   document.getElementById('assign-submit').addEventListener('click', funSubmitAssign);
-  
+ 
   // Update hours modal
   document.getElementById('update-hours-cancel').addEventListener('click', funCloseUpdateHoursModal);
   document.getElementById('update-hours-submit').addEventListener('click', funSubmitUpdateHours);
-  
+ 
   // Reallocate modal
   document.getElementById('reallocate-cancel').addEventListener('click', funCloseReallocateModal);
   document.getElementById('reallocate-submit').addEventListener('click', funSubmitReallocate);
-  
+ 
   // Close modals on backdrop click
   document.querySelectorAll('[id$="-modal"]').forEach(modal => {
     modal.addEventListener('click', (e) => {
@@ -1788,7 +1791,7 @@ function funSetupModalEventListeners() {
       }
     });
   });
-  
+ 
   // ESC key to close modals
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -1804,7 +1807,7 @@ function funSetupModalEventListeners() {
 // Edit modal functions
 function funOpenEditModal() {
   const activity = currentActivity;
-  
+ 
   document.getElementById('edit-title').value = activity.title || '';
   document.getElementById('edit-description').value = activity.description || '';
   document.getElementById('edit-category').value = activity.category || 'Client Focused';
@@ -1827,7 +1830,7 @@ function funOpenEditModal() {
       selectedTagsContainer.appendChild(tagBadge);
     });
   }
-  
+ 
   document.getElementById('edit-modal').classList.remove('hidden');
   document.getElementById('edit-title').focus();
 }
@@ -1838,22 +1841,22 @@ function funCloseEditModal() {
 
 async function funSubmitEdit() {
   const form = document.getElementById('edit-form');
-  
+ 
   if (!form.checkValidity()) {
     form.reportValidity();
     return;
   }
-  
+ 
   const title = document.getElementById('edit-title').value.trim();
   const description = document.getElementById('edit-description').value.trim();
   const category = document.getElementById('edit-category').value;
   const priority = document.getElementById('edit-priority').value;
   const selectedTagsContainer = document.getElementById('edit-selected-tags');
   const tags = Array.from(selectedTagsContainer.children).map(tagBadge => tagBadge.firstChild.textContent.trim());
-  
+ 
   try {
     showLoader('Updating activity...');
-    
+   
     const updates = {
       title,
       description,
@@ -1862,16 +1865,16 @@ async function funSubmitEdit() {
       tags,
       updatedAt: new Date().toISOString()
     };
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), updates);
-    
+   
     // Add log entry
     const changes = [];
     if (title !== currentActivity.title) changes.push(`Title: "${currentActivity.title}" → "${title}"`);
     if (description !== currentActivity.description) changes.push(`Description updated`);
     if (category !== currentActivity.category) changes.push(`Category: "${currentActivity.category}" → "${category}"`);
     if (priority !== currentActivity.priority) changes.push(`Priority: "${currentActivity.priority}" → "${priority}"`);
-    
+   
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
       timestamp: new Date().toISOString(),
@@ -1879,15 +1882,15 @@ async function funSubmitEdit() {
       memberId: currentUser.uid,
       details: changes.length > 0 ? changes.join('; ') : 'Activity details updated'
     });
-    
+   
     // Update local state and refresh UI
     Object.assign(currentActivity, updates);
     funUpdateActivityUI();
     await funLoadDetailsTab();
-    
+   
     funCloseEditModal();
     showToast('Activity updated successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error updating activity:', error);
     showToast('Failed to update activity', 'error');
@@ -1909,12 +1912,12 @@ function funCloseDeleteModal() {
 async function funConfirmDelete() {
   try {
     showLoader('Deleting activity...');
-    
+   
     const batch = writeBatch(db);
-    
+   
     // Delete activity
     batch.delete(doc(db, 'activities', currentActivityId));
-    
+   
     // Delete all comments
     const commentsQuery = query(
       collection(db, 'activityComments'),
@@ -1924,7 +1927,7 @@ async function funConfirmDelete() {
     commentsSnapshot.forEach((commentDoc) => {
       batch.delete(commentDoc.ref);
     });
-    
+   
     // Delete all logs
     const logsQuery = query(
       collection(db, 'activityLogs'),
@@ -1934,9 +1937,9 @@ async function funConfirmDelete() {
     logsSnapshot.forEach((logDoc) => {
       batch.delete(logDoc.ref);
     });
-    
+   
     await batch.commit();
-    
+   
     // Delete attachments from storage (best effort)
     if (currentActivity.attachments) {
       for (const attachment of currentActivity.attachments) {
@@ -1948,14 +1951,14 @@ async function funConfirmDelete() {
         }
       }
     }
-    
+   
     showToast('Activity deleted successfully', 'success');
-    
+   
     // Redirect to backlog
     setTimeout(() => {
       window.location.href = 'backlog_management.html';
     }, 1000);
-    
+   
   } catch (error) {
     console.error('Error deleting activity:', error);
     showToast('Failed to delete activity', 'error');
@@ -1979,144 +1982,229 @@ function funCloseAssignModal() {
 async function funLoadMembersForAssignment() {
   const memberList = document.getElementById('member-list');
   const assignSubmit = document.getElementById('assign-submit');
-  
+  const hoursInput = document.getElementById('assign-hours');
+  const availabilityInfo = document.getElementById('member-availability-info');
+ 
   memberList.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div></div>';
-  
+  availabilityInfo.classList.add('hidden');
+ 
   try {
-    // Get all members
+    // Get all members - single query
     const membersSnapshot = await getDocs(collection(db, 'members'));
     const members = [];
-    
-    for (const memberDoc of membersSnapshot.docs) {
-      const member = { id: memberDoc.id, ...memberDoc.data() };
-      
-      // Calculate remaining capacity for the activity's week
-      let remainingCapacity = member.defaultWeeklyCapacity || 40;
-      
-      if (currentActivity.weekAllocated) {
-        // Calculate the week date range (Wednesday to Tuesday)
-        const weekStartDate = new Date(currentActivity.weekAllocated);
-        const weekEndDate = new Date(weekStartDate);
-        weekEndDate.setDate(weekStartDate.getDate() + 6); // 6 days after Wednesday = Tuesday
-        
-        // Get all unavailability for this member
-        const unavailabilityQuery = query(
-          collection(db, 'unavailability'),
-          where('memberId', '==', member.id)
-        );
-        const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
-        
-        let unavailableHours = 0;
-        unavailabilitySnapshot.forEach(doc => {
-          const unavailData = doc.data();
-          const unavailDate = new Date(unavailData.day);
-          
-          // Check if the unavailability date falls within this week
-          if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
-            unavailableHours += unavailData.hoursUnavailable || 0;
-          }
-        });
-        
-        // Get assigned hours for this week (excluding current activity)
-        const activitiesQuery = query(
-          collection(db, 'activities'),
-          where('weekAllocated', '==', currentActivity.weekAllocated),
-          where('assignedMember', '==', member.id)
-        );
-        const activitiesSnapshot = await getDocs(activitiesQuery);
-        
-        let assignedHours = 0;
-        activitiesSnapshot.forEach(doc => {
-          const activityData = doc.data();
-          if (doc.id !== currentActivityId) { // Exclude current activity
-            assignedHours += activityData.assignedHours || 0;
-          }
-        });
-        
-        remainingCapacity = remainingCapacity - unavailableHours - assignedHours;
-      }
-      
-      member.remainingCapacity = Math.max(0, remainingCapacity);
-      members.push(member);
-    }
-    
-    // Sort by remaining capacity (highest first)
-    members.sort((a, b) => b.remainingCapacity - a.remainingCapacity);
-    
+   
+    membersSnapshot.forEach(memberDoc => {
+      members.push({
+        id: memberDoc.id,
+        ...memberDoc.data()
+      });
+    });
+   
     if (members.length === 0) {
       memberList.innerHTML = '<p class="text-sm leading-5 text-slate-500 text-center py-4">No members found</p>';
       return;
     }
-    
+   
+    // Sort by name
+    members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+   
+    // Render members without capacity info
     memberList.innerHTML = members.map(member => `
-      <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer">
-        <input type="radio" name="selectedMember" value="${member.id}" class="text-blue-600 focus:ring-blue-500" ${member.remainingCapacity === 0 ? 'disabled' : ''}>
+      <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer member-option" data-member-id="${member.id}">
+        <input type="radio" name="selectedMember" value="${member.id}" class="text-blue-600 focus:ring-blue-500">
         <div class="flex-1">
           <p class="text-sm leading-5 font-medium text-slate-900">${member.name || 'Unnamed Member'}</p>
-          <p class="text-xs leading-4 text-slate-500">
-            ${member.remainingCapacity} hours available
-            ${member.remainingCapacity === 0 ? '(No capacity)' : ''}
-          </p>
         </div>
       </label>
     `).join('');
-    
+   
     // Setup event listeners for member selection
     const memberRadios = document.querySelectorAll('input[name="selectedMember"]');
-    const hoursInput = document.getElementById('assign-hours');
-    
-    function updateAssignButton() {
+   
+    memberRadios.forEach(radio => {
+      radio.addEventListener('change', async (e) => {
+        const memberId = e.target.value;
+       
+        // Show loading state in availability info
+        availabilityInfo.classList.remove('hidden');
+        availabilityInfo.innerHTML = `
+          <div class="flex items-center gap-2 p-3 bg-blue-50 rounded border border-blue-200">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span class="text-sm text-blue-700">Calculating availability...</span>
+          </div>
+        `;
+        assignSubmit.disabled = true;
+        hoursInput.value = '';
+       
+        try {
+          // Calculate capacity for selected member only
+          const member = members.find(m => m.id === memberId);
+          const capacity = await funCalculateMemberCapacity(member);
+         
+          // Store capacity on the radio button for validation
+          e.target.dataset.capacity = capacity;
+         
+          // Update availability display below hours input
+          if (capacity > 0) {
+            availabilityInfo.innerHTML = `
+              <div class="p-3 bg-green-50 rounded border border-green-200">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                  <span class="text-sm font-medium text-green-800">${member.name || 'This member'} has ${capacity} hours available</span>
+                </div>
+              </div>
+            `;
+          } else {
+            availabilityInfo.innerHTML = `
+              <div class="p-3 bg-red-50 rounded border border-red-200">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="alert-circle" class="w-4 h-4 text-red-600"></i>
+                  <span class="text-sm font-medium text-red-800">No capacity available for this week</span>
+                </div>
+              </div>
+            `;
+            e.target.disabled = true;
+            e.target.checked = false;
+            showToast(`${member.name || 'This member'} has no available capacity for this week`, 'warning');
+          }
+         
+          lucide.createIcons();
+        } catch (error) {
+          console.error('Error calculating capacity:', error);
+          availabilityInfo.innerHTML = `
+            <div class="p-3 bg-red-50 rounded border border-red-200">
+              <div class="flex items-center gap-2">
+                <i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i>
+                <span class="text-sm font-medium text-red-800">Error checking availability</span>
+              </div>
+            </div>
+          `;
+          lucide.createIcons();
+        }
+      });
+    });
+   
+    // Hours input validation
+    hoursInput.addEventListener('input', () => {
       const selectedMember = document.querySelector('input[name="selectedMember"]:checked');
       const hours = parseInt(hoursInput.value);
-      
-      assignSubmit.disabled = !selectedMember || !hours || hours < 1;
-      
-      if (selectedMember && hours > 0) {
-        const memberData = members.find(m => m.id === selectedMember.value);
-        if (memberData && hours > memberData.remainingCapacity) {
-          assignSubmit.disabled = true;
-          hoursInput.setCustomValidity(`Cannot exceed ${memberData.remainingCapacity} available hours`);
-          showToast(`Cannot assign ${hours} hours. Only ${memberData.remainingCapacity} hours available for ${memberData.name || 'this member'}`, 'error');
-        } else {
-          hoursInput.setCustomValidity('');
-        }
+     
+      if (!selectedMember || !hours || hours < 1) {
+        assignSubmit.disabled = true;
+        hoursInput.setCustomValidity('');
+        return;
       }
-    }
-    
-    memberRadios.forEach(radio => {
-      radio.addEventListener('change', updateAssignButton);
+     
+      const capacity = parseInt(selectedMember.dataset.capacity || 0);
+     
+      if (hours > capacity) {
+        assignSubmit.disabled = true;
+        hoursInput.setCustomValidity(`Cannot exceed ${capacity} available hours`);
+       
+        // Update availability info with error
+        availabilityInfo.innerHTML = `
+          <div class="p-3 bg-red-50 rounded border border-red-200">
+            <div class="flex items-center gap-2">
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600"></i>
+              <span class="text-sm font-medium text-red-800">Cannot assign ${hours} hours. Only ${capacity} hours available</span>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+      } else {
+        assignSubmit.disabled = false;
+        hoursInput.setCustomValidity('');
+       
+        // Update availability info with success
+        availabilityInfo.innerHTML = `
+          <div class="p-3 bg-green-50 rounded border border-green-200">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+              <span class="text-sm font-medium text-green-800">Assigning ${hours} of ${capacity} available hours</span>
+            </div>
+          </div>
+        `;
+        lucide.createIcons();
+      }
     });
-    
-    hoursInput.addEventListener('input', updateAssignButton);
-    
+   
   } catch (error) {
     console.error('Error loading members:', error);
     memberList.innerHTML = '<p class="text-sm leading-5 text-red-600 text-center py-4">Failed to load members</p>';
   }
 }
 
+// New function to calculate capacity for a specific member
+async function funCalculateMemberCapacity(member) {
+  let remainingCapacity = member.defaultWeeklyCapacity || 40;
+ 
+  if (!currentActivity.weekAllocated) {
+    return remainingCapacity;
+  }
+ 
+  // Calculate the week date range (Wednesday to Tuesday)
+  const weekStartDate = new Date(currentActivity.weekAllocated);
+  const weekEndDate = new Date(weekStartDate);
+  weekEndDate.setDate(weekStartDate.getDate() + 6);
+ 
+  // Get unavailability for this member in this week
+  const unavailabilityQuery = query(
+    collection(db, 'unavailability'),
+    where('memberId', '==', member.id)
+  );
+  const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
+ 
+  let unavailableHours = 0;
+  unavailabilitySnapshot.forEach(doc => {
+    const unavailData = doc.data();
+    const unavailDate = new Date(unavailData.day);
+   
+    if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
+      unavailableHours += unavailData.hoursUnavailable || 0;
+    }
+  });
+ 
+  // Get assigned hours for this week (excluding current activity)
+  const activitiesQuery = query(
+    collection(db, 'activities'),
+    where('weekAllocated', '==', currentActivity.weekAllocated),
+    where('assignedMember', '==', member.id)
+  );
+  const activitiesSnapshot = await getDocs(activitiesQuery);
+ 
+  let assignedHours = 0;
+  activitiesSnapshot.forEach(doc => {
+    if (doc.id !== currentActivityId) {
+      assignedHours += doc.data().assignedHours || 0;
+    }
+  });
+ 
+  remainingCapacity = remainingCapacity - unavailableHours - assignedHours;
+  return Math.max(0, remainingCapacity);
+}
+
 async function funSubmitAssign() {
   const selectedMember = document.querySelector('input[name="selectedMember"]:checked');
   const hours = parseInt(document.getElementById('assign-hours').value);
-  
+ 
   if (!selectedMember || !hours) {
     showToast('Please select a member and enter hours', 'error');
     return;
   }
-  
+ 
   try {
     showLoader('Assigning member...');
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       assignedMember: selectedMember.value,
       assignedHours: hours,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Get member name for logging
     const memberDoc = await getDoc(doc(db, 'members', selectedMember.value));
     const memberName = memberDoc.exists() ? memberDoc.data().name || 'Unknown Member' : 'Unknown Member';
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -2125,19 +2213,19 @@ async function funSubmitAssign() {
       memberId: currentUser.uid,
       details: `Assigned ${memberName} for ${hours} hours`
     });
-    
+   
     // Update local state
     currentActivity.assignedMember = selectedMember.value;
     currentActivity.assignedHours = hours;
     currentActivity.updatedAt = new Date().toISOString();
-    
+   
     // Update UI
     funUpdateActivityUI();
     await funUpdateAssignmentSection();
-    
+   
     funCloseAssignModal();
     showToast('Member assigned successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error assigning member:', error);
     showToast('Failed to assign member', 'error');
@@ -2151,20 +2239,20 @@ async function funUnassignMember() {
   if (!confirm('Are you sure you want to remove the assigned member?')) {
     return;
   }
-  
+ 
   try {
     showLoader('Removing assignment...');
-    
+   
     // Get member name for logging
     const memberDoc = await getDoc(doc(db, 'members', currentActivity.assignedMember));
     const memberName = memberDoc.exists() ? memberDoc.data().name || 'Unknown Member' : 'Unknown Member';
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       assignedMember: null,
       assignedHours: null,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -2173,18 +2261,18 @@ async function funUnassignMember() {
       memberId: currentUser.uid,
       details: `Removed assignment from ${memberName}`
     });
-    
+   
     // Update local state
     currentActivity.assignedMember = null;
     currentActivity.assignedHours = null;
     currentActivity.updatedAt = new Date().toISOString();
-    
+   
     // Update UI
     funUpdateActivityUI();
     await funUpdateAssignmentSection();
-    
+   
     showToast('Assignment removed successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error removing assignment:', error);
     showToast('Failed to remove assignment', 'error');
@@ -2208,42 +2296,42 @@ function funCloseUpdateHoursModal() {
 async function funLoadUpdateHoursData() {
   try {
     const memberDoc = await getDoc(doc(db, 'members', currentActivity.assignedMember));
-    
+   
     if (!memberDoc.exists()) {
       showToast('Assigned member not found', 'error');
       funCloseUpdateHoursModal();
       return;
     }
-    
+   
     const member = memberDoc.data();
-    
+   
     // Calculate remaining capacity (excluding current assignment)
     let remainingCapacity = member.defaultWeeklyCapacity || 40;
-    
+   
     if (currentActivity.weekAllocated) {
       // Calculate the week date range (Wednesday to Tuesday)
       const weekStartDate = new Date(currentActivity.weekAllocated);
       const weekEndDate = new Date(weekStartDate);
       weekEndDate.setDate(weekStartDate.getDate() + 6); // 6 days after Wednesday = Tuesday
-      
+     
       // Get all unavailability for this member
       const unavailabilityQuery = query(
         collection(db, 'unavailability'),
         where('memberId', '==', member.id || currentActivity.assignedMember)
       );
       const unavailabilitySnapshot = await getDocs(unavailabilityQuery);
-      
+     
       let unavailableHours = 0;
       unavailabilitySnapshot.forEach(doc => {
         const unavailData = doc.data();
         const unavailDate = new Date(unavailData.day);
-        
+       
         // Check if the unavailability date falls within this week
         if (unavailDate >= weekStartDate && unavailDate <= weekEndDate) {
           unavailableHours += unavailData.hoursUnavailable || 0;
         }
       });
-      
+     
       // Get other assigned hours
       const activitiesQuery = query(
         collection(db, 'activities'),
@@ -2251,25 +2339,25 @@ async function funLoadUpdateHoursData() {
         where('assignedMember', '==', currentActivity.assignedMember)
       );
       const activitiesSnapshot = await getDocs(activitiesQuery);
-      
+     
       let otherAssignedHours = 0;
       activitiesSnapshot.forEach(doc => {
         if (doc.id !== currentActivityId) {
           otherAssignedHours += doc.data().assignedHours || 0;
         }
       });
-      
+     
       remainingCapacity = remainingCapacity - unavailableHours - otherAssignedHours;
     }
-    
+   
     document.getElementById('update-hours-member').textContent = member.name || 'Unknown Member';
     document.getElementById('update-hours-current').textContent = `${currentActivity.assignedHours} hours`;
     document.getElementById('update-hours-capacity').textContent = `${Math.max(0, remainingCapacity)} hours`;
     document.getElementById('new-hours').value = currentActivity.assignedHours;
-    
+   
     // Set max value
     document.getElementById('new-hours').max = remainingCapacity + currentActivity.assignedHours;
-    
+   
   } catch (error) {
     console.error('Error loading update hours data:', error);
     showToast('Failed to load member data', 'error');
@@ -2280,25 +2368,25 @@ async function funLoadUpdateHoursData() {
 async function funSubmitUpdateHours() {
   const newHours = parseInt(document.getElementById('new-hours').value);
   const oldHours = currentActivity.assignedHours;
-  
+ 
   if (!newHours || newHours < 1) {
     showToast('Please enter valid hours', 'error');
     return;
   }
-  
+ 
   if (newHours === oldHours) {
     funCloseUpdateHoursModal();
     return;
   }
-  
+ 
   try {
     showLoader('Updating assigned hours...');
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       assignedHours: newHours,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -2307,17 +2395,17 @@ async function funSubmitUpdateHours() {
       memberId: currentUser.uid,
       details: `Updated assigned hours from ${oldHours} to ${newHours}`
     });
-    
+   
     // Update local state
     currentActivity.assignedHours = newHours;
     currentActivity.updatedAt = new Date().toISOString();
-    
+   
     // Update UI
     await funUpdateAssignmentSection();
-    
+   
     funCloseUpdateHoursModal();
     showToast('Hours updated successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error updating hours:', error);
     showToast('Failed to update hours', 'error');
@@ -2330,7 +2418,7 @@ async function funSubmitUpdateHours() {
 function funOpenReallocateModal() {
   document.getElementById('reallocate-activity-title').textContent = currentActivity.title || 'Untitled Activity';
   document.getElementById('reallocate-current-week').textContent = getWeekDateRange(currentActivity.weekAllocated);
-  
+ 
   funLoadWeekOptions();
   document.getElementById('reallocate-modal').classList.remove('hidden');
 }
@@ -2342,7 +2430,7 @@ function funCloseReallocateModal() {
 function funLoadWeekOptions() {
   const weekSelect = document.getElementById('reallocate-week');
   const weeks = getNextWednesdays(4);
-  
+ 
   weekSelect.innerHTML = weeks.map(week => `
     <option value="${week.isoDate}">${week.display}</option>
   `).join('');
@@ -2351,20 +2439,20 @@ function funLoadWeekOptions() {
 async function funSubmitReallocate() {
   const newWeek = document.getElementById('reallocate-week').value;
   const oldWeek = currentActivity.weekAllocated;
-  
+ 
   if (newWeek === oldWeek) {
     funCloseReallocateModal();
     return;
   }
-  
+ 
   try {
     showLoader('Reallocating to new week...');
-    
+   
     await updateDoc(doc(db, 'activities', currentActivityId), {
       weekAllocated: newWeek,
       updatedAt: new Date().toISOString()
     });
-    
+   
     // Add log entry
     await addDoc(collection(db, 'activityLogs'), {
       activityId: currentActivityId,
@@ -2373,17 +2461,17 @@ async function funSubmitReallocate() {
       memberId: currentUser.uid,
       details: `Moved from ${getWeekDateRange(oldWeek)} to ${getWeekDateRange(newWeek)}`
     });
-    
+   
     // Update local state
     currentActivity.weekAllocated = newWeek;
     currentActivity.updatedAt = new Date().toISOString();
-    
+   
     // Update UI
     await funLoadDetailsTab();
-    
+   
     funCloseReallocateModal();
     showToast('Activity reallocated successfully', 'success');
-    
+   
   } catch (error) {
     console.error('Error reallocating activity:', error);
     showToast('Failed to reallocate activity', 'error');
@@ -2399,7 +2487,7 @@ const editSelectedTagsContainer = document.getElementById('edit-selected-tags');
 // Function to add tags from input
 function addTagsFromInput(inputValue) {
   if (!inputValue.trim()) return;
-  
+ 
   // Split by comma and process each tag
   inputValue.split(',').forEach(tagText => {
     const trimmedTag = tagText.trim();

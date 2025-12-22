@@ -158,10 +158,6 @@
         </button>
       </div>
       <div class="flex items-center gap-3">
-        <button id="btn-show-completed" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-600 text-white text-sm leading-5 font-medium rounded hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-colors">
-          <i data-lucide="check-circle" class="w-4 h-4"></i>
-          Show Completed Activities
-        </button>
         <button id="btn-create-activity" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm leading-5 font-medium rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
           <i data-lucide="plus" class="w-4 h-4"></i>
           Create New Activity
@@ -172,7 +168,22 @@
 
   <!-- Filters and Controls -->
   <div class="bg-white rounded-lg border border-slate-200 p-4 mb-6">
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Search Bar -->
+    <div class="mb-4">
+      <div class="relative">
+        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search activities by title, tags, or description..." 
+          class="w-full pl-10 pr-10 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <button id="btn-clear-search" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
       <div>
         <label for="filter-category" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Category</label>
         <select id="filter-category" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -189,6 +200,15 @@
           <option value="High">High</option>
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
+        </select>
+      </div>
+      <div>
+        <label for="filter-status" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Status</label>
+        <select id="filter-status" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="">All Statuses</option>
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
         </select>
       </div>
       <div>
@@ -737,6 +757,7 @@ let currentSort = 'createdAt-desc';
 let currentActivityId = null;
 let selectedTags = [];
 let currentAbort = null;
+let searchTerm = '';
 
 // DOM Elements
 const activitiesContainer = document.getElementById('activities-container');
@@ -745,8 +766,11 @@ const emptyState = document.getElementById('empty-state');
 const activitiesCount = document.getElementById('activities-count');
 
 // Filter elements
+const searchInput = document.getElementById('search-input');
+const btnClearSearch = document.getElementById('btn-clear-search');
 const filterCategory = document.getElementById('filter-category');
 const filterPriority = document.getElementById('filter-priority');
+const filterStatus = document.getElementById('filter-status');
 const filterAllocation = document.getElementById('filter-allocation');
 const filterMember = document.getElementById('filter-member');
 const sortBy = document.getElementById('sort-by');
@@ -927,6 +951,9 @@ function funBuildQuery() {
   if (currentFilters.priority) {
     constraints.push(where('priority', '==', currentFilters.priority));
   }
+  if (currentFilters.status) {
+    constraints.push(where('status', '==', currentFilters.status));
+  }
   if (currentFilters.allocation === 'allocated') {
     constraints.push(where('weekAllocated', '!=', null));
   } else if (currentFilters.allocation === 'unallocated') {
@@ -963,6 +990,9 @@ function funBuildCountQuery() {
   if (currentFilters.priority) {
     constraints.push(where('priority', '==', currentFilters.priority));
   }
+  if (currentFilters.status) {
+    constraints.push(where('status', '==', currentFilters.status));
+  }
   if (currentFilters.allocation === 'allocated') {
     constraints.push(where('weekAllocated', '!=', null));
   } else if (currentFilters.allocation === 'unallocated') {
@@ -979,10 +1009,22 @@ function funBuildCountQuery() {
 
 // Render activities list
 function funRenderActivities() {
-  // Filter out completed activities from the main list
-  const nonCompletedActivities = activities.filter(a => a.status !== 'Completed');
+  // Start with all activities
+  let filteredActivities = activities;
   
-  if (nonCompletedActivities.length === 0) {
+  // Apply search filter if search term exists
+  if (searchTerm.trim()) {
+    const search = searchTerm.toLowerCase();
+    filteredActivities = filteredActivities.filter(activity => {
+      const title = (activity.title || '').toLowerCase();
+      const description = (activity.description || '').toLowerCase();
+      const tags = (activity.tags || []).map(t => t.toLowerCase()).join(' ');
+      
+      return title.includes(search) || description.includes(search) || tags.includes(search);
+    });
+  }
+  
+  if (filteredActivities.length === 0) {
     activitiesContainer.innerHTML = '';
     emptyState.classList.remove('hidden');
     paginationContainer.classList.add('hidden');
@@ -992,7 +1034,7 @@ function funRenderActivities() {
 
   emptyState.classList.add('hidden');
   
-  const html = nonCompletedActivities.map(activity => {
+  const html = filteredActivities.map(activity => {
     const member = activity.assignedMember ? 
       members.find(m => m.id === activity.assignedMember) : null;
     
@@ -1079,8 +1121,8 @@ function funRenderActivities() {
   }).join('');
 
   activitiesContainer.innerHTML = html;
-  // Show count of non-completed activities
-  activitiesCount.textContent = nonCompletedActivities.length.toString();
+  // Show count of filtered activities
+  activitiesCount.textContent = filteredActivities.length.toString();
   
   // Reinitialize Lucide icons
   if (window.lucide) {
@@ -1571,12 +1613,24 @@ function funShowAllocateModal(activityId) {
   currentActivityId = activityId;
   document.getElementById('allocate-activity-title').textContent = activity.title || 'Untitled';
   
-  // Clear previous selection
+  // Clear previous selection first
   document.querySelectorAll('input[name="allocate-week"]').forEach(radio => {
     radio.checked = false;
   });
   
-  document.getElementById('btn-confirm-allocate').disabled = true;
+  // Pre-select the currently allocated week if exists
+  if (activity.weekAllocated) {
+    const weekRadio = document.querySelector(`input[name="allocate-week"][value="${activity.weekAllocated}"]`);
+    if (weekRadio) {
+      weekRadio.checked = true;
+      document.getElementById('btn-confirm-allocate').disabled = false;
+    } else {
+      document.getElementById('btn-confirm-allocate').disabled = true;
+    }
+  } else {
+    document.getElementById('btn-confirm-allocate').disabled = true;
+  }
+  
   modalAllocate.classList.remove('hidden');
 }
 
@@ -1944,23 +1998,48 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-create-activity')?.addEventListener('click', funShowCreateModal);
   document.getElementById('btn-create-activity-empty')?.addEventListener('click', funShowCreateModal);
   
-  // Show completed activities button
-  document.getElementById('btn-show-completed')?.addEventListener('click', funShowCompletedModal);
-  
-  // Completed modal handlers
-  document.getElementById('btn-close-completed-modal')?.addEventListener('click', funCloseCompletedModal);
-  
   // Refresh button
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
     funInitialLoad(true);
+  });
+  
+  // Search input handler with debounce
+  let searchTimeout;
+  searchInput?.addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    
+    // Show/hide clear button
+    if (searchTerm) {
+      btnClearSearch?.classList.remove('hidden');
+    } else {
+      btnClearSearch?.classList.add('hidden');
+    }
+    
+    // Debounce search to avoid excessive re-renders
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      funRenderActivities();
+    }, 300);
+  });
+  
+  // Clear search button
+  btnClearSearch?.addEventListener('click', () => {
+    searchInput.value = '';
+    searchTerm = '';
+    btnClearSearch.classList.add('hidden');
+    funRenderActivities();
   });
   
   // Clear filters button
   btnClearFilters?.addEventListener('click', () => {
     filterCategory.value = '';
     filterPriority.value = '';
+    filterStatus.value = '';
     filterAllocation.value = '';
     filterMember.value = '';
+    searchInput.value = '';
+    searchTerm = '';
+    btnClearSearch?.classList.add('hidden');
     currentFilters = {};
     currentPage = 1;
     lastDoc = null;
@@ -1969,7 +2048,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Filter change handlers
-  [filterCategory, filterPriority, filterAllocation, filterMember, sortBy].forEach(element => {
+  [filterCategory, filterPriority, filterStatus, filterAllocation, filterMember, sortBy].forEach(element => {
     element?.addEventListener('change', (e) => {
       const value = e.target.value;
       const name = e.target.id.replace('filter-', '').replace('sort-by', 'sort');
