@@ -34,7 +34,7 @@ const env = {
     MEASUREMENT_ID: "G-K7F7SRX3RQ",
     FIRESTORE_DB_NAME: '',
   },
-  BASE_URL: 'https://qvm-api-wp-abhishek-cha-a654.azurewebsites.net/team_member',
+  BASE_URL: 'https://qvm-api-wp-abhishek-cha-a654.azurewebsites.net',
   REFINER: {
     ENABLED: false,
     POSITION: 'bottom-right', // Can be 'top-left', 'top-right', 'bottom-left', 'bottom-right'
