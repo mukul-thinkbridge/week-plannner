@@ -74,6 +74,31 @@ const rejectAuthStateOnError = (error) => {
   }
 };
 
+/**
+ * Checks if user has required claims for zpqv-weekly-planner
+ * @param {Object} user - Firebase user object
+ * @returns {Promise<boolean>}
+ */
+async function checkUserClaims(user) {
+  if (!user) return false;
+  
+  try {
+    const tokenResult = await user.getIdTokenResult();
+    const claims = tokenResult.claims;
+    
+    // Check if user has the required claim for zpqv-weekly-planner
+          if (claims && Array.isArray(claims['app']) && claims['app'].includes('zpqv-weekly-planner')) {
+            return true;
+          }
+    
+    console.warn('User does not have required zpqv-weekly-planner claims');
+    return false;
+  } catch (error) {
+    console.error('Error checking user claims:', error);
+    return false;
+  }
+}
+
 // --- Auth Guard ---
 let __authGuardInitialized = false;
 
@@ -90,7 +115,24 @@ export function initializeAuthGuard() {
 
   onAuthStateChanged(
     auth,
-    (user) => {
+    async (user) => {
+      // Check claims if user is authenticated
+      if (user && env.AUTH_ENABLED && !window.location.pathname.includes('auth.html')) {
+        const hasValidClaims = await checkUserClaims(user);
+        
+        if (!hasValidClaims) {
+          console.warn('User authenticated but lacks required claims, signing out');
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.error('Error signing out user:', e);
+          }
+          resolveInitialAuthState(null);
+          handleUnauthorized();
+          return;
+        }
+      }
+      
       // Resolve the promise with the initial user state
       resolveInitialAuthState(user);
 
@@ -247,9 +289,24 @@ async function performInitialAuthCheck(currentPage = window.location.pathname) {
   try {
     // First, check if Firebase auth is already initialized and has current user
     if (auth.currentUser !== null && auth.currentUser !== undefined) {
-      // Auth is already determined, use current user state
+      // Auth is already determined, use current user state and verify claims
       const user = auth.currentUser;
       if (user) {
+        // Verify claims before allowing access
+        const hasValidClaims = await checkUserClaims(user);
+        if (!hasValidClaims) {
+          console.warn('User lacks required claims, redirecting to auth');
+          try {
+            await auth.signOut();
+          } catch (e) {
+            console.error('Error signing out user:', e);
+          }
+          return {
+            shouldRender: false,
+            shouldRedirect: true,
+            redirectTo: 'auth.html',
+          };
+        }
         return { shouldRender: true, shouldRedirect: false, redirectTo: null };
       } else {
         return {
@@ -271,7 +328,22 @@ async function performInitialAuthCheck(currentPage = window.location.pathname) {
     const user = await Promise.race([authStatePromise, timeoutPromise]);
 
     if (user) {
-      // User is authenticated, allow rendering
+      // Verify claims before allowing access
+      const hasValidClaims = await checkUserClaims(user);
+      if (!hasValidClaims) {
+        console.warn('User lacks required claims, redirecting to auth');
+        try {
+          await auth.signOut();
+        } catch (e) {
+          console.error('Error signing out user:', e);
+        }
+        return {
+          shouldRender: false,
+          shouldRedirect: true,
+          redirectTo: 'auth.html',
+        };
+      }
+      // User is authenticated and has valid claims, allow rendering
       return { shouldRender: true, shouldRedirect: false, redirectTo: null };
     } else {
       // User is not authenticated, redirect to auth page

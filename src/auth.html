@@ -17,8 +17,8 @@
     <link
       data-tiramai="web-gen"
       rel="icon"
-      href="assets/imgs/logo.ico"
-      type="image/x-icon"
+      href="assets/imgs/week-planner-favicon.svg"
+      type="image/svg+xml"
     />
     <script data-tiramai="web-gen" type="module" src="scripts/main.js"></script>
     <!-- Custom Tailwind Configuration -->
@@ -659,11 +659,37 @@
         return 'weekly_dashboard.html';
       }
 
+      async function checkUserClaims(user) {
+        try {
+          const tokenResult = await user.getIdTokenResult();
+          const claims = tokenResult.claims;
+          
+          // Check if user has the required claim for zpqv-weekly-planner
+          if (claims && Array.isArray(claims['app']) && claims['app'].includes('zpqv-weekly-planner')) {
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Error checking user claims:', error);
+          return false;
+        }
+      }
+
       function signIn(email, password) {
         showLoader('Signing you in... Please wait...');
         signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
+          .then(async (userCredential) => {
             const user = userCredential.user;
+
+            // Check if user has required claims
+            const hasValidClaims = await checkUserClaims(user);
+            
+            if (!hasValidClaims) {
+              hideLoader();
+              await auth.signOut();
+              alert('Unauthorized: You do not have permission to access this application.');
+              return;
+            }
 
             user.getIdToken().then(async (idToken) => {
               localStorage.setItem('lastAuthState', 'authenticated');
@@ -719,8 +745,19 @@
       function handleSocialSignIn(provider) {
         showLoader('Connecting to provider... Please wait...');
         signInWithPopup(auth, provider)
-          .then((result) => {
+          .then(async (result) => {
             const user = result.user;
+            
+            // Check if user has required claims
+            const hasValidClaims = await checkUserClaims(user);
+            
+            if (!hasValidClaims) {
+              hideLoader();
+              await auth.signOut();
+              alert('Unauthorized: You do not have permission to access this application.');
+              return;
+            }
+            
             user.getIdToken().then(async (idToken) => {
               localStorage.setItem('idToken', idToken);
               localStorage.setItem('refreshToken', user.refreshToken);

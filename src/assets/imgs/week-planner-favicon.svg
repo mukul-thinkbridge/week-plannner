@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Background -->
+  <rect width="64" height="64" fill="#2563eb" rx="12"/>
+  
+  <!-- Calendar base -->
+  <rect x="12" y="16" width="40" height="36" fill="#ffffff" rx="3"/>
+  
+  <!-- Calendar header -->
+  <rect x="12" y="16" width="40" height="10" fill="#1e40af" rx="3"/>
+  <rect x="12" y="23" width="40" height="3" fill="#1e40af"/>
+  
+  <!-- Calendar rings -->
+  <circle cx="20" cy="18" r="1.5" fill="#ffffff"/>
+  <circle cx="32" cy="18" r="1.5" fill="#ffffff"/>
+  <circle cx="44" cy="18" r="1.5" fill="#ffffff"/>
+  
+  <!-- Week grid (7 days) -->
+  <rect x="15" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  <rect x="21" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  <rect x="27" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  <rect x="33" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  <rect x="39" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  <rect x="45" y="29" width="4" height="4" fill="#3b82f6" rx="1"/>
+  
+  <rect x="15" y="35" width="4" height="4" fill="#60a5fa" rx="1"/>
+  <rect x="21" y="35" width="4" height="4" fill="#60a5fa" rx="1"/>
+  <rect x="27" y="35" width="4" height="4" fill="#60a5fa" rx="1"/>
+  <rect x="33" y="35" width="4" height="4" fill="#60a5fa" rx="1"/>
+  <rect x="39" y="35" width="4" height="4" fill="#60a5fa" rx="1"/>
+  
+  <!-- Checkmark to indicate planning -->
+  <path d="M 42 42 L 45 46 L 51 38" stroke="#10b981" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
