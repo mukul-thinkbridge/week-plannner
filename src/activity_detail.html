@@ -519,6 +519,23 @@
           <h2 class="text-xl leading-8 font-semibold text-slate-900">Assign Member</h2>
         </div>
         <form id="assign-form" class="px-6 py-4 space-y-4">
+          <!-- Member Search Bar -->
+          <div>
+            <label for="member-search-detail" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Search Member</label>
+            <div class="relative">
+              <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+              <input
+                type="text"
+                id="member-search-detail"
+                placeholder="Search by name..."
+                class="w-full pl-10 pr-10 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button type="button" id="btn-clear-member-search-detail" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          
           <div>
             <label for="assign-member" class="block text-sm leading-5 font-medium text-slate-700 mb-2">Select Member *</label>
             <div id="member-list" class="space-y-2 max-h-48 overflow-y-auto border border-slate-200 rounded p-2">
@@ -1769,6 +1786,35 @@ function funSetupModalEventListeners() {
   // Assign modal
   document.getElementById('assign-cancel').addEventListener('click', funCloseAssignModal);
   document.getElementById('assign-submit').addEventListener('click', funSubmitAssign);
+  
+  // Member search handlers for assign modal
+  document.getElementById('member-search-detail')?.addEventListener('input', (e) => {
+    memberSearchTermDetail = e.target.value;
+    const btnClear = document.getElementById('btn-clear-member-search-detail');
+    
+    if (memberSearchTermDetail.trim()) {
+      btnClear?.classList.remove('hidden');
+    } else {
+      btnClear?.classList.add('hidden');
+    }
+    
+    // Re-render member list with search filter
+    funLoadMembersForAssignment();
+  });
+  
+  document.getElementById('btn-clear-member-search-detail')?.addEventListener('click', () => {
+    const searchInput = document.getElementById('member-search-detail');
+    if (searchInput) {
+      searchInput.value = '';
+      memberSearchTermDetail = '';
+      document.getElementById('btn-clear-member-search-detail')?.classList.add('hidden');
+      
+      // Re-render member list without filter
+      funLoadMembersForAssignment();
+      
+      searchInput.focus();
+    }
+  });
  
   // Update hours modal
   document.getElementById('update-hours-cancel').addEventListener('click', funCloseUpdateHoursModal);
@@ -1968,15 +2014,30 @@ async function funConfirmDelete() {
 }
 
 // Assign modal functions
+let memberSearchTermDetail = '';
+let allMembersForAssignment = [];
+
 function funOpenAssignModal() {
+  // Reset search
+  document.getElementById('member-search-detail').value = '';
+  memberSearchTermDetail = '';
+  document.getElementById('btn-clear-member-search-detail')?.classList.add('hidden');
+  
   funLoadMembersForAssignment();
   document.getElementById('assign-modal').classList.remove('hidden');
+  
+  // Focus on search input
+  setTimeout(() => {
+    document.getElementById('member-search-detail')?.focus();
+  }, 100);
 }
 
 function funCloseAssignModal() {
   document.getElementById('assign-modal').classList.add('hidden');
   document.getElementById('assign-hours').value = '';
   document.getElementById('assign-submit').disabled = true;
+  memberSearchTermDetail = '';
+  allMembersForAssignment = [];
 }
 
 async function funLoadMembersForAssignment() {
@@ -1989,27 +2050,44 @@ async function funLoadMembersForAssignment() {
   availabilityInfo.classList.add('hidden');
  
   try {
-    // Get all members - single query
-    const membersSnapshot = await getDocs(collection(db, 'members'));
-    const members = [];
-   
-    membersSnapshot.forEach(memberDoc => {
-      members.push({
-        id: memberDoc.id,
-        ...memberDoc.data()
+    // Get all members only if not already loaded
+    if (allMembersForAssignment.length === 0) {
+      const membersSnapshot = await getDocs(collection(db, 'members'));
+      allMembersForAssignment = [];
+     
+      membersSnapshot.forEach(memberDoc => {
+        allMembersForAssignment.push({
+          id: memberDoc.id,
+          ...memberDoc.data()
+        });
       });
-    });
+     
+      // Sort by name
+      allMembersForAssignment.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
    
-    if (members.length === 0) {
+    if (allMembersForAssignment.length === 0) {
       memberList.innerHTML = '<p class="text-sm leading-5 text-slate-500 text-center py-4">No members found</p>';
       return;
     }
+    
+    // Filter members based on search term
+    let filteredMembers = allMembersForAssignment.filter(member => {
+      if (!memberSearchTermDetail.trim()) return true;
+      const searchLower = memberSearchTermDetail.toLowerCase();
+      const memberName = (member.name || '').toLowerCase();
+      const memberEmail = (member.email || '').toLowerCase();
+      return memberName.includes(searchLower) || memberEmail.includes(searchLower);
+    });
+    
+    // Show message if no members match search
+    if (filteredMembers.length === 0) {
+      memberList.innerHTML = '<p class="text-sm leading-5 text-slate-500 text-center py-4">No members found matching your search</p>';
+      return;
+    }
    
-    // Sort by name
-    members.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-   
-    // Render members without capacity info
-    memberList.innerHTML = members.map(member => `
+    // Render filtered members without capacity info
+    memberList.innerHTML = filteredMembers.map(member => `
       <label class="flex items-center gap-3 p-3 rounded border hover:bg-slate-50 cursor-pointer member-option" data-member-id="${member.id}">
         <input type="radio" name="selectedMember" value="${member.id}" class="text-blue-600 focus:ring-blue-500">
         <div class="flex-1">
@@ -2038,7 +2116,7 @@ async function funLoadMembersForAssignment() {
        
         try {
           // Calculate capacity for selected member only
-          const member = members.find(m => m.id === memberId);
+          const member = allMembersForAssignment.find(m => m.id === memberId);
           const capacity = await funCalculateMemberCapacity(member);
          
           // Store capacity on the radio button for validation
