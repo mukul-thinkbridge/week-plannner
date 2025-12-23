@@ -375,7 +375,10 @@
             <label class="flex items-center gap-2">
               <input type="checkbox" id="add-to-current-week" name="addToCurrentWeek" checked 
                      class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-              <span class="text-sm leading-5 text-slate-700">Add to Current Week</span>
+              <div class="flex flex-col">
+                <span class="text-sm leading-5 text-slate-700">Add to Current Week</span>
+                <span class="text-xs text-slate-500" id="modal-week-dates">Loading...</span>
+              </div>
             </label>
           </div>
 
@@ -790,6 +793,14 @@ function funUpdateCurrentDateDisplay() {
     });
     currentDateElement.textContent = `Today: ${dateString}`;
   }
+}
+
+// Format week range for display
+function funFormatWeekRange(weekStartDate) {
+  const tuesday = new Date(weekStartDate.getFullYear(), weekStartDate.getMonth(), weekStartDate.getDate() + 6);
+  const startStr = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const endStr = tuesday.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return `${startStr} - ${endStr}`;
 }
 
 // Update week display
@@ -1271,6 +1282,14 @@ btnAddActivity.addEventListener('click', () => {
     showToast('Cannot add activities to past weeks', 'error');
     return;
   }
+  
+  // Update modal week dates display
+  const modalWeekDates = document.getElementById('modal-week-dates');
+  if (modalWeekDates && currentWeekStart) {
+    const weekRange = funFormatWeekRange(currentWeekStart);
+    modalWeekDates.textContent = weekRange;
+  }
+  
   modalAddActivity.classList.remove('hidden');
   document.getElementById('activity-title').focus();
 });
