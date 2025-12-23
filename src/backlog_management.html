@@ -961,7 +961,11 @@ function funBuildQuery() {
     constraints.push(where('priority', '==', currentFilters.priority));
   }
   if (currentFilters.status) {
+    // If status is explicitly filtered, use that filter
     constraints.push(where('status', '==', currentFilters.status));
+  } else {
+    // By default, exclude completed activities
+    constraints.push(where('status', 'in', ['Not Started', 'In Progress']));
   }
   if (currentFilters.allocation === 'allocated') {
     constraints.push(where('weekAllocated', '!=', null));
@@ -1000,7 +1004,11 @@ function funBuildCountQuery() {
     constraints.push(where('priority', '==', currentFilters.priority));
   }
   if (currentFilters.status) {
+    // If status is explicitly filtered, use that filter
     constraints.push(where('status', '==', currentFilters.status));
+  } else {
+    // By default, exclude completed activities
+    constraints.push(where('status', 'in', ['Not Started', 'In Progress']));
   }
   if (currentFilters.allocation === 'allocated') {
     constraints.push(where('weekAllocated', '!=', null));
