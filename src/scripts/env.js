@@ -24,7 +24,7 @@ const env = {
     appType: 'business',
   },
   // this key wil be used to setup the firebase config
-  FIREBASE_CONFIG: {
+FIREBASE_CONFIG: {
     FIREBASE_API_KEY: "AIzaSyBrTbMZnm5uVfqkLePIyUqmlxYnmlFv56s",
     FIREBASE_AUTH_DOMAIN: "mbs-app-3ffa0.firebaseapp.com",
     FIREBASE_PROJECT_ID: "mbs-app-3ffa0",

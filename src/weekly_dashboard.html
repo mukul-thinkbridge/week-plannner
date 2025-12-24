@@ -198,19 +198,6 @@
       
       <!-- Filters -->
       <div class="flex flex-wrap items-center gap-3">
-        <!-- Search Bar -->
-        <div class="relative">
-          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-          <input 
-            type="text" 
-            id="search-input" 
-            placeholder="Search activities..." 
-            class="pl-10 pr-8 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-52"
-          />
-          <button id="btn-clear-search" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden">
-            <i data-lucide="x" class="w-4 h-4"></i>
-          </button>
-        </div>
         <select id="filter-category" class="border border-slate-200 rounded px-3 py-2 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option value="">All Categories</option>
           <option value="Client Focused">Client Focused</option>
@@ -638,11 +625,8 @@ let currentWeekStart = null;
 let currentUser = null;
 let currentAbort = null;
 let selectedTags = [];
-let searchTerm = '';
 
 // DOM elements
-const searchInput = document.getElementById('search-input');
-const btnClearSearch = document.getElementById('btn-clear-search');
 const weekStartDate = document.getElementById('week-start-date');
 const weekEndDate = document.getElementById('week-end-date');
 const weekDisplay = document.getElementById('week-display');
@@ -987,18 +971,6 @@ async function funLoadActivities() {
     
     // Apply filters
     const filteredActivities = activities.filter(activity => {
-      // Search filter
-      if (searchTerm.trim()) {
-        const search = searchTerm.toLowerCase();
-        const title = (activity.title || '').toLowerCase();
-        const description = (activity.description || '').toLowerCase();
-        const tags = (activity.tags || []).map(t => t.toLowerCase()).join(' ');
-        
-        if (!title.includes(search) && !description.includes(search) && !tags.includes(search)) {
-          return false;
-        }
-      }
-      
       if (filterCategory.value && activity.category !== filterCategory.value) return false;
       if (filterPriority.value && activity.priority !== filterPriority.value) return false;
       if (filterAssignment.value === 'assigned' && !activity.assignedMember) return false;
@@ -1234,42 +1206,12 @@ async function funInitialLoad() {
 // Refresh button handlers
 btnRefreshCapacity.addEventListener('click', funLoadCapacity);
 
-// Search input handler with debounce
-let searchTimeout;
-searchInput?.addEventListener('input', (e) => {
-  searchTerm = e.target.value;
-  
-  // Show/hide clear button
-  if (searchTerm) {
-    btnClearSearch?.classList.remove('hidden');
-  } else {
-    btnClearSearch?.classList.add('hidden');
-  }
-  
-  // Debounce search to avoid excessive re-renders
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    funLoadActivities();
-  }, 300);
-});
-
-// Clear search button
-btnClearSearch?.addEventListener('click', () => {
-  searchInput.value = '';
-  searchTerm = '';
-  btnClearSearch.classList.add('hidden');
-  funLoadActivities();
-});
-
 // Clear filters button handler
 btnClearFilters.addEventListener('click', () => {
   filterCategory.value = '';
   filterPriority.value = '';
   filterAssignment.value = '';
   filterMember.value = '';
-  searchInput.value = '';
-  searchTerm = '';
-  btnClearSearch?.classList.add('hidden');
   funLoadActivities();
   showToast('Filters cleared', 'success');
 });
@@ -1534,25 +1476,42 @@ formAddActivity.addEventListener('submit', async (e) => {
     }
     
     showToast('Activity created successfully', 'success');
-    modalAddActivity.classList.add('hidden');
-    formAddActivity.reset();
-    funClearValidationErrors();
-    funClearTags();
     
-    // Reload activities if added to current week
-    if (addToCurrentWeek && currentWeekStart) {
-      funLoadActivities();
-      
-    }
+    // Redirect to activity detail page
+    hideLoader();
+    window.location.href = `activity_detail.html?activityId=${activityRef.id}`;
     
   } catch (error) {
     console.error('Error creating activity:', error);
     showToast('Failed to create activity', 'error');
-  } finally {
     hideLoader();
   }
 });
 
+// Tags input - Handle Enter key
+document.getElementById('activity-tags-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const input = e.target.value.trim();
+    if (input) {
+      // Split by comma and add each tag
+      input.split(',').forEach(tag => {
+        const t = tag.trim();
+        if (t && !selectedTags.includes(t)) {
+          selectedTags.push(t);
+        }
+      });
+      e.target.value = '';
+      
+      // Update the display
+      const c = document.getElementById('selected-tags');
+      c.innerHTML = selectedTags.map(tag => `<span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"><span>${tag}</span><button type="button" data-tag="${tag}" class="hover:text-blue-900"><i data-lucide="x" class="w-3 h-3"></i></button></span>`).join('');
+      if (window.lucide) lucide.createIcons();
+    }
+  }
+});
+
+// Tags input - Handle blur event
 document.getElementById('activity-tags-input').addEventListener('blur', (e) => {
   e.target.value.split(',').forEach(tag => {
     const t = tag.trim();
@@ -1564,6 +1523,7 @@ document.getElementById('activity-tags-input').addEventListener('blur', (e) => {
   if (window.lucide) lucide.createIcons();
 });
 
+// Remove tag on click
 document.getElementById('selected-tags').addEventListener('click', (e) => {
   const btn = e.target.closest('button[data-tag]');
   if (btn) {

@@ -205,7 +205,7 @@
       <div>
         <label for="filter-status" class="block text-xs leading-4 font-medium text-slate-700 mb-1">Status</label>
         <select id="filter-status" class="w-full px-3 py-2 text-sm leading-5 border border-slate-200 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="">Not Completed</option>
+          <option value="">Ongoing activities</option>
           <option value="Not Started">Not Started</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
@@ -774,10 +774,6 @@ const db = getDb();
 let currentUser = null;
 let activities = [];
 let members = [];
-let currentPage = 1;
-let pageSize = 20;
-let totalCount = 0;
-let lastDoc = null;
 let currentFilters = {};
 let currentSort = 'createdAt-desc';
 let currentActivityId = null;
@@ -830,8 +826,6 @@ async function funInitialLoad(forceRefresh = false) {
   try {
     // Reset state for fresh load
     if (forceRefresh) {
-      currentPage = 1;
-      lastDoc = null;
       activities = [];
     }
    
@@ -909,16 +903,11 @@ async function funLoadMembers() {
   }
 }
 
-// Load activities with current filters and pagination
-async function funLoadActivities(isLoadMore = false) {
+// Load activities with current filters
+async function funLoadActivities() {
   const signal = funAbortPreviousQuery();
  
   try {
-    if (!isLoadMore) {
-      currentPage = 1;
-      lastDoc = null;
-    }
-
     const activitiesQuery = funBuildQuery();
     const snapshot = await getDocs(activitiesQuery);
 
@@ -939,26 +928,9 @@ async function funLoadActivities(isLoadMore = false) {
       });
     }
 
-    if (isLoadMore) {
-      activities = [...activities, ...newActivities];
-    } else {
-      activities = newActivities;
-    }
-
-    // Update pagination info
-    if (snapshot.docs.length > 0) {
-      lastDoc = snapshot.docs[snapshot.docs.length - 1];
-    }
-
-    // Get total count (for display purposes)
-    const countQuery = funBuildCountQuery();
-    const countSnapshot = await getCountFromServer(countQuery);
-    if (!signal.aborted) {
-      totalCount = countSnapshot.data().count;
-    }
+    activities = newActivities;
 
     funRenderActivities();
-    funUpdatePagination();
 
   } catch (error) {
     if (signal.aborted) return;
@@ -982,8 +954,9 @@ function funBuildQuery() {
   if (currentFilters.status) {
     // If status is explicitly filtered, use that filter
     constraints.push(where('status', '==', currentFilters.status));
-  } else {
-    // By default, exclude completed activities
+  } else if (!searchTerm.trim()) {
+    // By default, exclude completed activities only when NOT searching
+    // When searching, include all statuses to search across all activities
     constraints.push(where('status', 'in', ['Not Started', 'In Progress']));
   }
   if (currentFilters.allocation === 'allocated') {
@@ -1001,46 +974,7 @@ function funBuildQuery() {
   const [sortField, sortDirection] = currentSort.split('-');
   constraints.push(orderBy(sortField, sortDirection === 'asc' ? 'asc' : 'desc'));
 
-  // Add pagination
-  if (lastDoc) {
-    constraints.push(startAfter(lastDoc));
-  }
-  constraints.push(limit(pageSize));
-
   return query(baseQuery, ...constraints);
-}
-
-// Build count query (without pagination)
-function funBuildCountQuery() {
-  let baseQuery = collection(db, 'activities');
-  let constraints = [];
-
-  // Apply same filters as main query
-  if (currentFilters.category) {
-    constraints.push(where('category', '==', currentFilters.category));
-  }
-  if (currentFilters.priority) {
-    constraints.push(where('priority', '==', currentFilters.priority));
-  }
-  if (currentFilters.status) {
-    // If status is explicitly filtered, use that filter
-    constraints.push(where('status', '==', currentFilters.status));
-  } else {
-    // By default, exclude completed activities
-    constraints.push(where('status', 'in', ['Not Started', 'In Progress']));
-  }
-  if (currentFilters.allocation === 'allocated') {
-    constraints.push(where('weekAllocated', '!=', null));
-  } else if (currentFilters.allocation === 'unallocated') {
-    constraints.push(where('weekAllocated', '==', null));
-  }
-  if (currentFilters.member === 'unassigned') {
-    constraints.push(where('assignedMember', '==', null));
-  } else if (currentFilters.member) {
-    constraints.push(where('assignedMember', '==', currentFilters.member));
-  }
-
-  return constraints.length > 0 ? query(baseQuery, ...constraints) : baseQuery;
 }
 
 // Render activities list
@@ -1063,7 +997,6 @@ function funRenderActivities() {
   if (filteredActivities.length === 0) {
     activitiesContainer.innerHTML = '';
     emptyState.classList.remove('hidden');
-    paginationContainer.classList.add('hidden');
     activitiesCount.textContent = '0';
     return;
   }
@@ -1269,26 +1202,6 @@ function funPopulateWeekOptions() {
         <span class="text-sm leading-5 text-slate-700">${week.label}</span>
       </label>
     `).join('');
-  }
-}
-
-// Update pagination UI
-function funUpdatePagination() {
-  const start = Math.min((currentPage - 1) * pageSize + 1, totalCount);
-  const end = Math.min(currentPage * pageSize, totalCount);
-  const hasNextPage = activities.length === pageSize;
- 
-  document.getElementById('page-start').textContent = start.toString();
-  document.getElementById('page-end').textContent = end.toString();
-  document.getElementById('total-count').textContent = totalCount.toString();
- 
-  document.getElementById('btn-prev-page').disabled = currentPage === 1;
-  document.getElementById('btn-next-page').disabled = !hasNextPage;
- 
-  if (totalCount > pageSize) {
-    paginationContainer.classList.remove('hidden');
-  } else {
-    paginationContainer.classList.add('hidden');
   }
 }
 
@@ -2110,10 +2023,10 @@ document.addEventListener('DOMContentLoaded', () => {
       btnClearSearch?.classList.add('hidden');
     }
    
-    // Debounce search to avoid excessive re-renders
+    // Debounce search to reload activities (includes completed when searching)
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-      funRenderActivities();
+      funLoadActivities();
     }, 300);
   });
  
@@ -2122,7 +2035,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.value = '';
     searchTerm = '';
     btnClearSearch.classList.add('hidden');
-    funRenderActivities();
+    funLoadActivities();
   });
  
   // Clear filters button
@@ -2136,8 +2049,6 @@ document.addEventListener('DOMContentLoaded', () => {
     searchTerm = '';
     btnClearSearch?.classList.add('hidden');
     currentFilters = {};
-    currentPage = 1;
-    lastDoc = null;
     funLoadActivities();
     showToast('Filters cleared', 'success');
   });
@@ -2157,10 +2068,6 @@ document.addEventListener('DOMContentLoaded', () => {
           delete currentFilters[name];
         }
       }
-     
-      // Reset pagination when filters change
-      currentPage = 1;
-      lastDoc = null;
      
       funLoadActivities();
     });
@@ -2349,19 +2256,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hasError) return;
    
     await funAssignActivity(selectedMember.value, hours);
-  });
- 
-  // Pagination handlers
-  document.getElementById('btn-prev-page')?.addEventListener('click', async () => {
-    if (currentPage > 1) {
-      currentPage--;
-      await funLoadActivities();
-    }
-  });
- 
-  document.getElementById('btn-next-page')?.addEventListener('click', async () => {
-    currentPage++;
-    await funLoadActivities(true); // Load more
   });
  
   // Modal backdrop click handlers
